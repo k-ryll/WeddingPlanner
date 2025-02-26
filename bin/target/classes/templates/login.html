@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>Login</title>
+
+</head>
+<body>
+
+<header>
+  Wedding Planner
+  
+  
+</header>
+
+<div class="container">
+  <form action="/user/validate" method="post">
+    <h1>Login to your Account</h1>
+    <label for="email">Email</label>
+    <input type="text" name="email" id="email" required>
+
+    <label for="password">Password</label>
+    <input type="password" name="password" id="password" required>
+
+    <button type="submit">Login</button>
+    <a href="/user/signup">Don't have an Account?</a>
+  </form>
+</div>
+
+</body>
+</html>

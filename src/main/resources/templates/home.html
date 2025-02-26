@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" th:href="@{/styles/styles.css}">
+    <link rel="stylesheet" href="../static/styles/styles.css">
+    <link rel="stylesheet" th:href="@{/styles/home.css}">
+    <link rel="stylesheet" href="../static/styles/home.css">
+    <script src="https://kit.fontawesome.com/b80e3de11b.js" ></script>
+    <title>Document</title>
+</head>
+<body>
+    <header>
+        <img src="logo.jpg" alt="logo">
+        <div>
+            
+                <ul>
+                    <li> <a th:href="@{/home}">Home</a> </li>
+                    <li><a th:href="@{/guests}">Guests</a></li>
+                    <li>Planning</li>
+                    <li>Vendors</li>
+                    <li>About Us</li>
+                </ul>
+            
+                <i class="fa-regular fa-circle-user user-icon"></i>
+        </div>
+    </header>
+    <div class="container">
+        <h1>Organize your Wedding in One Place</h1>
+        <div class="dashboard">
+            <section class="left">
+                <form action="" class="essential-details">
+                    <h2>Essential Details</h2>
+                    <div>
+                        <label for="wife-name">Bride's Name:</label>
+                        <input type="text" name="wife-name">
+                    </div>
+                    <div>
+                        <label for="groom-name">Groom's Name:</label>
+                        <input type="text" name="groom-name">
+                    </div>
+                    <div>
+                        <label for="wedding-date">Wedding Date:</label>
+                        <input type="date" name="wedding-date" id="wedding-date">
+                    </div>
+                    <div>
+                        <label for="maid-of-honor">Maid of Honor:</label>
+                        <input type="text" name="maid-of-honor">
+                    </div>
+                    <div>
+                        <label for="best-man">Best Man:</label>
+                        <input type="text" name="best-man">
+                    </div>
+                    <div>
+                        <button>Edit</button>
+                        <button>Save</button>
+                    </div>
+                </form>
+                <div class="guest-list">
+                    <h2>Guest List</h2>
+                    <p>Total Invited:</p>
+                    <p>Confirmed:</p>
+                    <p>Pending:</p>
+                </div>
+                <button>+ ADD GUEST</button>
+                <button>+ ADD TASK</button>
+            </section>
+            <section class="right">
+                
+                    <div>
+                        <h2>Upcoming Tasks</h2>
+                        <ul>
+                            <li>
+                                <input type="checkbox" name="" id="">
+                                Book Photographer
+                            </li>
+                            <li>
+                                <input type="checkbox" name="" id="">
+                                Send Invitations
+                            </li>
+                        </ul>
+                    </div>
+    
+                    <div>
+                        <h2>Vendor List</h2>
+                        <ul>
+                            <li>Catering</li>
+                            <li>Venue</li>
+                        </ul>
+                    </div>
+    
+                    <div class="itinerary">
+                        <h2>Wedding Day Itinerary</h2>
+                        <ul>
+                            <li>4am</li>
+                            <li>12pm</li>
+                        </ul>
+                    </div>
+                
+    
+                <div>
+                    <h2>
+                        Budget Overview
+                    </h2>
+                    <ul>
+                        <li>Food <span>20,000</span></li>
+                    </ul>
+                </div>
+            </section>
+        </div>
+        
+    </div>
+    
+</body>
+</html>

@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>Guest Page</title>
+<link rel="stylesheet" th:href="@{/styles/guestsPage.css}">
+<link rel="stylesheet" th:href="@{/styles/styles.css}">
+<link rel="stylesheet" href="/src/main/resources/static/styles/guestsPage.css">
+<link rel="stylesheet" href="/src/main/resources/static/styles/styles.css">
+
+<script src="https://kit.fontawesome.com/b80e3de11b.js" ></script>
+</head>
+<body>
+  <header>
+    <img src="logo.jpg" alt="logo">
+    <div>
+        <ul>
+            <li> <a th:href="@{/home}">Home</a> </li>
+            <li><a th:href="@{/guests}">Guests</a></li>
+            <li>Planning</li>
+            <li>Vendors</li>
+            <li>About Us</li>
+        </ul>
+        <i class="fa-regular fa-circle-user user-icon"></i>
+    </div>
+</header>
+<div class="container">
+  <div class="search-box">
+    <div class="">
+      <input type="text" placeholder="Search guest">
+      
+<i class="fas fa-search"></i>
+    </div>
+    <button id="openModal" class="btn btn-primary">
+      <i class="fa-solid fa-plus"></i>
+      ADD GUEST</button>
+  </div>
+
+
+  <h1 class="text-success">Guest List</h1>
+
+<!-- Modal -->
+<div id="guestModal" class="modal">
+  <div class="modal-content">
+    <span class="close">&times;</span>
+    <h4 class="modal-title">Add Guest</h4>
+    <form class="guestForm" th:action="@{/guest/create}" method="post" th:object="${guest}">
+      <div>
+        <label for="title">Title:</label>
+        <select name="title" id="title" th:field="*{title}">
+          <option value="">None</option>
+          <option value="Mr.">Mr.</option>
+          <option value="Mrs.">Mrs.</option>
+          <option value="Miss">Miss</option>
+          <option value="Dr.">Dr.</option>
+          <option value="Hon.">Hon.</option>
+          <option value="Rev.">Rev.</option>
+        </select>
+      </div>
+      <div>
+        <label for="name">Name:</label>
+        <input type="text" th:field="*{name}">
+      </div>
+      <div>
+        <label for="email">Email:</label>
+        <input type="email" name="email" id="email" th:field="*{email}">
+      </div>
+      <div>
+        <label for="entourage">Entourage:</label>
+        <select name="entourage" id="entourage" th:field="*{entourage}">
+          <option value="" disabled selected>Select Role</option>
+          <option value="Guest">Guest</option>
+          <option value="Bride's Maid">Bride's Maid</option>
+          <option value="Maid of Honor">Maid of Honor</option>
+          <option value="Matron of Honor">Matron of Honor</option>
+          <option value="Groomsman">Groomsman</option>
+          <option value="Best Man">Best Man</option>
+          <option value="Flower Girl">Flower Girl</option>
+          <option value="Ring Bearer">Ring Bearer</option>
+          <option value="Junior Bridesmaid">Junior Bridesmaid</option>
+          <option value="Junior Groomsman">Junior Groomsman</option>
+          <option value="Father of the Bride">Father of the Bride</option>
+          <option value="Mother of the Bride">Mother of the Bride</option>
+          <option value="Father of the Groom">Father of the Groom</option>
+          <option value="Mother of the Groom">Mother of the Groom</option>
+        </select>
+      </div>
+      <div>
+        <label for="rsvp">RSVP:</label>
+        <select name="rsvp" id="rsvp" th:field="*{rsvp}">
+          <option value="" disabled selected>Select Response</option>
+          <option value="Pending">Pending</option>
+          <option value="Accepted">Accepted</option>
+          <option value="Declined">Declined</option>
+        </select>
+      </div>
+      <div>
+        <button type="submit" class="btn btn-primary">Submit</button>
+      </div>
+    </form>
+  </div>
+</div>
+</div>
+
+
+<script>
+  const modal = document.getElementById("guestModal");
+  const openModalBtn = document.getElementById("openModal");
+  const closeModalBtn = document.querySelector(".close");
+
+  openModalBtn.addEventListener("click", () => {
+    modal.style.display = "block";
+  });
+
+  closeModalBtn.addEventListener("click", () => {
+    modal.style.display = "none";
+  });
+
+  window.addEventListener("click", (event) => {
+    if (event.target === modal) {
+      modal.style.display = "none";
+    }
+  });
+</script>
+
+</body>
+</html>

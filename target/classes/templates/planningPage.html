@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>Planning Page</title>
+<link rel="stylesheet" th:href="@{/styles/guestsPage.css}">
+<link rel="stylesheet" th:href="@{/styles/styles.css}">
+<link rel="stylesheet" href="/src/main/resources/static/styles/planningPage.css">
+<link rel="stylesheet" href="/src/main/resources/static/styles/styles.css">
+<script src="https://kit.fontawesome.com/b80e3de11b.js"></script>
+</head>
+<body>
+    <header>
+        <img src="logo.jpg" alt="logo">
+        <div>
+            <ul>
+                <li><a th:href="@{/home}">Home</a></li>
+                <li><a th:href="@{/guests}">Guests</a></li>
+                <li>Planning</li>
+                <li>Vendors</li>
+                <li>About Us</li>
+            </ul>
+            <i class="fa-regular fa-circle-user user-icon"></i>
+        </div>
+    </header>
+
+    <div>
+        <button id="openTaskModal" class="btn btn-primary">
+            <i class="fa-solid fa-plus"></i> ADD TASK
+        </button>
+        <button id="openExpenseModal" class="btn btn-primary">
+            <i class="fa-solid fa-plus"></i> ADD EXPENSE
+        </button>
+        <button id="openEventModal" class="btn btn-primary">
+            <i class="fa-solid fa-plus"></i> ADD EVENT
+        </button>
+
+        <!-- TASK MODAL -->
+        <div id="taskModal" class="modal">
+            <div class="modal-content">
+                <span class="task-close">&times;</span>
+                <h4 class="modal-title">Add Task</h4>
+                <form th:action="@{/task/create}" method="post" th:object="${task}">
+                    <div>
+                        <label for="taskName">Task Name:</label>
+                        <input type="text" id="taskName" th:field="*{taskName}">
+                    </div>
+                    <div>
+                        <label for="taskDueDate">Due Date:</label>
+                        <input type="date" id="taskDueDate" th:field="*{dueDate}">
+                    </div>
+                    <div>
+                        <button type="submit" class="btn btn-primary">Submit</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- EXPENSE MODAL -->
+        <div id="expenseModal" class="modal">
+            <div class="modal-content">
+                <span class="expense-close">&times;</span>
+                <h4 class="modal-title">Add Expense</h4>
+                <form th:action="@{/expense/create}" method="post" th:object="${expense}">
+                    <div>
+                        <label for="expenseName">Expense Name:</label>
+                        <input type="text" id="expenseName" th:field="*{name}">
+                    </div>
+                    <div>
+                        <label for="amount">Amount:</label>
+                        <input type="number" id="amount" th:field="*{amount}">
+                    </div>
+                    <div>
+                        <label for="category">Category:</label>
+                        <select id="category" th:field="*{category}">
+                            <option value="Venue">Venue</option>
+                            <option value="Catering">Catering</option>
+                            <option value="Decoration">Decoration</option>
+                            <option value="Photography">Photography</option>
+                        </select>
+                    </div>
+                    <div>
+                        <button type="submit" class="btn btn-primary">Submit</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- EVENT MODAL -->
+        <div id="eventModal" class="modal">
+            <div class="modal-content">
+                <span class="event-close">&times;</span>
+                <h4 class="modal-title">Add Event</h4>
+                <form th:action="@{/event/create}" method="post" th:object="${event}">
+                    <div>
+                        <label for="eventName">Event Name:</label>
+                        <input type="text" id="eventName" th:field="*{name}">
+                    </div>
+                    <div>
+                        <label for="eventDate">Date:</label>
+                        <input type="date" id="eventDate" th:field="*{date}">
+                    </div>
+                    <div>
+                        <label for="eventLocation">Location:</label>
+                        <input type="text" id="eventLocation" th:field="*{location}">
+                    </div>
+                    <div>
+                        <button type="submit" class="btn btn-primary">Submit</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Get modal elements
+        const taskModal = document.getElementById("taskModal");
+        const expenseModal = document.getElementById("expenseModal");
+        const eventModal = document.getElementById("eventModal");
+
+        // Get open buttons
+        const openTaskModalBtn = document.getElementById("openTaskModal");
+        const openExpenseModalBtn = document.getElementById("openExpenseModal");
+        const openEventModalBtn = document.getElementById("openEventModal");
+
+        // Get close buttons
+        const closeTaskModalBtn = document.querySelector(".task-close");
+        const closeExpenseModalBtn = document.querySelector(".expense-close");
+        const closeEventModalBtn = document.querySelector(".event-close");
+
+        // Open modals
+        openTaskModalBtn.addEventListener("click", () => taskModal.style.display = "block");
+        openExpenseModalBtn.addEventListener("click", () => expenseModal.style.display = "block");
+        openEventModalBtn.addEventListener("click", () => eventModal.style.display = "block");
+
+        // Close modals
+        closeTaskModalBtn.addEventListener("click", () => taskModal.style.display = "none");
+        closeExpenseModalBtn.addEventListener("click", () => expenseModal.style.display = "none");
+        closeEventModalBtn.addEventListener("click", () => eventModal.style.display = "none");
+
+        // Close modal on outside click
+        window.addEventListener("click", (event) => {
+            if (event.target === taskModal) taskModal.style.display = "none";
+            if (event.target === expenseModal) expenseModal.style.display = "none";
+            if (event.target === eventModal) eventModal.style.display = "none";
+        });
+    </script>
+</body>
+</html>
