@@ -16,17 +16,22 @@
 <div class ="container">
 <form th:action="@{/user/save}" method="post" th:object="${user}">
 <h1>Create an Account</h1>
-    <div>
-        <label for="brideFN">Bride's First Name:</label>
-        <input type="text" th:field="*{brideFN}" name="brideFN" id="brideFN" required>
-        <label for="brideLN">Bride's Last Name:</label>
-        <input type="text" th:field="*{brideLN}" name="brideLN" id="brideLN" required>
+    <div class="name">
+        <div><label for="brideFN">Bride's First Name:</label>
+            <input type="text" th:field="*{brideFN}" name="brideFN" id="brideFN" required></div>
+        <div><label for="brideLN">Bride's Last Name:</label>
+            <input type="text" th:field="*{brideLN}" name="brideLN" id="brideLN" required></div>
+        
     </div>
-    <div>
-        <label for="groomFN">Groom's First Name:</label>
-        <input type="text" th:field="*{groomFN}" name="groomFN" id="groomFN" required>
-        <label for="groomLN">Groom's Last Name:</label>
-        <input type="text" th:field="*{groomLN}" name="groomLN" id="groomLN" required>
+    <div class="name">
+        <div>
+            <label for="groomFN">Groom's First Name:</label>
+            <input type="text" th:field="*{groomFN}" name="groomFN" id="groomFN" required>
+        </div>
+        <div>
+            <label for="groomLN">Groom's Last Name:</label>
+            <input type="text" th:field="*{groomLN}" name="groomLN" id="groomLN" required>
+        </div>        
     </div>
     <div>
         <label for="weddingDate">Wedding Date:</label>

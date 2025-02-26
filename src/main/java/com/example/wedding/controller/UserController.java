@@ -4,13 +4,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 
 import com.example.wedding.model.User;
-
+import com.example.wedding.service.DuplicateEmailException;
 import com.example.wedding.service.UserService;
 
 @Controller
@@ -19,7 +20,7 @@ public class UserController {
 	@Autowired
 	private UserService service;
 	
-	private User user;
+
 	
 
 	@GetMapping("/home")
@@ -38,13 +39,17 @@ public class UserController {
 	}
 	
 	@PostMapping("/user/save")
-	public String saveUser(User user, RedirectAttributes redi) {
-		
-		redi.addFlashAttribute("message", "User has been saved!");
-		service.save(user);
-		return "redirect:/home";
-		
-	}
+	public String saveUser( User user, RedirectAttributes redi) {
+        try {
+            service.save(user);
+            redi.addFlashAttribute("message", "You have successfully registered to Fitrack! Login to your account now.");
+            return "redirect:/home";
+        }catch(DuplicateEmailException e) {
+            redi.addFlashAttribute("error", e.getMessage());
+            redi.addFlashAttribute("user", user);
+            return "redirect:/user/signup";
+        }
+    }
 	
 	
 	
