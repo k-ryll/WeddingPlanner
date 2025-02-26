@@ -46,12 +46,7 @@ public class UserController {
 		
 	}
 	
-	@PostMapping("/user/validate")
-	public String validateUser(@RequestParam("email") String email,
-			@RequestParam("password") String password, Model model)  {
-		String userEmail = service.findByEmail();
-		return "redirect:/home";
-	}
+	
 	
 	
 }
