@@ -13,7 +13,7 @@
             <div>
                 <label for="role">You are:</label>
                 <select name="role" id="role" th:field="*{role}">
-                    <option value="Wife">Wife</option>
+                    <option value="Bride">Bride</option>
                     <option value="Groom">Groom</option>
                     <option value="Organizer">Organizer</option>
                 </select>
@@ -30,7 +30,8 @@
             </div>
             <div>
                 <label for="weddingDate">Wedding Date:</label>
-                <input type="date" th:field="*{weddingDate}" name="weddingDate" id="weddingDate">
+                <input type="datetime-local" th:field="*{weddingDate}" name="weddingDate" id="weddingDate">
+    <p id="date-error-message"></p> 
             </div>
             <div>
                 <label for="email">Email:</label>

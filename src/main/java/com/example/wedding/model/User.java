@@ -33,8 +33,8 @@ public class User {
     @Column(nullable = false, length = 45)
     private String lastName;
 
-    @Column(nullable = false, length = 45)
-    private String weddingDate;
+    @Column(nullable = false)
+private LocalDateTime weddingDate;
 
     @CreationTimestamp
     @Column(updatable = false)
@@ -62,8 +62,14 @@ public class User {
     public String getLastName() { return lastName; }
     public void setLastName(String lastName) { this.lastName = lastName; }
 
-    public String getWeddingDate() { return weddingDate; }
-    public void setWeddingDate(String weddingDate) { this.weddingDate = weddingDate; }
+    public LocalDateTime getWeddingDate() {
+		return weddingDate;
+	}
+	
+	public void setWeddingDate(LocalDateTime weddingDate) {
+		this.weddingDate = weddingDate;
+	}
+	
 
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
