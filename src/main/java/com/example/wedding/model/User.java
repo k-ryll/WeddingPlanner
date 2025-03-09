@@ -2,134 +2,72 @@ package com.example.wedding.model;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
-
 import java.time.LocalDateTime;
-
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Id;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 
 @Entity
-@Table (name="users")
+@Table(name = "users")
 public class User {
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	
-	@Column(nullable = false, unique = true)
-	private Integer id;
-	
-	@Column(nullable = false, length = 45)
-	private String email;
-	
-	@Column(nullable = false, length = 50)
-	private String password;
-	
-	@Column(nullable = false, length = 45)
-	private String brideFN;
-	
-	@Column(nullable = false, length = 45)
-	private String brideLN;
-	
-	@Column(nullable = false, length = 45)
-	private String groomFN;
-	
-	@Column(nullable = false, length = 45)
-	private String groomLN;
-	
-	@Column(nullable = false, length = 45)
-	private String weddingDate;
-	
-	@CreationTimestamp
-	@Column(updatable = false)
-	private LocalDateTime createdAt;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(nullable = false, unique = true)
+    private Integer id;
 
-	@UpdateTimestamp
-	private LocalDateTime updatedAt;
+    @Column(nullable = false, length = 45)
+    private String role;
 
+    @Column(nullable = false, length = 45)
+    private String email;
 
-	public Integer getId() {
-		return id;
-	}
+    @Column(nullable = false, length = 255)
+    private String password;
 
-	public void setId(Integer id) {
-		this.id = id;
-	}
+    @Column(nullable = false, length = 45)
+    private String firstName;
 
-	public String getEmail() {
-		return email;
-	}
+    @Column(nullable = false, length = 45)
+    private String lastName;
 
-	public void setEmail(String email) {
-		this.email = email;
-	}
+    @Column(nullable = false, length = 45)
+    private String weddingDate;
 
-	public String getPassword() {
-		return password;
-	}
+    @CreationTimestamp
+    @Column(updatable = false)
+    private LocalDateTime createdAt;
 
-	public void setPassword(String password) {
-		this.password = password;
-	}
+    @UpdateTimestamp
+    private LocalDateTime updatedAt;
 
-	public String getBrideFN() {
-		return brideFN;
-	}
+    // Getters and Setters
+    public Integer getId() { return id; }
+    public void setId(Integer id) { this.id = id; }
 
-	public void setBrideFN(String brideFN) {
-		this.brideFN = brideFN;
-	}
+    public String getRole() { return role; }
+    public void setRole(String role) { this.role = role; }
 
-	public String getBrideLN() {
-		return brideLN;
-	}
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
 
-	public void setBrideLN(String brideLN) {
-		this.brideLN = brideLN;
-	}
+    public String getPassword() { return password; }
+    public void setPassword(String password) { this.password = password; }
 
-	public String getGroomFN() {
-		return groomFN;
-	}
+    public String getFirstName() { return firstName; }
+    public void setFirstName(String firstName) { this.firstName = firstName; }
 
-	public void setGroomFN(String groomFN) {
-		this.groomFN = groomFN;
-	}
+    public String getLastName() { return lastName; }
+    public void setLastName(String lastName) { this.lastName = lastName; }
 
-	public String getGroomLN() {
-		return groomLN;
-	}
+    public String getWeddingDate() { return weddingDate; }
+    public void setWeddingDate(String weddingDate) { this.weddingDate = weddingDate; }
 
-	public void setGroomLN(String groomLN) {
-		this.groomLN = groomLN;
-	}
+    public LocalDateTime getCreatedAt() { return createdAt; }
+    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
 
-	public String getWeddingDate() {
-		return weddingDate;
-	}
-
-	public void setWeddingDate(String weddingDate) {
-		this.weddingDate = weddingDate;
-	}
-
-	public LocalDateTime getCreatedAt() {
-		return createdAt;
-	}
-
-	public void setCreatedAt(LocalDateTime createdAt) {
-		this.createdAt = createdAt;
-	}
-
-	public LocalDateTime getUpdatedAt() {
-		return updatedAt;
-	}
-
-	public void setUpdatedAt(LocalDateTime updatedAt) {
-		this.updatedAt = updatedAt;
-	}
-
-	
+    public LocalDateTime getUpdatedAt() { return updatedAt; }
+    public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
 }

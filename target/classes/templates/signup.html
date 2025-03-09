@@ -1,64 +1,56 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
-<meta charset="UTF-8">
-<link rel="stylesheet" th:href="@{/styles/register.css}">
-<title>Wedding Registration</title>
-
-
+    <meta charset="UTF-8">
+    <link rel="stylesheet" th:href="@{/styles/register.css}">
+    <title>Wedding Registration</title>
 </head>
 <body>
-    <header>
-        Wedding Planner
-        
-        
-      </header>
-<div class ="container">
-<form th:action="@{/user/save}" method="post" th:object="${user}">
-<h1>Create an Account</h1>
-    <div class="name">
-        <div><label for="brideFN">Bride's First Name:</label>
-            <input type="text" th:field="*{brideFN}" name="brideFN" id="brideFN" required></div>
-        <div><label for="brideLN">Bride's Last Name:</label>
-            <input type="text" th:field="*{brideLN}" name="brideLN" id="brideLN" required></div>
-        
+    <header>Wedding Planner</header>
+    <div class="container">
+        <form id="registrationForm" th:action="@{/user/save}" method="post" th:object="${user}">
+            <h1>Create an Account</h1>
+            <div>
+                <label for="role">You are:</label>
+                <select name="role" id="role" th:field="*{role}">
+                    <option value="Wife">Wife</option>
+                    <option value="Groom">Groom</option>
+                    <option value="Organizer">Organizer</option>
+                </select>
+            </div>
+            <div class="name">
+                <div>
+                    <label for="firstName">First Name:</label>
+                    <input type="text" th:field="*{firstName}" name="firstName" id="firstName" required>
+                </div>
+                <div>
+                    <label for="lastName">Last Name:</label>
+                    <input type="text" th:field="*{lastName}" name="lastName" id="lastName" required>
+                </div>        
+            </div>
+            <div>
+                <label for="weddingDate">Wedding Date:</label>
+                <input type="date" th:field="*{weddingDate}" name="weddingDate" id="weddingDate">
+            </div>
+            <div>
+                <label for="email">Email:</label>
+                <input type="email" th:field="*{email}" name="email" id="email" required>
+            </div>
+            <div>
+                <label for="password">Password:</label>
+                <input type="password" th:field="*{password}" name="password" id="password" required>
+            </div>
+            <div>
+                <label for="confirmPass">Confirm Password:</label>
+                <input type="password" name="confirmPass" id="confirmPass" required>
+                <p id="error-message"></p>
+            </div>
+            <div class="buttons">
+                <a class="loginButton" href="/user/login">Already have an Account</a>
+                <button type="submit">Register</button>
+            </div>
+        </form>
     </div>
-    <div class="name">
-        <div>
-            <label for="groomFN">Groom's First Name:</label>
-            <input type="text" th:field="*{groomFN}" name="groomFN" id="groomFN" required>
-        </div>
-        <div>
-            <label for="groomLN">Groom's Last Name:</label>
-            <input type="text" th:field="*{groomLN}" name="groomLN" id="groomLN" required>
-        </div>        
-    </div>
-    <div>
-        <label for="weddingDate">Wedding Date:</label>
-        <input type="date" th:field="*{weddingDate}" name="weddingDate" id="weddingDate">
-    </div>
-    <div>
-        <label for="email">Email:</label>
-        <input type="email" th:field="*{email}" name="email" id="email" required>
-    </div>
-    <div>
-        <label for="password">Password:</label>
-        <input type="password" th:field="*{password}" name="password" id="password" required>
-    </div>
-    <div>
-        <label for="confirmPass">Confirm Password:</label>
-        <input type="password" name="confirmPass" id="confirmPass" required>
-    </div>
-    <div class="buttons">
-    
-    <a class="loginButton"href="/user/login">
-    Already have an Account
-    </a>
-    
-    <button type="submit">Register</button>
-    </div>
-    
-</form>
-</div>
+    <script src="/js/register.js"></script>
 </body>
 </html>

@@ -3,24 +3,19 @@ package com.example.wedding.service;
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCrypt;
-
 import com.example.wedding.model.User;
 import com.example.wedding.repository.UserRepository;
 
-
 @Service
 public class UserService {
-	@Autowired
-	private UserRepository repo;
-	
-	
-	
-	
-public User findByEmail(String email) {
-	return repo.findByEmail(email);
-	}
+    @Autowired
+    private UserRepository repo;
 
-	 public String save(User user) throws DuplicateEmailException {
+    public User findByEmail(String email) {
+        return repo.findByEmail(email);
+    }
+
+    public String save(User user) throws DuplicateEmailException {
         if (repo.findByEmail(user.getEmail()) != null) {
             throw new DuplicateEmailException("An account with this email already exists.");
         }

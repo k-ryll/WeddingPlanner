@@ -9,49 +9,51 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-
 import com.example.wedding.model.User;
 import com.example.wedding.service.DuplicateEmailException;
 import com.example.wedding.service.UserService;
 
 @Controller
 public class UserController {
-	
-	@Autowired
-	private UserService service;
-	
 
-	
+    @Autowired
+    private UserService service;
 
-	@GetMapping("/home")
-	public String showHomePage() {
-		return "home";
-	}
-	
-	@GetMapping("/user/login")
-	public String showLoginPage() {
-		return "login";
-	}
-	@GetMapping("/user/signup")
-	public String showSignupPage(Model model) {
-		model.addAttribute("user",new User());
-		return "signup";
-	}
-	
-	@PostMapping("/user/save")
-	public String saveUser( User user, RedirectAttributes redi) {
+    @GetMapping("/home")
+    public String showHomePage() {
+        return "home";
+    }
+
+    @GetMapping("/user/login")
+    public String showLoginPage() {
+        return "login";
+    }
+
+    @GetMapping("/user/signup")
+    public String showSignupPage(Model model) {
+        model.addAttribute("user", new User());
+        return "signup";
+    }
+
+    @PostMapping("/user/save")
+    public String saveUser(@RequestParam("password") String password,
+                           @RequestParam("confirmPass") String confirmPass,
+                           @ModelAttribute User user,
+                           RedirectAttributes redi) {
         try {
+            if (!password.equals(confirmPass)) {
+                redi.addFlashAttribute("error", "Passwords do not match!");
+                redi.addFlashAttribute("user", user);
+                return "redirect:/user/signup";
+            }
+
             service.save(user);
-            redi.addFlashAttribute("message", "You have successfully registered to Fitrack! Login to your account now.");
+            redi.addFlashAttribute("message", "You have successfully registered! Login to your account now.");
             return "redirect:/home";
-        }catch(DuplicateEmailException e) {
+        } catch (DuplicateEmailException e) {
             redi.addFlashAttribute("error", e.getMessage());
             redi.addFlashAttribute("user", user);
             return "redirect:/user/signup";
         }
     }
-	
-	
-	
-	
 }
