@@ -1,14 +1,9 @@
 package com.example.wedding.model;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
-import jakarta.persistence.Column;
-import jakarta.persistence.Id;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 
 @Entity
 @Table(name = "users")
@@ -21,7 +16,7 @@ public class User {
     @Column(nullable = false, length = 45)
     private String role;
 
-    @Column(nullable = false, length = 45)
+    @Column(nullable = false, length = 45, unique = true)
     private String email;
 
     @Column(nullable = false, length = 255)
@@ -34,7 +29,7 @@ public class User {
     private String lastName;
 
     @Column(nullable = false)
-private LocalDateTime weddingDate;
+    private LocalDateTime weddingDate;
 
     @CreationTimestamp
     @Column(updatable = false)
@@ -42,6 +37,11 @@ private LocalDateTime weddingDate;
 
     @UpdateTimestamp
     private LocalDateTime updatedAt;
+
+    // 🔹 Email Verification Fields
+    @Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT false")
+    private boolean verified = false;
+
 
     // Getters and Setters
     public Integer getId() { return id; }
@@ -62,18 +62,17 @@ private LocalDateTime weddingDate;
     public String getLastName() { return lastName; }
     public void setLastName(String lastName) { this.lastName = lastName; }
 
-    public LocalDateTime getWeddingDate() {
-		return weddingDate;
-	}
-	
-	public void setWeddingDate(LocalDateTime weddingDate) {
-		this.weddingDate = weddingDate;
-	}
-	
+    public LocalDateTime getWeddingDate() { return weddingDate; }
+    public void setWeddingDate(LocalDateTime weddingDate) { this.weddingDate = weddingDate; }
 
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
 
     public LocalDateTime getUpdatedAt() { return updatedAt; }
     public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
+
+    // 🔹 Verification Getters & Setters
+    public boolean isVerified() { return verified; }
+    public void setVerified(boolean verified) { this.verified = verified; }
+
 }

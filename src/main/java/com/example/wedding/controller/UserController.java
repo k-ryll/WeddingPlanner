@@ -14,13 +14,21 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.example.wedding.model.User;
 import com.example.wedding.service.DuplicateEmailException;
+import com.example.wedding.service.EmailService;
 import com.example.wedding.service.UserService;
+import com.example.wedding.service.VerificationService;
 
 @Controller
 public class UserController {
 
     @Autowired
     private UserService service;
+
+    @Autowired
+    private EmailService emailService;
+
+    @Autowired
+    private VerificationService verificationService;
 
     @GetMapping("/home")
     public String showHomePage() {
@@ -38,37 +46,51 @@ public class UserController {
         return "signup";
     }
 
- @PostMapping("/user/save")
-public String saveUser(@RequestParam("password") String password,
-                       @RequestParam("confirmPass") String confirmPass,
-                       @RequestParam("weddingDate") String weddingDateTime,
-                       @ModelAttribute User user,
-                       RedirectAttributes redi) {
-    try {
-        // Validate password match
-        if (!password.equals(confirmPass)) {
-            redi.addFlashAttribute("error", "Passwords do not match!");
+    @PostMapping("/user/save")
+    public String saveUser(@RequestParam("password") String password,
+                           @RequestParam("confirmPass") String confirmPass,
+                           @RequestParam("weddingDate") String weddingDateTime,
+                           @RequestParam("email") String email,
+                           @ModelAttribute User user,
+                           RedirectAttributes redi) {
+        try {
+         
+            if (!password.equals(confirmPass)) {
+                redi.addFlashAttribute("error", "Passwords do not match!");
+                redi.addFlashAttribute("user", user);
+                return "redirect:/user/signup";
+            }
+
+          
+            LocalDateTime now = LocalDateTime.now();
+            LocalDateTime enteredDateTime = LocalDateTime.parse(weddingDateTime, DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm"));
+
+            if (enteredDateTime.isBefore(now)) {
+                redi.addFlashAttribute("error", "Wedding date & time cannot be in the past!");
+                redi.addFlashAttribute("user", user);
+                return "redirect:/user/signup";
+            }
+
+         
+            service.save(user);
+
+        
+            String verificationCode = verificationService.generateVerificationCode(user);
+
+        
+            try {
+                emailService.sendVerificationEmail(email, verificationCode);
+            } catch (Exception e) {
+                redi.addFlashAttribute("error", "Failed to send verification email. Please try again.");
+                return "redirect:/user/signup";
+            }
+            redi.addFlashAttribute("message", "A verification code has been sent to your email. Please verify your account.");
+            return "redirect:/verify?email=" + email;
+
+        } catch (DuplicateEmailException e) {
+            redi.addFlashAttribute("error", e.getMessage());
             redi.addFlashAttribute("user", user);
             return "redirect:/user/signup";
         }
-
-        // Validate wedding date is not in the past
-        LocalDateTime now = LocalDateTime.now();
-        LocalDateTime enteredDateTime = LocalDateTime.parse(weddingDateTime, DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm"));
-
-        if (enteredDateTime.isBefore(now)) {
-            redi.addFlashAttribute("error", "Wedding date & time cannot be in the past!");
-            redi.addFlashAttribute("user", user);
-            return "redirect:/user/signup";
-        }
-
-        service.save(user);
-        redi.addFlashAttribute("message", "You have successfully registered! Login to your account now.");
-        return "redirect:/home";
-    } catch (DuplicateEmailException e) {
-        redi.addFlashAttribute("error", e.getMessage());
-        redi.addFlashAttribute("user", user);
-        return "redirect:/user/signup";
     }
-}
 }
