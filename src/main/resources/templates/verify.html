@@ -17,7 +17,7 @@
 
     <form action="#" th:action="@{/verify}" method="post">
         <label for="email">Email:</label>
-        <input type="email" name="email" id="email" th:value="${email}" required readonly> <!-- ✅ Autofill email -->
+        <input type="email" name="email" id="email" th:value="${email}" required > 
         
         <label for="code">Verification Code:</label>
         <input type="text" name="code" id="code" required>

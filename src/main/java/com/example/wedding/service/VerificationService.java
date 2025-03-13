@@ -38,6 +38,11 @@ public class VerificationService {
         VerificationToken verificationToken = optionalToken.get();
 
         if (verificationToken.getExpiryDate().isBefore(LocalDateTime.now())) {
+        	 User user = verificationToken.getUser();
+        	 
+        	verificationTokenRepository.delete(verificationToken);
+            userRepository.delete(user);
+            System.out.println("Deleted unverified user, token expired: " + user.getEmail());
             return false; 
         }
 

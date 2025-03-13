@@ -3,6 +3,8 @@ package com.example.wedding.service;
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCrypt;
+
+import com.example.wedding.dto.UserDto;
 import com.example.wedding.model.User;
 import com.example.wedding.repository.UserRepository;
 
