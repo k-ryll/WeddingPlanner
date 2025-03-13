@@ -63,4 +63,27 @@ public class VerificationController {
     	return "redirect:/user/login";
 		
     }
+    @GetMapping("/user/resetpassword")
+    public String showResetPasswordForm(@RequestParam("email") String email, Model model) {
+        model.addAttribute("email", email);
+        return "resetpassword"; 
+    }
+
+    @PostMapping("/user/resetpassword")
+    public String resetPassword(@RequestParam("email") String email,
+                                @RequestParam("newPassword") String newPassword,
+                                @RequestParam("confirmPassword") String confirmPassword,
+                                Model model) {
+        if (!newPassword.equals(confirmPassword)) {
+            model.addAttribute("error", "Passwords do not match. Please try again.");
+            return "resetpassword";
+        }
+        
+        
+        service.savePassword(email, confirmPassword);
+        
+
+        model.addAttribute("message", "Your password has been successfully reset.");
+        return "redirect:/home"; 
+    }
 }

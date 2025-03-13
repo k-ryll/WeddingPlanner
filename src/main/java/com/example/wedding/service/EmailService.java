@@ -45,8 +45,8 @@ public class EmailService {
 
             helper.setTo(recipientEmail);
             helper.setSubject("Reset Your Password");
-            helper.setText("Click here to reset you password: "
-                    + "" + "http://localhost:8080/resetpassword/"+recipientEmail+ "");
+            helper.setText("Click here to reset your password: "
+                    + "http://localhost:8080/user/resetpassword?email=" + recipientEmail);
 
             mailSender.send(message);
             logger.info("Verification email sent successfully to {}", recipientEmail);

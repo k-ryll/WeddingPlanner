@@ -13,7 +13,7 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf().disable() 
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/user/**").permitAll()
+                .requestMatchers("/verify", "/verify/**","/user/**", "/home" ,"/styles/**", "/js/**", "/images/**").permitAll()
                 .anyRequest().authenticated()
             );
         return http.build();
