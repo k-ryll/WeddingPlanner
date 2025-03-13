@@ -1,4 +1,4 @@
-package com.example.wedding.security;
+package com.example.wedding.config;
 
 import java.security.SecureRandom;
 

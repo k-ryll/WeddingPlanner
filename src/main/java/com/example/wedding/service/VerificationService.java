@@ -10,8 +10,8 @@ import java.time.LocalDateTime;
 import com.example.wedding.model.VerificationToken;
 import com.example.wedding.repository.VerificationTokenRepository;
 import com.example.wedding.repository.UserRepository;
-import com.example.wedding.model.User;
-import com.example.wedding.security.VerificationCodeGenerator; 
+import com.example.wedding.config.VerificationCodeGenerator;
+import com.example.wedding.model.User; 
 @Service
 public class VerificationService {
 

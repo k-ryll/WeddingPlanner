@@ -51,7 +51,6 @@ public class UserController {
         return "signup";
     }
     
-
 @PostMapping("/user/validate")
 public String loginUser(
         @RequestParam("email") String email, 
@@ -61,7 +60,7 @@ public String loginUser(
 
     User user = service.findByEmail(email);
 
-    if (user != null && BCrypt.checkpw(password, user.getPassword())) {
+    if (user != null && BCrypt.checkpw(password, user.getPassword()) && user.isVerified() == true) {
         session.setAttribute("loggedUser", user);
         return "redirect:/home";
     } else {

@@ -37,4 +37,22 @@ public class EmailService {
             logger.error("Failed to send verification email to {}: {}", recipientEmail, e.getMessage());
         }
     }
+    
+    public void sendResetPassword(String recipientEmail) {
+    	try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+
+            helper.setTo(recipientEmail);
+            helper.setSubject("Reset Your Password");
+            helper.setText("Click here to reset you password: "
+                    + "" + "http://localhost:8080/resetpassword/"+recipientEmail+ "");
+
+            mailSender.send(message);
+            logger.info("Verification email sent successfully to {}", recipientEmail);
+
+        } catch (MailException | MessagingException e) {
+            logger.error("Failed to send verification email to {}: {}", recipientEmail, e.getMessage());
+        }
+    }
 }
