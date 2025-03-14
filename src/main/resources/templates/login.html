@@ -17,6 +17,9 @@
 <div class="container">
   <form action="/user/validate" method="post">
     <h1>Login to your Account</h1>
+
+        <p th:if="${message}" th:text="${message}" style="color: green;"></p>
+        <p th:if="${error}" th:text="${error}" style="color: red;"></p>
     <label for="email">Email</label>
     <input type="text"  name="email" id="email" required>
 
@@ -26,6 +29,7 @@
     <button type="submit">Login</button>
     <a href="/user/signup">Don't have an Account?</a>
     <a href="/user/reset">Reset Password</a>
+    
   </form>
 </div>
 

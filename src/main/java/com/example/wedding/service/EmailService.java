@@ -38,7 +38,7 @@ public class EmailService {
         }
     }
     
-    public void sendResetPassword(String recipientEmail) {
+    public void sendResetPassword(String recipientEmail, String token) {
     	try {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
@@ -46,7 +46,7 @@ public class EmailService {
             helper.setTo(recipientEmail);
             helper.setSubject("Reset Your Password");
             helper.setText("Click here to reset your password: "
-                    + "http://localhost:8080/user/resetpassword?email=" + recipientEmail);
+                    + "http://localhost:8080/user/resetpassword?token=" + token);
 
             mailSender.send(message);
             logger.info("Verification email sent successfully to {}", recipientEmail);

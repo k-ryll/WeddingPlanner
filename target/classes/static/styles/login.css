@@ -88,4 +88,10 @@ header {
 a{
   margin-top: 10px;
 }
-
+.container-reset{
+	height: 100%;
+	 display: flex;
+	 flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}

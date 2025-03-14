@@ -40,10 +40,12 @@ public class UserService {
     
 
     @Transactional
-    public String savePassword(String email, String password) {
+    public String savePassword(User user, String password) {
         String salt = BCrypt.gensalt(10);
         String hashedPassword = BCrypt.hashpw(password, salt);
+        String email = user.getEmail();
         repo.changeUserPassword(hashedPassword, email);
+        System.out.print("Password Changed succesfully!");
         return "redirect:/home";
     }
 

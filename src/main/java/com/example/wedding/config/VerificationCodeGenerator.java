@@ -1,6 +1,7 @@
 package com.example.wedding.config;
 
 import java.security.SecureRandom;
+import java.util.UUID;
 
 public class VerificationCodeGenerator {
 	private static final String CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
@@ -14,4 +15,12 @@ public class VerificationCodeGenerator {
         }
         return code.toString();
     }
+    
+    
+        public static String generatePasswordToken() {
+            return UUID.randomUUID().toString();
+        }
+    
+
+	
 }
