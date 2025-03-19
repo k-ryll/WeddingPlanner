@@ -37,7 +37,7 @@ form {
     display: flex;
     flex-direction: column;
 }
-input {
+input, select {
     padding: 8px;
     margin-bottom: 10px;
     border: 1px solid #ccc;
@@ -88,6 +88,6 @@ header {
 .name div{
     width: 48%;
 }
-.name input{
+.name input {
     width: 100%;
 }

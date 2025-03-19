@@ -22,7 +22,11 @@ import com.example.wedding.service.DuplicateEmailException;
 import com.example.wedding.service.EmailService;
 import com.example.wedding.service.UserService;
 import com.example.wedding.service.VerificationService;
-import com.example.wedding.util.SecurityUtil;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
+import java.util.Collections;
 
 import jakarta.servlet.http.HttpSession;
 
@@ -41,11 +45,11 @@ public class UserController {
     @GetMapping("/home")
     public String home(@SessionAttribute(name = "loggedUser", required = false) User user, Model model) {
         if (user == null) {
-            return "redirect:/user/login"; // Redirect if not logged in
-        }
+            return "redirect:/user/login";    }
         model.addAttribute("user", user);
-        return "home"; // Return the home page
+        return "home"; 
     }
+
 
 
     @GetMapping("/user/login")
@@ -60,71 +64,79 @@ public class UserController {
         return "signup";
     }
     
-@PostMapping("/user/validate")
-public String loginUser(
-        @RequestParam("email") String email, 
-        @RequestParam("password") String password, 
-        RedirectAttributes redi, 
-        HttpSession session) {
-
-    User user = service.findByEmail(email);
-
-    if (user != null && BCrypt.checkpw(password, user.getPassword()) && user.isVerified() == true) {
-        session.setAttribute("loggedUser", user);
-        return "redirect:/home";
-    } else {
-        redi.addFlashAttribute("error", "Invalid email or password.");
-        return "redirect:/user/login";
-    }
-}
-    
-
-    @PostMapping("/user/save")
-    public String saveUser(@RequestParam("password") String password,
-                           @RequestParam("confirmPass") String confirmPass,
-                           @RequestParam("weddingDate") String weddingDateTime,
-                           @RequestParam("email") String email,
-                           @ModelAttribute User user,
-                           RedirectAttributes redi) {
-        try {
-         
-            if (!password.equals(confirmPass)) {
-                redi.addFlashAttribute("error", "Passwords do not match!");
-                redi.addFlashAttribute("user", user);
-                return "redirect:/user/signup";
-            }
-
-          
-            LocalDateTime now = LocalDateTime.now();
-            LocalDateTime enteredDateTime = LocalDateTime.parse(weddingDateTime, DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm"));
-
-            if (enteredDateTime.isBefore(now)) {
-                redi.addFlashAttribute("error", "Wedding date & time cannot be in the past!");
-                redi.addFlashAttribute("user", user);
-                return "redirect:/user/signup";
-            }
-
-         
-            service.save(user);
-
+    @PostMapping("/user/validate")
+    public String loginUser(
+            @RequestParam("email") String email, 
+            @RequestParam("password") String password, 
+            RedirectAttributes redi, 
+            HttpSession session) {
         
-            String verificationCode = verificationService.generateVerificationCode(user);
-
+        System.out.println("Email: " + email);
+        User user = service.findByEmail(email);
         
-            try {
-                emailService.sendVerificationEmail(email, verificationCode);
-            } catch (Exception e) {
-                redi.addFlashAttribute("error", "Failed to send verification email. Please try again.");
-                return "redirect:/user/signup";
-            }
-            redi.addFlashAttribute("message", "A verification code has been sent to your email. Please verify your account.");
-            return "redirect:/verify?email=" + email;
+        if (user != null) {
+            System.out.println("User found: " + user.getEmail());
+        } else {
+            System.out.println("User not found!");
+        }
+        
+        if (user != null && BCrypt.checkpw(password, user.getPassword()) && user.isVerified()) {
+            
+            session.setAttribute("loggedUser", user);
+            
 
-        } catch (DuplicateEmailException e) {
-            redi.addFlashAttribute("error", e.getMessage());
-            redi.addFlashAttribute("user", user);
-            return "redirect:/user/signup";
+            Authentication auth = new UsernamePasswordAuthenticationToken(
+                    user, 
+                    null, 
+                    Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"))
+            );
+            
+
+            SecurityContextHolder.getContext().setAuthentication(auth);
+            
+      
+            session.setAttribute("SPRING_SECURITY_CONTEXT", SecurityContextHolder.getContext());
+         
+            return "redirect:/home";
+        } else {
+            redi.addFlashAttribute("error", "Invalid email or password.");
+            return "redirect:/user/login";
         }
     }
+
+@PostMapping("/user/save")
+public String saveUser(@RequestParam("password") String password,
+                       @RequestParam("confirmPass") String confirmPass,
+                       @RequestParam("email") String email,
+                       @ModelAttribute User user,
+                       RedirectAttributes redi) {
+    try {
+        if (!password.equals(confirmPass)) {
+            redi.addFlashAttribute("error", "Passwords do not match!");
+            redi.addFlashAttribute("user", user);
+            return "redirect:/user/signup";
+        }   
+        
+        service.save(user);
+
+        String verificationCode = verificationService.generateVerificationCode(user);
+        
+        try {
+            emailService.sendVerificationEmail(email, verificationCode);
+        } catch (Exception e) {
+            redi.addFlashAttribute("error", "Failed to send verification email. Please try again.");
+            return "redirect:/user/signup";
+        }
+        
+        redi.addFlashAttribute("message", "A verification code has been sent to your email. Please verify your account.");
+        return "redirect:/verify?email=" + email;
+
+    } catch (DuplicateEmailException e) {
+        redi.addFlashAttribute("error", e.getMessage());
+        redi.addFlashAttribute("user", user);
+        return "redirect:/user/signup";
+    }
+}
+
     
 }

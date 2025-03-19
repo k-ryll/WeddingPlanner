@@ -5,8 +5,6 @@
 <title>Guest Page</title>
 <link rel="stylesheet" th:href="@{/styles/guestsPage.css}">
 <link rel="stylesheet" th:href="@{/styles/styles.css}">
-<link rel="stylesheet" href="/src/main/resources/static/styles/guestsPage.css">
-<link rel="stylesheet" href="/src/main/resources/static/styles/styles.css">
 
 <script src="https://kit.fontawesome.com/b80e3de11b.js" ></script>
 </head>
@@ -21,6 +19,7 @@
             <li>Planning</li>
             <li>Vendors</li>
             <li>About Us</li>
+            <li><a th:href="@{/logout}">Logout</a></li>
         </ul>
         <i class="fa-regular fa-circle-user user-icon"></i>
     </div>
@@ -38,8 +37,9 @@
   </div>
 
 
-  <h1 class="text-success">Guest List</h1>
-	
+ 
+	<div class="table-container">
+    <h1 class="text-success">Guest List</h1>
 <table>
     <thead>
         <tr>
@@ -62,6 +62,7 @@
         </tr>
     </tbody>
 </table>
+</div>
 <!-- Modal -->
 <div id="guestModal" class="modal">
   <div class="modal-content">
