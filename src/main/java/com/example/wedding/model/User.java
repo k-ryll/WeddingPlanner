@@ -2,6 +2,9 @@ package com.example.wedding.model;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -28,8 +31,6 @@ public class User {
     @Column(nullable = false, length = 45)
     private String lastName;
 
-    @Column(nullable = false)
-    private LocalDateTime weddingDate;
 
     @CreationTimestamp
     @Column(updatable = false)
@@ -42,6 +43,11 @@ public class User {
     @Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT false")
     private boolean verified = false;
 
+    @OneToMany(mappedBy = "addedBy", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Guest> guests = new ArrayList<>();
+
+    public List<Guest> getGuests() { return guests; }
+    public void setGuests(List<Guest> guests) { this.guests = guests; }
 
     // Getters and Setters
     public Integer getId() { return id; }
@@ -62,9 +68,7 @@ public class User {
     public String getLastName() { return lastName; }
     public void setLastName(String lastName) { this.lastName = lastName; }
 
-    public LocalDateTime getWeddingDate() { return weddingDate; }
-    public void setWeddingDate(LocalDateTime weddingDate) { this.weddingDate = weddingDate; }
-
+  
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
 

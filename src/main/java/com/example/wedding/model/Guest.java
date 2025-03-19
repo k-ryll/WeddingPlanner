@@ -1,84 +1,55 @@
 package com.example.wedding.model;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 
 @Entity
-@Table (name="guests")
+@Table(name = "guests")
 public class Guest {
-	
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
-	
-	@Column(nullable = false, unique = true)
-	private Integer guestId;
-	
-	@Column(nullable = false, length = 50)
-	private String title;
-	
-	@Column(nullable = false, length = 50)
-	private String name;
-	
-	@Column(nullable = false, length = 50)
-	private String email;
-	
-	@Column(nullable = false, length = 45)
-	private String rsvp;
-	
-	@Column(nullable = false, length = 45)
-	private String entourage;
+    
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(nullable = false, unique = true)
+    private Integer guestId;
 
-	public Integer getGuestId() {
-		return guestId;
-	}
+    @Column(nullable = false, length = 50)
+    private String title;
 
-	public void setGuestId(Integer guestId) {
-		this.guestId = guestId;
-	}
+    @Column(nullable = false, length = 50)
+    private String name;
 
-	public String getTitle() {
-		return title;
-	}
+    @Column(nullable = false, length = 50)
+    private String email;
 
-	public void setTitle(String title) {
-		this.title = title;
-	}
+    @Column(nullable = false, length = 45)
+    private String rsvp;
 
-	public String getName() {
-		return name;
-	}
+    @Column(nullable = false, length = 45)
+    private String entourage;
 
-	public void setName(String name) {
-		this.name = name;
-	}
+    // Establishing a Many-to-One relationship with User
+    @ManyToOne
+    @JoinColumn(name = "added_by", nullable = false) // This creates a foreign key column `added_by`
+    private User addedBy;
 
-	public String getEmail() {
-		return email;
-	}
+    // Getters and Setters
+    public Integer getGuestId() { return guestId; }
+    public void setGuestId(Integer guestId) { this.guestId = guestId; }
 
-	public void setEmail(String email) {
-		this.email = email;
-	}
+    public String getTitle() { return title; }
+    public void setTitle(String title) { this.title = title; }
 
-	public String getRsvp() {
-		return rsvp;
-	}
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
 
-	public void setRsvp(String rsvp) {
-		this.rsvp = rsvp;
-	}
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
 
-	public String getEntourage() {
-		return entourage;
-	}
+    public String getRsvp() { return rsvp; }
+    public void setRsvp(String rsvp) { this.rsvp = rsvp; }
 
-	public void setEntourage(String entourage) {
-		this.entourage = entourage;
-	}
-	
-	                                                                                                       
+    public String getEntourage() { return entourage; }
+    public void setEntourage(String entourage) { this.entourage = entourage; }
+
+    public User getAddedBy() { return addedBy; }
+    public void setAddedBy(User addedBy) { this.addedBy = addedBy; }
 }
