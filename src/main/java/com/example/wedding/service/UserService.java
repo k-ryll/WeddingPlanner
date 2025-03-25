@@ -1,6 +1,10 @@
 package com.example.wedding.service;
 
 import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCrypt;
 
@@ -24,6 +28,27 @@ public class UserService {
         return repo.findByEmail(email);
     }
 
+    public List<User> getBrides() {
+        return repo.findAll()
+            .stream()
+            .filter(user -> user.getRole().equalsIgnoreCase("BRIDE")) // Ensure role matches
+            .collect(Collectors.toList());
+    }
+
+    public List<User> getGrooms() {
+        return repo.findAll()
+            .stream()
+            .filter(user -> user.getRole().equalsIgnoreCase("GROOM")) // Ensure role matches
+            .collect(Collectors.toList());
+    }
+
+    public List<User> getOrganizers() {
+        return repo.findAll()
+            .stream()
+            .filter(user -> user.getRole().equalsIgnoreCase("ORGANIZER")) // Ensure role matches
+            .collect(Collectors.toList());
+    }
+
     public String save(User user) throws DuplicateEmailException {
         if (repo.findByEmail(user.getEmail()) != null) {
             throw new DuplicateEmailException("An account with this email already exists.");
@@ -37,6 +62,7 @@ public class UserService {
         
         return "redirect:/home";
     }
+    
     
 
     @Transactional

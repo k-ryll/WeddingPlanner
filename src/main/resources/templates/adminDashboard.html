@@ -4,9 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" th:href="@{/styles/styles.css}">
-    <link rel="stylesheet" href="../static/styles/styles.css">
-    <link rel="stylesheet" th:href="@{/styles/home.css}">
-    <link rel="stylesheet" href="../static/styles/home.css">
+    <link rel="stylesheet" th:href="@{/styles/admin.css}">
     <script src="https://kit.fontawesome.com/b80e3de11b.js" ></script>
     <title>Document</title>
 </head>
@@ -41,5 +39,51 @@
           </div>
     </div>
     
+<!-- Modal -->
+<div id="projectModal" class="modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h4 class="modal-title">Create New Project</h4>
+        <form class="projectForm" th:action="@{/project/create}" method="post">
+    <label>Project Name:</label>
+    <input type="text" name="projectName" required />
+
+    <label>Groom:</label>
+    <select name="groomEmail">
+        <option value="">Select Groom</option>
+        <option th:each="groom : ${grooms}" th:value="${groom.email}" th:text="${groom.firstName}+' '+${groom.lastName}"></option>
+    </select>
+
+    <label>Bride:</label>
+    <select name="brideEmail">
+        <option value="">Select Bride</option>
+        <option th:each="bride : ${brides}" th:value="${bride.email}" th:text="${bride.firstName}+' '+${bride.lastName}"></option>
+    </select>
+
+    <label>Organizer (Optional):</label>
+    <select name="organizerEmail">
+        <option value="">Select Organizer</option>
+        <option th:each="org : ${organizers}" th:value="${org.email}" th:text="${org.firstName}+' '+${org.lastName}"></option>
+    </select>
+
+    <label>Wedding Date:</label>
+    <input type="datetime-local" name="weddingDate" required>
+
+
+    <label>Status:</label>
+	<select name="status">
+        <option value="Pending">Pending</option>
+        <option value="Ongoing">Ongoing</option>
+        <option value="Completed">Completed</option>
+    </select>
+    <button type="submit">Create Project</button>
+</form>
+
+    </div>
+</div>
+    
+        <script th:src="@{/js/admin.js}"></script>
+  
+
 </body>
 </html>

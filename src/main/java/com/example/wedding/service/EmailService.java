@@ -28,7 +28,8 @@ public class EmailService {
             helper.setSubject("Your Email Verification Code");
             helper.setText("<p>Your verification code is:</p>"
                     + "<h2>" + verificationCode + "</h2>"
-                    + "<p>Enter this code in the verification form to confirm your email.</p>", true);
+                    + "<p>Enter this code in the verification form to confirm your email.</p>"
+                    +"http://localhost:8080/verify?email="+recipientEmail, true);
 
             mailSender.send(message);
             logger.info("Verification email sent successfully to {}", recipientEmail);

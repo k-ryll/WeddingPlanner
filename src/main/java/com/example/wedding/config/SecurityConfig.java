@@ -21,7 +21,7 @@ public class SecurityConfig {
 	                "/user/signup", "/user/save",
 	                "/user/resetpassword", "/user/reset", "/user/reset-password",
 	                "/verify", "/user/login", "/home", "/guests", "/guests/**", "/user/validate", 
-	                "/admin/login", "/admin/**", "/styles/**", "/js/**", "/images/**"
+	                "/admin/login", "/admin/**","/project/**", "/styles/**", "/js/**", "/images/**"
 	            ).permitAll()
 	            
 	           

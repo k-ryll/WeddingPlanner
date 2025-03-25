@@ -41,5 +41,85 @@ public class Project {
     @Column(nullable = false)
     private String status;
 
-	
+    public Project() {}
+
+    public Project(String projectName, User groom, User bride, User organizer, LocalDateTime weddingDate, String status) {
+        this.projectName = projectName;
+        this.groom = groom;
+        this.bride = bride;
+        this.organizer = organizer;
+        this.weddingDate = weddingDate;
+        this.status = status;
+    }
+
+    // Getters and Setters
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public String getProjectName() {
+        return projectName;
+    }
+
+    public void setProjectName(String projectName) {
+        this.projectName = projectName;
+    }
+
+    public User getGroom() {
+        return groom;
+    }
+
+    public void setGroom(User groom) {
+        this.groom = groom;
+    }
+
+    public User getBride() {
+        return bride;
+    }
+
+    public void setBride(User bride) {
+        this.bride = bride;
+    }
+
+    public User getOrganizer() {
+        return organizer;
+    }
+
+    public void setOrganizer(User organizer) {
+        this.organizer = organizer;
+    }
+
+    public LocalDateTime getWeddingDate() {
+        return weddingDate;
+    }
+
+    public void setWeddingDate(LocalDateTime weddingDate) {
+        this.weddingDate = weddingDate;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    @Override
+    public String toString() {
+        return "Project{" +
+                "id=" + id +
+                ", projectName='" + projectName + '\'' +
+                ", groom=" + groom +
+                ", bride=" + bride +
+                ", organizer=" + organizer +
+                ", weddingDate=" + weddingDate +
+                ", status='" + status + '\'' +
+                '}';
+    }
+        
 }

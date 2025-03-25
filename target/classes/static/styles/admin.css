@@ -1,0 +1,71 @@
+
+.search-box{
+    display: flex;
+    width: 100%;
+    justify-content: space-around;
+}
+.search-box div{
+    display: flex;
+    align-items: center;
+    width: 50%;
+    justify-content: flex-end;
+}
+
+.search-box div input{
+    padding: 1rem .5rem;
+    font-size: 1rem;
+    border-radius: 10px;
+    width: 100%;
+}
+
+.search-box div i{
+    position: absolute;
+    margin-right: 2rem;
+}
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+  }
+  .modal-content {
+    background-color: white;
+    margin: 10% auto;
+    padding: 20px;
+    width: 50%;
+    border-radius: 5px;
+  }
+  .close {
+    float: right;
+    font-size: 24px;
+    cursor: pointer;
+  }
+
+.modal-content{
+    padding-bottom: .5rem;
+}
+.modal-content input, select{
+    border-radius: 8px;
+    padding: 8px;
+    border: none;
+    background-color: var(--accent-color);
+    width: 70%;
+}
+.projectForm{
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    
+    font-size: 1vw;
+    padding-inline: 2rem;
+}
+.projectForm div{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-bottom: .5rem;
+}
