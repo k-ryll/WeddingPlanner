@@ -60,11 +60,18 @@ public class AdminController {
         @RequestParam String brideEmail,
         @RequestParam(required = false) String organizerEmail,
         @RequestParam String weddingDate,
-        @RequestParam String status
+        @RequestParam String status,
+        RedirectAttributes redirectAttributes
     ) {
-		System.out.println("Creating project: " + projectName);
-	    Project project = projectService.createProject(projectName, groomEmail, brideEmail, organizerEmail, weddingDate, status);
-	    System.out.println("Project created successfully: " + project);
-        return "redirect:/admin/dashboard";  
+        try {
+            System.out.println("Creating project: " + projectName);
+            Project project = projectService.createProject(projectName, groomEmail, brideEmail, organizerEmail, weddingDate, status);
+            System.out.println("Project created successfully: " + project);
+            redirectAttributes.addFlashAttribute("success", "Project created successfully!");
+            return "redirect:/admin/home";
+        } catch (IllegalArgumentException e) {
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
+            return "redirect:/admin/home";
+        }
     }
 }

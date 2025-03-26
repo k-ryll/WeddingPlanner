@@ -6,6 +6,7 @@ import com.example.wedding.model.Project;
 import com.example.wedding.model.User;
 import com.example.wedding.repository.ProjectRepository;
 import jakarta.transaction.Transactional;
+import java.util.List;
 
 @Service
 public class ProjectService {
@@ -16,8 +17,29 @@ public class ProjectService {
     @Autowired
     private UserService userService;  
 
+    public boolean isUserInProject(String email) {
+        List<Project> allProjects = projectRepository.findAll();
+        return allProjects.stream()
+                .anyMatch(project -> 
+                    (project.getGroom() != null && project.getGroom().getEmail().equals(email)) ||
+                    (project.getBride() != null && project.getBride().getEmail().equals(email)) ||
+                    (project.getOrganizer() != null && project.getOrganizer().getEmail().equals(email))
+                );
+    }
+
     @Transactional
     public Project createProject(String projectName, String groomEmail, String brideEmail, String organizerEmail, String weddingDate, String status) {
+        // Check if any of the users are already in a project
+        if (isUserInProject(groomEmail)) {
+            throw new IllegalArgumentException("Groom is already in a project!");
+        }
+        if (isUserInProject(brideEmail)) {
+            throw new IllegalArgumentException("Bride is already in a project!");
+        }
+        if (organizerEmail != null && isUserInProject(organizerEmail)) {
+            throw new IllegalArgumentException("Organizer is already in a project!");
+        }
+
         User groom = userService.findByEmail(groomEmail);
         User bride = userService.findByEmail(brideEmail);
         User organizer = organizerEmail != null ? userService.findByEmail(organizerEmail) : null;
@@ -36,4 +58,6 @@ public class ProjectService {
 
         return projectRepository.save(project);
     }
+    
+    
 }
