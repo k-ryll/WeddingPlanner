@@ -41,7 +41,37 @@
               NEW PROJECT</button>
           </div>
           <div class="project-list">
-
+            <table class="projects-table">
+                <thead>
+                    <tr>
+                        <th>Project Name</th>
+                        <th>Bride</th>
+                        <th>Groom</th>
+                        <th>Organizer</th>
+                        <th>Wedding Date</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="project : ${projects}">
+                        <td th:text="${project.projectName}"></td>
+                        <td th:text="${project.bride.firstName + ' ' + project.bride.lastName}"></td>
+                        <td th:text="${project.groom.firstName + ' ' + project.groom.lastName}"></td>
+                        <td th:text="${project.organizer != null ? project.organizer.firstName + ' ' + project.organizer.lastName : '-'}"></td>
+                        <td th:text="${#temporals.format(project.weddingDate, 'MMM dd, yyyy HH:mm')}"></td>
+                        <td th:text="${project.status}"></td>
+                        <td class="actions">
+                            <button class="edit-btn" th:attr="data-project-id=${project.id}">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="delete-btn" th:attr="data-project-id=${project.id}">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
           </div>
     </div>
     

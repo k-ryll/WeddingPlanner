@@ -10,8 +10,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.example.wedding.model.Guest;
+import com.example.wedding.model.Project;
 import com.example.wedding.model.User;
 import com.example.wedding.service.GuestService;
+import com.example.wedding.service.ProjectService;
 
 import jakarta.servlet.http.HttpSession;
 
@@ -20,6 +22,9 @@ public class GuestController {
 	
 	@Autowired
 	private GuestService service;
+	
+	@Autowired
+	private ProjectService projectService;
 	
 	@GetMapping("/guests")
 	public String showGuestPage(Model model, HttpSession session) {
@@ -50,8 +55,17 @@ public class GuestController {
 	        return "redirect:/user/login"; // Redirect to login if not logged in
 	    }
 
-	    // Associate the guest with the logged-in user
+	    // Find the project associated with the logged-in user
+	    Project userProject = projectService.findProjectByUserEmail(loggedUser.getEmail());
+	    
+	    if (userProject == null) {
+	        redirectAttributes.addFlashAttribute("error", "You must be part of a project to add guests.");
+	        return "redirect:/guests";
+	    }
+
+	    // Associate the guest with the logged-in user and their project
 	    guest.setAddedBy(loggedUser);
+	    guest.setProjectId(userProject);
 
 	    // Save the guest
 	    service.save(guest);

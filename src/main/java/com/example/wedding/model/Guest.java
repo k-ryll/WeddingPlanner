@@ -25,7 +25,11 @@ public class Guest {
 
     @Column(nullable = false, length = 45)
     private String entourage;
-
+    
+    @ManyToOne
+    @JoinColumn(name = "projectId", nullable = false)
+    private Project projectId;
+    
     // Establishing a Many-to-One relationship with User
     @ManyToOne
     @JoinColumn(name = "added_by", nullable = false) // This creates a foreign key column `added_by`
@@ -35,7 +39,13 @@ public class Guest {
     public Integer getGuestId() { return guestId; }
     public void setGuestId(Integer guestId) { this.guestId = guestId; }
 
-    public String getTitle() { return title; }
+    public Project getProjectId() {
+		return projectId;
+	}
+	public void setProjectId(Project projectId) {
+		this.projectId = projectId;
+	}
+	public String getTitle() { return title; }
     public void setTitle(String title) { this.title = title; }
 
     public String getName() { return name; }

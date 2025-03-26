@@ -40,6 +40,8 @@
  
 	<div class="table-container">
     <h1 class="text-success">Guest List</h1>
+    <p th:if="${message}" th:text="${message}" style="color: green;"></p>
+        <p th:if="${error}" th:text="${error}" style="color: red;"></p>
 <table>
     <thead>
         <tr>
@@ -48,7 +50,9 @@
             <th>Email</th>
             <th>Entourage</th>
             <th>RSVP</th>
+            <th>Project</th>
             <th>Added By</th>
+            <th>Actions</th>
         </tr>
     </thead>
     <tbody>
@@ -58,7 +62,19 @@
             <td th:text="${guest.email}"></td>
             <td th:text="${guest.entourage}"></td>
             <td th:text="${guest.rsvp}"></td>
+            <td th:text="${guest.projectId.projectName}"></td>
             <td th:text="${guest.addedBy.firstName + ' ' + guest.addedBy.lastName}"></td>
+            <td class="actions">
+              <button class="email-btn" th:attr="data-guest-email=${guest.email}">
+                <i class="fas fa-envelope"></i>
+            </button>
+              <button class="edit-btn" th:attr="data-guest-id=${guest.guestId}">
+                  <i class="fas fa-edit"></i>
+              </button>
+              <button class="delete-btn" th:attr="data-guest-id=${guest.guestId}">
+                  <i class="fas fa-trash"></i>
+              </button>
+          </td>
         </tr>
     </tbody>
 </table>

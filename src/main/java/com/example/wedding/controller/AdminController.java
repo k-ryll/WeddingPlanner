@@ -41,13 +41,12 @@ public class AdminController {
 	}
 	
 	@GetMapping("/admin/home")
-	public String showAdminHome( Model model) {
-	    
-
+	public String showAdminHome(Model model) {
 	    model.addAttribute("project", new Project());
 	    model.addAttribute("brides", userService.getBrides());  // Fetch brides
 	    model.addAttribute("grooms", userService.getGrooms());  // Fetch grooms
 	    model.addAttribute("organizers", userService.getOrganizers());  // Fetch organizers
+	    model.addAttribute("projects", projectService.findAll());  // Add all projects
 	    return "adminDashboard";  
 	}
 

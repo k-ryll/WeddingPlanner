@@ -58,6 +58,20 @@ public class ProjectService {
 
         return projectRepository.save(project);
     }
+
+    public Project findProjectByUserEmail(String email) {
+        List<Project> allProjects = projectRepository.findAll();
+        return allProjects.stream()
+                .filter(project -> 
+                    (project.getGroom() != null && project.getGroom().getEmail().equals(email)) ||
+                    (project.getBride() != null && project.getBride().getEmail().equals(email)) ||
+                    (project.getOrganizer() != null && project.getOrganizer().getEmail().equals(email))
+                )
+                .findFirst()
+                .orElse(null);
+    }
     
-    
+    public List<Project> findAll() {
+        return projectRepository.findAll();
+    }
 }
