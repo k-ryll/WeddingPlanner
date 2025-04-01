@@ -11,4 +11,5 @@ import com.example.wedding.model.User;
 public interface GuestRepository extends JpaRepository<Guest, Integer> {
 	 List<Guest> findByAddedBy(User user);
 	 List<Guest> findByProjectId(Project project);
+	 Guest findByEmail(String email);
 }

@@ -16,4 +16,31 @@ window.addEventListener("click", (event) => {
     modal.style.display = "none";
   }
 });
+
+// Email button click handler
+document.querySelectorAll('.email-btn').forEach(button => {
+    button.addEventListener('click', async function() {
+        const guestEmail = this.getAttribute('data-guest-email');
+        
+        try {
+            const response = await fetch('/guest/send-invitation', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `email=${encodeURIComponent(guestEmail)}`
+            });
+
+            const result = await response.text();
+            
+            if (response.ok) {
+                alert('Invitation sent successfully!');
+            } else {
+                alert('Failed to send invitation: ' + result);
+            }
+        } catch (error) {
+            alert('Error sending invitation: ' + error.message);
+        }
+    });
+});
 });

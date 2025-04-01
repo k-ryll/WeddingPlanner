@@ -104,6 +104,8 @@ a:not([class]) {
 	  position: relative;
 	  padding-inline: 1.5rem;
 	  padding-block: .5rem;
+	  display: flex;
+	  align-items: center;
   }
   
   header div ul li::after {
@@ -131,3 +133,13 @@ a:not([class]) {
 	  transition: color 0.1s ease;
   }
 
+button a{
+	text-decoration: none;
+}
+li a{
+	text-decoration: none;
+}
+
+.logo{
+	width: 50px;
+}

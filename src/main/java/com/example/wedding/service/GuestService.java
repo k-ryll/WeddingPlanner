@@ -24,7 +24,6 @@ public class GuestService {
         // Get the user's project
         Project userProject = projectService.findProjectByUserEmail(user.getEmail());
         if (userProject != null) {
-            // If user is in a project, return all guests in that project
             return repo.findByProjectId(userProject);
         }
         // If user is not in a project, return only guests they added
@@ -35,4 +34,8 @@ public class GuestService {
 		repo.save(guest);
 		return "redirect:/home";
 	}
+
+    public Guest findByEmail(String email) {
+        return repo.findByEmail(email);
+    }
 }

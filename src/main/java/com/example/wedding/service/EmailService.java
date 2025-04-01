@@ -56,4 +56,37 @@ public class EmailService {
             logger.error("Failed to send verification email to {}: {}", recipientEmail, e.getMessage());
         }
     }
+
+    public void sendInvitationEmail(String to, String guestName, String projectName) throws MessagingException {
+        MimeMessage message = mailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(message, true);
+        
+        helper.setTo(to);
+        helper.setSubject("Wedding Invitation - " + projectName);
+        
+        String htmlContent = String.format("""
+            <html>
+            <body style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;'>
+                <h2 style='color: #814256; text-align: center;'>Wedding Invitation</h2>
+                <p>Dear %s,</p>
+                <p>You have been invited to the wedding of %s.</p>
+                <p>Please click one of the following buttons to respond to the invitation:</p>
+                <div style='text-align: center; margin: 30px 0;'>
+                    <a href='http://localhost:8080/guest/rsvp?email=%s&response=accept' 
+                       style='background-color: #4CAF50; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; margin-right: 10px;'>
+                        Accept
+                    </a>
+                    <a href='http://localhost:8080/guest/rsvp?email=%s&response=decline' 
+                       style='background-color: #f44336; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;'>
+                        Decline
+                    </a>
+                </div>
+                <p style='color: #666; font-size: 14px;'>If you have any questions, please don't hesitate to contact us.</p>
+            </body>
+            </html>
+        """, guestName, projectName, to, to);
+        
+        helper.setText(htmlContent, true);
+        mailSender.send(message);
+    }
 }

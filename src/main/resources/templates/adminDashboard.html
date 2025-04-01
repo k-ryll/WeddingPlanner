@@ -10,7 +10,7 @@
 </head>
 <body>
     <header>
-        <img src="logo.jpg" alt="logo">
+        <img src="/images/logo.svg" class="logo" alt="logo">
         <div>
             
                 <ul>
@@ -41,37 +41,43 @@
               NEW PROJECT</button>
           </div>
           <div class="project-list">
-            <table class="projects-table">
-                <thead>
-                    <tr>
-                        <th>Project Name</th>
-                        <th>Bride</th>
-                        <th>Groom</th>
-                        <th>Organizer</th>
-                        <th>Wedding Date</th>
-                        <th>Status</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr th:each="project : ${projects}">
-                        <td th:text="${project.projectName}"></td>
-                        <td th:text="${project.bride.firstName + ' ' + project.bride.lastName}"></td>
-                        <td th:text="${project.groom.firstName + ' ' + project.groom.lastName}"></td>
-                        <td th:text="${project.organizer != null ? project.organizer.firstName + ' ' + project.organizer.lastName : '-'}"></td>
-                        <td th:text="${#temporals.format(project.weddingDate, 'MMM dd, yyyy HH:mm')}"></td>
-                        <td th:text="${project.status}"></td>
-                        <td class="actions">
-                            <button class="edit-btn" th:attr="data-project-id=${project.id}">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            <button class="delete-btn" th:attr="data-project-id=${project.id}">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+            <ul class="projects-grid">
+                <li th:each="project : ${projects}" class="project-card">
+                    <a th:href="@{/project/{id}(id=${project.id})}">
+                    <div class="project-header">
+                        <h3 th:text="${project.projectName}"></h3>
+                        <span class="status-badge" th:text="${project.status}"></span>
+                    </div>
+                    <div class="project-details">
+                        <div class="detail-item">
+                            <i class="fas fa-user"></i>
+                            <span>Bride: <span th:text="${project.bride.firstName + ' ' + project.bride.lastName}"></span></span>
+                        </div>
+                        <div class="detail-item">
+                            <i class="fas fa-user"></i>
+                            <span>Groom: <span th:text="${project.groom.firstName + ' ' + project.groom.lastName}"></span></span>
+                        </div>
+                        <div class="detail-item" th:if="${project.organizer != null}">
+                            <i class="fas fa-user-tie"></i>
+                            <span>Organizer: <span th:text="${project.organizer.firstName + ' ' + project.organizer.lastName}"></span></span>
+                        </div>
+                        <div class="detail-item">
+                            <i class="fas fa-calendar"></i>
+                            <span>Wedding Date: <span th:text="${#temporals.format(project.weddingDate, 'MMM dd, yyyy HH:mm')}"></span></span>
+                        </div>
+                    </div>
+                </a>
+                    <div class="project-actions">
+                        <button class="edit-btn" th:attr="data-project-id=${project.id}">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="delete-btn" th:attr="data-project-id=${project.id}">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                    
+                </li>
+            </ul>
           </div>
     </div>
     
@@ -108,7 +114,7 @@
 
     <label>Status:</label>
 	<select name="status">
-        <option value="Pending">Pending</option>
+        <option value="Upcoming">Upcoming</option>
         <option value="Ongoing">Ongoing</option>
         <option value="Completed">Completed</option>
     </select>

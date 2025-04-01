@@ -1,11 +1,14 @@
 package com.example.wedding.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import com.example.wedding.model.Project;
 import com.example.wedding.model.User;
 import com.example.wedding.repository.ProjectRepository;
 import jakarta.transaction.Transactional;
+
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -73,5 +76,28 @@ public class ProjectService {
     
     public List<Project> findAll() {
         return projectRepository.findAll();
+    }
+    
+    @Scheduled(fixedRate = 3600000) 
+    public void changeStatus() {
+    	List<Project> allProjects = projectRepository.findAll();
+    	for (Project proj : allProjects) {
+    	    if (proj.getWeddingDate() != null) { 
+    	        LocalDate weddingDate = proj.getWeddingDate().toLocalDate();
+    	        LocalDate today = LocalDate.now();
+    	        
+    	        if (weddingDate.isEqual(today)) {
+    	            proj.setStatus("Ongoing");
+    	            projectRepository.save(proj);
+    	        } else if (weddingDate.isAfter(today)) { 
+    	            proj.setStatus("Upcoming");
+    	            projectRepository.save(proj);
+    	        } else { 
+    	            proj.setStatus("Completed");
+    	            projectRepository.save(proj);
+    	        }
+    	    }
+    	}
+
     }
 }

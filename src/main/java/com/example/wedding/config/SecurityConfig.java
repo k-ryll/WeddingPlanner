@@ -18,10 +18,10 @@ public class SecurityConfig {
 	        .authorizeHttpRequests(auth -> auth
 	
 	            .requestMatchers(
-	                "/user/signup", "/user/save",
+	                "/user/signup", "/index", "/user/save",
 	                "/user/resetpassword", "/user/reset", "/user/reset-password",
 	                "/verify", "/user/login", "/home", "/guests", "/guests/**", "/user/validate", 
-	                "/admin/login", "/admin/**","/project/**", "/styles/**", "/js/**", "/images/**"
+	                "/admin/login", "/admin/**","/project/**","/guest/**", "/rsvp-success", "/styles/**", "/js/**", "/images/**"
 	            ).permitAll()
 	            
 	           

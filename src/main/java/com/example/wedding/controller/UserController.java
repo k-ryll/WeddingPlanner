@@ -42,6 +42,12 @@ public class UserController {
     @Autowired
     private VerificationService verificationService;
 
+
+    @GetMapping("/index")
+    public String showIndexPage() {
+        
+        return "index"; 
+    }
     @GetMapping("/home")
     public String home(@SessionAttribute(name = "loggedUser", required = false) User user, Model model) {
         if (user == null) {

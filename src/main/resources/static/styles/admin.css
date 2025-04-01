@@ -145,3 +145,119 @@
     padding: 1rem;
     overflow-x: auto;
 }
+
+.projects-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 20px;
+    padding: 20px;
+    list-style: none;
+    margin: 0;
+}
+
+.project-card {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    transition: transform 0.2s, box-shadow 0.2s;
+    border: 1px solid #814256;
+}
+
+.project-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.project-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+.project-header h3 {
+    margin: 0;
+    color: #814256;
+    font-size: 1.2rem;
+}
+
+.status-badge {
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+.status-badge:contains("Pending") {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+.status-badge:contains("Ongoing") {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.status-badge:contains("Completed") {
+    background-color: #cce5ff;
+    color: #004085;
+}
+
+.project-details {
+    margin-bottom: 15px;
+}
+
+.detail-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 8px;
+    color: #666;
+}
+
+.detail-item i {
+    margin-right: 10px;
+    color: #814256;
+    width: 16px;
+}
+
+.project-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding-top: 15px;
+    border-top: 1px solid #eee;
+}
+
+.edit-btn,
+.delete-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+}
+
+.edit-btn:hover {
+    color: #4CAF50;
+    background-color: rgba(76, 175, 80, 0.1);
+}
+
+.delete-btn:hover {
+    color: #f44336;
+    background-color: rgba(244, 67, 54, 0.1);
+}
+
+@media (max-width: 768px) {
+    .projects-grid {
+        grid-template-columns: 1fr;
+        padding: 10px;
+    }
+    
+    .project-card {
+        padding: 15px;
+    }
+}
