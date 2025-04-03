@@ -31,9 +31,18 @@
       
 <i class="fas fa-search"></i>
     </div>
-    <button id="openModal" class="btn btn-primary">
-      <i class="fa-solid fa-plus"></i>
-      ADD GUEST</button>
+    
+      <button id="openModal" class="btn btn-primary">
+        <i class="fa-solid fa-plus"></i>
+        ADD GUEST
+      </button>
+      <form th:action="@{/guests/send-all-invitations}" method="post" style="display: inline;">
+        <button type="submit" class="btn btn-primary">
+          <i class="fas fa-paper-plane"></i>
+          SEND TO ALL
+        </button>
+      </form>
+    
   </div>
 
 

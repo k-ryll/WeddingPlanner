@@ -10,6 +10,8 @@ import org.slf4j.LoggerFactory;
 
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
+import java.util.List;
+import com.example.wedding.model.Guest;
 
 @Service
 public class EmailService {
@@ -69,7 +71,7 @@ public class EmailService {
             <body style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;'>
                 <h2 style='color: #814256; text-align: center;'>Wedding Invitation</h2>
                 <p>Dear %s,</p>
-                <p>You have been invited to the wedding of %s.</p>
+                <p>You have been invited to the wedding of %s. </p>
                 <p>Please click one of the following buttons to respond to the invitation:</p>
                 <div style='text-align: center; margin: 30px 0;'>
                     <a href='http://localhost:8080/guest/rsvp?email=%s&response=accept' 
@@ -88,5 +90,16 @@ public class EmailService {
         
         helper.setText(htmlContent, true);
         mailSender.send(message);
+    }
+
+    public void sendBulkInvitations(List<Guest> guests, String projectName) {
+        for (Guest guest : guests) {
+            try {
+                sendInvitationEmail(guest.getEmail(), guest.getName(), projectName);
+                logger.info("Invitation sent successfully to {}", guest.getEmail());
+            } catch (MessagingException e) {
+                logger.error("Failed to send invitation to {}: {}", guest.getEmail(), e.getMessage());
+            }
+        }
     }
 }

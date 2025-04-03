@@ -73,4 +73,45 @@ public class AdminController {
             return "redirect:/admin/home";
         }
     }
+
+    @PostMapping("/project/edit")
+    public String editProject(
+        @RequestParam Integer projectId,
+        @RequestParam String projectName,
+        @RequestParam String groomEmail,
+        @RequestParam String brideEmail,
+        @RequestParam(required = false) String organizerEmail,
+        @RequestParam String weddingDate,
+        @RequestParam String status,
+        RedirectAttributes redirectAttributes
+    ) {
+        try {
+            Project project = projectService.findById(projectId);
+            if (project == null) {
+                redirectAttributes.addFlashAttribute("error", "Project not found!");
+                return "redirect:/admin/home";
+            }
+            projectService.updateProject(projectId, projectName, groomEmail, brideEmail, organizerEmail, weddingDate, status);
+            redirectAttributes.addFlashAttribute("success", "Project updated successfully!");
+            return "redirect:/admin/home";
+        } catch (IllegalArgumentException e) {
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
+            return "redirect:/admin/home";
+        }
+    }
+
+    @PostMapping("/project/delete")
+    public String deleteProject(
+        @RequestParam Integer projectId,
+        RedirectAttributes redirectAttributes
+    ) {
+        try {
+            projectService.deleteProject(projectId);
+            redirectAttributes.addFlashAttribute("success", "Project deleted successfully!");
+            return "redirect:/admin/home";
+        } catch (IllegalArgumentException e) {
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
+            return "redirect:/admin/home";
+        }
+    }
 }

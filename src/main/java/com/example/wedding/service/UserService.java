@@ -31,21 +31,24 @@ public class UserService {
     public List<User> getBrides() {
         return repo.findAll()
             .stream()
-            .filter(user -> user.getRole().equalsIgnoreCase("BRIDE")) // Ensure role matches
+            .filter(user -> user.getRole().equalsIgnoreCase("BRIDE"))
+            .sorted((u1, u2) -> u2.getCreatedAt().compareTo(u1.getCreatedAt()))
             .collect(Collectors.toList());
     }
 
     public List<User> getGrooms() {
         return repo.findAll()
             .stream()
-            .filter(user -> user.getRole().equalsIgnoreCase("GROOM")) // Ensure role matches
+            .filter(user -> user.getRole().equalsIgnoreCase("GROOM"))
+            .sorted((u1, u2) -> u2.getCreatedAt().compareTo(u1.getCreatedAt()))
             .collect(Collectors.toList());
     }
 
     public List<User> getOrganizers() {
         return repo.findAll()
             .stream()
-            .filter(user -> user.getRole().equalsIgnoreCase("ORGANIZER")) // Ensure role matches
+            .filter(user -> user.getRole().equalsIgnoreCase("ORGANIZER"))
+            .sorted((u1, u2) -> u2.getCreatedAt().compareTo(u1.getCreatedAt()))
             .collect(Collectors.toList());
     }
 

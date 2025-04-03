@@ -9,6 +9,7 @@ import com.example.wedding.repository.ProjectRepository;
 import jakarta.transaction.Transactional;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -76,6 +77,37 @@ public class ProjectService {
     
     public List<Project> findAll() {
         return projectRepository.findAll();
+    }
+    
+    public Project findById(Integer id) {
+        return projectRepository.findById(id).orElse(null);
+    }
+
+    @Transactional
+    public Project updateProject(Integer projectId, String projectName, String groomEmail, String brideEmail, 
+            String organizerEmail, String weddingDate, String status) {
+        Project project = findById(projectId);
+        if (project == null) {
+            throw new IllegalArgumentException("Project not found");
+        }
+
+        project.setProjectName(projectName);
+        project.setGroom(userService.findByEmail(groomEmail));
+        project.setBride(userService.findByEmail(brideEmail));
+        project.setOrganizer(organizerEmail != null ? userService.findByEmail(organizerEmail) : null);
+        project.setWeddingDate(LocalDateTime.parse(weddingDate));
+        project.setStatus(status);
+
+        return projectRepository.save(project);
+    }
+
+    @Transactional
+    public void deleteProject(Integer projectId) {
+        Project project = findById(projectId);
+        if (project == null) {
+            throw new IllegalArgumentException("Project not found");
+        }
+        projectRepository.delete(project);
     }
     
     @Scheduled(fixedRate = 3600000) 

@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.example.wedding.model.Guest;
 import com.example.wedding.model.Project;
@@ -37,5 +38,35 @@ public class GuestService {
 
     public Guest findByEmail(String email) {
         return repo.findByEmail(email);
+    }
+
+    public Guest findById(Integer id) {
+        return repo.findById(id).orElse(null);
+    }
+
+    @Transactional
+    public Guest updateGuest(Integer guestId, String title, String name, String email, 
+            String entourage, String rsvp) {
+        Guest guest = findById(guestId);
+        if (guest == null) {
+            throw new IllegalArgumentException("Guest not found");
+        }
+
+        guest.setTitle(title);
+        guest.setName(name);
+        guest.setEmail(email);
+        guest.setEntourage(entourage);
+        guest.setRsvp(rsvp);
+
+        return repo.save(guest);
+    }
+
+    @Transactional
+    public void deleteGuest(Integer guestId) {
+        Guest guest = findById(guestId);
+        if (guest == null) {
+            throw new IllegalArgumentException("Guest not found");
+        }
+        repo.delete(guest);
     }
 }

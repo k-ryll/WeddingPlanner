@@ -120,4 +120,74 @@ public class GuestController {
             "Thank you for your response! Your RSVP has been recorded as: " + guest.getRsvp());
         return "redirect:/index";
     }
+
+    @PostMapping("/guest/edit")
+    public String editGuest(
+        @RequestParam Integer guestId,
+        @RequestParam String title,
+        @RequestParam String name,
+        @RequestParam String email,
+        @RequestParam String entourage,
+        @RequestParam String rsvp,
+        RedirectAttributes redirectAttributes
+    ) {
+        try {
+            Guest guest = service.findById(guestId);
+            if (guest == null) {
+                redirectAttributes.addFlashAttribute("error", "Guest not found!");
+                return "redirect:/guests";
+            }
+            service.updateGuest(guestId, title, name, email, entourage, rsvp);
+            redirectAttributes.addFlashAttribute("message", "Guest updated successfully!");
+            return "redirect:/guests";
+        } catch (IllegalArgumentException e) {
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
+            return "redirect:/guests";
+        }
+    }
+
+    @PostMapping("/guest/delete")
+    public String deleteGuest(
+        @RequestParam Integer guestId,
+        RedirectAttributes redirectAttributes
+    ) {
+        try {
+            service.deleteGuest(guestId);
+            redirectAttributes.addFlashAttribute("message", "Guest deleted successfully!");
+            return "redirect:/guests";
+        } catch (IllegalArgumentException e) {
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
+            return "redirect:/guests";
+        }
+    }
+
+    @PostMapping("/guests/send-all-invitations")
+    public String sendAllInvitations(HttpSession session, RedirectAttributes redirectAttributes) {
+        User loggedUser = (User) session.getAttribute("loggedUser");
+        if (loggedUser == null) {
+            redirectAttributes.addFlashAttribute("error", "You must be logged in to send invitations.");
+            return "redirect:/user/login";
+        }
+
+        Project userProject = projectService.findProjectByUserEmail(loggedUser.getEmail());
+        if (userProject == null) {
+            redirectAttributes.addFlashAttribute("error", "You must be part of a project to send invitations.");
+            return "redirect:/guests";
+        }
+
+        List<Guest> guests = service.findByUser(loggedUser);
+        if (guests.isEmpty()) {
+            redirectAttributes.addFlashAttribute("error", "No guests found to send invitations to.");
+            return "redirect:/guests";
+        }
+
+        try {
+            emailService.sendBulkInvitations(guests, userProject.getProjectName());
+            redirectAttributes.addFlashAttribute("message", "Invitations sent successfully to all guests!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Failed to send some invitations: " + e.getMessage());
+        }
+
+        return "redirect:/guests";
+    }
 }
