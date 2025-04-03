@@ -42,7 +42,10 @@ public class UserController {
     @Autowired
     private VerificationService verificationService;
 
-
+    @GetMapping("/favicon.ico")
+    void disableFavicon(HttpServletResponse response) throws IOException {
+        response.sendError(HttpServletResponse.SC_NOT_FOUND);
+    }
     @GetMapping("/index")
     public String showIndexPage() {
         
