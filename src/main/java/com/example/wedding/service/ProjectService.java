@@ -20,7 +20,7 @@ public class ProjectService {
 
     @Autowired
     private UserService userService;  
-
+    
     public boolean isUserInProject(String email) {
         List<Project> allProjects = projectRepository.findAll();
         return allProjects.stream()

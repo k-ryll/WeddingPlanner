@@ -16,15 +16,13 @@ public class SecurityConfig {
 	    http
 	        .csrf(csrf -> csrf.disable()) 
 	        .authorizeHttpRequests(auth -> auth
-	
 	            .requestMatchers(
 	                "/user/signup", "/index", "/user/save",
 	                "/user/resetpassword", "/user/reset", "/user/reset-password",
-	                "/verify", "/user/login", "/home", "/guests", "/guests/**", "/user/validate", 
+	                "/verify", "/user/login", "/home", "/guests", "/guests/**", "/user/validate", "/project/**", 
 	                "/admin/login", "/admin/**","/project/**","/guest/**", "/rsvp-success", "/styles/**", "/js/**", "/images/**"
 	            ).permitAll()
 	            
-	           
 	            .anyRequest().authenticated()
 	        )
 				

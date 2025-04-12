@@ -7,6 +7,9 @@
     --fs-300: 2rem;
     --fs-50: .5rem;
 	--ff-primary: "Inter", serif;
+
+	--primary-color: #814256;
+    --accent-color : #81425661;
 }
 
 
@@ -142,4 +145,16 @@ li a{
 
 .logo{
 	width: 50px;
+}
+
+.active{
+	background-color: #8142565f;
+	border-top-left-radius: 20px;
+	border-top-right-radius: 20px;
+}
+.active::after{
+	background-color: var(--primary-color);
+	  cursor: pointer;
+	  border-radius: 20px;
+	  z-index: 100;
 }

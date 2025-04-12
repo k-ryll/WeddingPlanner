@@ -30,6 +30,11 @@ public class GuestService {
         // If user is not in a project, return only guests they added
         return repo.findByAddedBy(user);
     }
+    
+    public List<Guest> findByProject(Project project) {
+        return repo.findByProjectId(project);
+    }
+    
 	
 	public String save(Guest guest) {
 		repo.save(guest);
@@ -46,7 +51,7 @@ public class GuestService {
 
     @Transactional
     public Guest updateGuest(Integer guestId, String title, String name, String email, 
-            String entourage, String rsvp) {
+            String entourage, String rsvp, String remarks) {
         Guest guest = findById(guestId);
         if (guest == null) {
             throw new IllegalArgumentException("Guest not found");
@@ -57,6 +62,7 @@ public class GuestService {
         guest.setEmail(email);
         guest.setEntourage(entourage);
         guest.setRsvp(rsvp);
+        guest.setRemarks(remarks);
 
         return repo.save(guest);
     }

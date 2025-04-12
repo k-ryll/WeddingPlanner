@@ -129,6 +129,7 @@ public class GuestController {
         @RequestParam String email,
         @RequestParam String entourage,
         @RequestParam String rsvp,
+        @RequestParam(required = false) String remarks,
         RedirectAttributes redirectAttributes
     ) {
         try {
@@ -137,7 +138,7 @@ public class GuestController {
                 redirectAttributes.addFlashAttribute("error", "Guest not found!");
                 return "redirect:/guests";
             }
-            service.updateGuest(guestId, title, name, email, entourage, rsvp);
+            service.updateGuest(guestId, title, name, email, entourage, rsvp, remarks);
             redirectAttributes.addFlashAttribute("message", "Guest updated successfully!");
             return "redirect:/guests";
         } catch (IllegalArgumentException e) {

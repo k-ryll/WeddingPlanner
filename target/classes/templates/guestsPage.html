@@ -15,7 +15,7 @@
     <div>
         <ul>
             <li> <a th:href="@{/home}">Home</a> </li>
-            <li><a th:href="@{/guests}">Guests</a></li>
+            <li class="active"><a th:href="@{/guests}">Guests</a></li>
             <li>Planning</li>
             <li>Vendors</li>
             <li>About Us</li>
@@ -59,6 +59,7 @@
             <th>Email</th>
             <th>Entourage</th>
             <th>RSVP</th>
+            <th>Remarks</th>
             <th>Project</th>
             <th>Added By</th>
             <th>Actions</th>
@@ -71,6 +72,7 @@
             <td th:text="${guest.email}"></td>
             <td th:text="${guest.entourage}"></td>
             <td th:text="${guest.rsvp}"></td>
+            <td th:text="${guest.remarks}"></td>
             <td th:text="${guest.projectId.projectName}"></td>
             <td th:text="${guest.addedBy.firstName + ' ' + guest.addedBy.lastName}"></td>
             <td class="actions">
@@ -114,6 +116,7 @@
         <label for="email">Email:</label>
         <input type="email" name="email" id="email" th:field="*{email}">
       </div>
+      
       <div>
         <label for="entourage">Entourage:</label>
         <select name="entourage" id="entourage" th:field="*{entourage}">
@@ -136,7 +139,7 @@
       </div>
       <div>
         <label for="rsvp">RSVP:</label>
-        <select name="rsvp" id="rsvp" th:field="*{rsvp}">
+        <select name="rsvp" id="rsvp" th:field="*{rsvp}" disabled>
           <option value="" disabled selected>Select Response</option>
           <option value="Pending">Pending</option>
           <option value="Accepted">Accepted</option>

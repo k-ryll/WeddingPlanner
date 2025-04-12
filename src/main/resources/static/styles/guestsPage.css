@@ -245,6 +245,7 @@ tbody tr:last-child td {
     transform: translateY(-1px);
 }
 
+
 /* Status badges for RSVP */
 td:nth-child(5) {
     font-weight: 500;

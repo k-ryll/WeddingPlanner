@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>Guest Page</title>
+<link rel="stylesheet" th:href="@{/styles/guestsPage.css}">
+<link rel="stylesheet" th:href="@{/styles/styles.css}">
+
+<script src="https://kit.fontawesome.com/b80e3de11b.js" ></script>
+</head>
+<body>
+ 
+  <header>
+    <img src="/images/logo.svg" class="logo" alt="logo">
+    <div>
+        <ul>
+          <li><a th:href="@{/project/{id}(id=${projectId})}">Home</a></li>
+          <li class="active"><a th:href="@{/project/{id}/guest(id=${projectId})}">Guests</a></li>
+          <li><a th:href="@{/project/{id}/planning(id=${projectId})}">Planning</a></li>
+            <li>Vendors</li>
+            <li>About Us</li>
+            <li><a th:href="@{/logout}">Logout</a></li>
+        </ul>
+        <i class="fa-regular fa-circle-user user-icon"></i>
+    </div>
+</header>
+
+<div class="container">
+  <h1>Guest Admin</h1>
+  <button id="addGuestBtn" class="btn btn-primary">Add Guest</button>
+  
+  <div class="table-container">
+    <table class="guest-table">
+      <thead>
+        <tr>
+          <th>Title</th>
+          <th>Name</th>
+          <th>Email</th>
+          <th>RSVP</th>
+          <th>Entourage</th>
+          <th>Remarks</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr th:each="guest : ${guests}">
+          <td th:text="${guest.title}"></td>
+          <td th:text="${guest.name}"></td>
+          <td th:text="${guest.email}"></td>
+          <td th:text="${guest.rsvp}"></td>
+          <td th:text="${guest.entourage}"></td>
+          <td th:text="${guest.remarks}"></td>
+          <td class="actions">
+            <button class="email-btn" th:attr="data-guest-email=${guest.email}">
+              <i class="fas fa-envelope"></i>
+          </button>
+            <button class="edit-btn" th:attr="data-guest-id=${guest.guestId}">
+                <i class="fas fa-edit"></i>
+            </button>
+            <button class="delete-btn" th:attr="data-guest-id=${guest.guestId}">
+                <i class="fas fa-trash"></i>
+            </button>
+        </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  
+</div>
+
+
+
+
+
+</body>
+</html>

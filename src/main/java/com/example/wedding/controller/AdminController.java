@@ -19,40 +19,39 @@ import jakarta.servlet.http.HttpSession;
 
 @Controller
 public class AdminController {
-  @Autowired
+    @Autowired
     private UserService userService;
-@Autowired
+    
+    @Autowired
     private ProjectService projectService;
-	@GetMapping("/admin/login")
-	public String showAdminLogin() {
-		return "adminLogin";
-	}
-	
-	@PostMapping("/admin/validate")
-	public String validateAdmin(
-			@RequestParam("email") String email,
-			@RequestParam("password") String password,
-			RedirectAttributes redi) {
-		if(email.equals("admin") && password.equals("password")) {
-			return "redirect:/admin/home";
-		}
-		return "redirect:/admin/login";
-		
-	}
-	
-	@GetMapping("/admin/home")
-	public String showAdminHome(Model model) {
-	    model.addAttribute("project", new Project());
-	    model.addAttribute("brides", userService.getBrides());  // Fetch brides
-	    model.addAttribute("grooms", userService.getGrooms());  // Fetch grooms
-	    model.addAttribute("organizers", userService.getOrganizers());  // Fetch organizers
-	    model.addAttribute("projects", projectService.findAll());  // Add all projects
-	    return "adminDashboard";  
-	}
 
-	
+    @GetMapping("/admin/login")
+    public String showAdminLogin() {
+        return "adminLogin";
+    }
+    
+    @PostMapping("/admin/validate")
+    public String validateAdmin(
+            @RequestParam("email") String email,
+            @RequestParam("password") String password,
+            RedirectAttributes redi) {
+        if(email.equals("admin") && password.equals("password")) {
+            return "redirect:/admin/home";
+        }
+        return "redirect:/admin/login";
+    }
+    
+    @GetMapping("/admin/home")
+    public String showAdminHome(Model model) {
+        model.addAttribute("project", new Project());
+        model.addAttribute("brides", userService.getBrides());
+        model.addAttribute("grooms", userService.getGrooms());
+        model.addAttribute("organizers", userService.getOrganizers());
+        model.addAttribute("projects", projectService.findAll());
+        return "adminDashboard";  
+    }
 
-	@PostMapping("/project/create")
+    @PostMapping("/project/create")
     public String createProject(
         @RequestParam String projectName,
         @RequestParam String groomEmail,

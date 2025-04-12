@@ -23,6 +23,9 @@ public class Guest {
     @Column(nullable = false, length = 45)
     private String rsvp;
 
+    @Column(length = 255)
+    private String remarks;
+
     @Column(nullable = false, length = 45)
     private String entourage;
     
@@ -56,6 +59,9 @@ public class Guest {
 
     public String getRsvp() { return rsvp; }
     public void setRsvp(String rsvp) { this.rsvp = rsvp; }
+
+    public String getRemarks() { return remarks; }
+    public void setRemarks(String remarks) { this.remarks = remarks; }
 
     public String getEntourage() { return entourage; }
     public void setEntourage(String entourage) { this.entourage = entourage; }
