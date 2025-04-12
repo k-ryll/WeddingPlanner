@@ -3,31 +3,30 @@
 <head>
 <meta charset="UTF-8">
 <link rel="stylesheet" th:href="@{/styles/login.css}">
-<title>Login</title>
+<title>Admin Login</title>
 
 </head>
 <body>
 
 <header class="admin-header">
   Wedding Planner
-  
-  
 </header>
 
 <div class="container">
   <form action="/admin/validate" method="post">
+    <input type="hidden" name="_csrf" th:value="${_csrf.token}" />
     <h1>Login to your Admin Account</h1>
 
-        <p th:if="${message}" th:text="${message}" style="color: green;"></p>
-        <p th:if="${error}" th:text="${error}" style="color: red;"></p>
+    <p th:if="${message}" th:text="${message}" style="color: green;"></p>
+    <p th:if="${error}" th:text="${error}" style="color: red;"></p>
+    
     <label for="email">Email</label>
-    <input type="text"  name="email" id="email" required>
+    <input type="text" name="email" id="email" required>
 
     <label for="password">Password</label>
-    <input type="password"  name="password" id="password" required>
+    <input type="password" name="password" id="password" required>
 
     <button type="submit">Login</button>
-    
   </form>
 </div>
 

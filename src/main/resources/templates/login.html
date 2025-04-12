@@ -16,6 +16,7 @@
 
 <div class="container">
   <form action="/user/validate" method="post">
+    <input type="hidden" name="_csrf" th:value="${_csrf.token}" />
     <h1>Login to your Account</h1>
 
         <p th:if="${message}" th:text="${message}" style="color: green;"></p>

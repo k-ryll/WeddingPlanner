@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.example.wedding.model.Project;
-import com.example.wedding.model.User;
 import com.example.wedding.service.ProjectService;
 import com.example.wedding.service.UserService;
 
@@ -34,15 +33,21 @@ public class AdminController {
     public String validateAdmin(
             @RequestParam("email") String email,
             @RequestParam("password") String password,
-            RedirectAttributes redi) {
+            RedirectAttributes redi,
+            HttpSession session) {
         if(email.equals("admin") && password.equals("password")) {
+            session.setAttribute("adminLoggedIn", true);
             return "redirect:/admin/home";
         }
+        redi.addFlashAttribute("error", "Invalid admin credentials");
         return "redirect:/admin/login";
     }
     
     @GetMapping("/admin/home")
-    public String showAdminHome(Model model) {
+    public String showAdminHome(Model model, HttpSession session) {
+        if (session.getAttribute("adminLoggedIn") == null) {
+            return "redirect:/admin/login";
+        }
         model.addAttribute("project", new Project());
         model.addAttribute("brides", userService.getBrides());
         model.addAttribute("grooms", userService.getGrooms());

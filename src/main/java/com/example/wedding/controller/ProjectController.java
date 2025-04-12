@@ -17,6 +17,7 @@ import com.example.wedding.service.GuestService;
 import com.example.wedding.service.ProjectService;
 import com.example.wedding.service.TaskService;
 import com.example.wedding.service.ItineraryService;
+import com.example.wedding.service.TableService;
 
 @Controller
 public class ProjectController {
@@ -28,11 +29,25 @@ public class ProjectController {
     private TaskService taskService;
     @Autowired
     private ItineraryService itineraryService;
+    @Autowired
+    private TableService tableService;
 
     @GetMapping("/project/{id}")
     public String showProjectPage(@PathVariable Integer id, Model model) {
         model.addAttribute("projectId", id);
         return "project";
+    }
+    
+    @GetMapping("/project/{id}/seatplan")
+    public String showSeatPlanPage(@PathVariable Integer id, Model model) {
+        Project project = projectService.findById(id);
+        if (project == null) {
+            return "redirect:/home";
+        }
+
+        model.addAttribute("projectId", id);
+        model.addAttribute("project", project);
+        return "seatplan";
     }
     
     @GetMapping("/project/{id}/guest")

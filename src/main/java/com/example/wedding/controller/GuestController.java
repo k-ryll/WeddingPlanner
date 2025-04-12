@@ -35,7 +35,7 @@ public class GuestController {
 	
 	@GetMapping("/guests")
 	public String showGuestPage(Model model, HttpSession session) {
-	    User loggedUser = (User) session.getAttribute("loggedUser");
+	    User loggedUser = (User) session.getAttribute("user");
 
 	    if (loggedUser == null) {
 	        return "redirect:/user/login"; // Redirect to login if not logged in
@@ -55,7 +55,7 @@ public class GuestController {
 	@PostMapping("/guest/create")
 	public String createGuest(Guest guest, HttpSession session, RedirectAttributes redirectAttributes) {
 	    // Retrieve the logged-in user from session
-	    User loggedUser = (User) session.getAttribute("loggedUser");
+	    User loggedUser = (User) session.getAttribute("user");
 
 	    if (loggedUser == null) {
 	        redirectAttributes.addFlashAttribute("error", "You must be logged in to add a guest.");
@@ -165,7 +165,7 @@ public class GuestController {
 
     @PostMapping("/guests/send-all-invitations")
     public String sendAllInvitations(HttpSession session, RedirectAttributes redirectAttributes) {
-        User loggedUser = (User) session.getAttribute("loggedUser");
+        User loggedUser = (User) session.getAttribute("user");
         if (loggedUser == null) {
             redirectAttributes.addFlashAttribute("error", "You must be logged in to send invitations.");
             return "redirect:/user/login";

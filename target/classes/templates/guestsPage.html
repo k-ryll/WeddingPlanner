@@ -19,7 +19,7 @@
             <li>Planning</li>
             <li>Vendors</li>
             <li>About Us</li>
-            <li><a th:href="@{/logout}">Logout</a></li>
+            <li><a th:href="@{/user/logout}">Logout</a></li>
         </ul>
         <i class="fa-regular fa-circle-user user-icon"></i>
     </div>
@@ -140,11 +140,11 @@
       <div>
         <label for="rsvp">RSVP:</label>
         <select name="rsvp" id="rsvp" th:field="*{rsvp}" disabled>
-          <option value="" disabled selected>Select Response</option>
-          <option value="Pending">Pending</option>
+          <option value="Pending" selected>Pending</option>
           <option value="Accepted">Accepted</option>
           <option value="Declined">Declined</option>
         </select>
+        <input type="hidden" name="rsvp" value="Pending">
       </div>
       <div>
         <button type="submit" class="btn btn-primary">Submit</button>

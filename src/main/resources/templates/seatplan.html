@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Seat Plan</title>
+    <link rel="stylesheet" th:href="@{/styles/seatplan.css}">
+    <link rel="stylesheet" th:href="@{/styles/styles.css}">
+</head>
+<body>
+    <div class="container">
+        <h1>Seat Plan</h1>
+        
+        <div class="controls">
+            <form id="addTableForm">
+                <input type="text" id="tableName" placeholder="Table Name" required>
+                <input type="number" id="capacity" placeholder="Capacity" required>
+                <button type="submit">Add Table</button>
+            </form>
+            <button id="saveSeatPlan" class="save-button">Save Seat Plan</button>
+        </div>
+
+        <div class="canvas-container">
+            <div id="seatPlanCanvas" class="canvas">
+                <!-- Tables will be added here -->
+            </div>
+        </div>
+    </div>
+
+    <script src="/js/seatplan.js"></script>
+</body>
+</html> 

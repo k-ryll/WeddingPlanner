@@ -82,9 +82,9 @@ a:not([class]) {
   header{
 	  display: flex;
 	  justify-content: space-between;
-	  margin-inline: 5rem;
-	  padding-block: 1rem;
-	  
+	  padding-inline: 5rem;
+	  padding-block: .5rem;
+	  background-color: #8142565f;
   }
   header div{
 	  display: flex;
@@ -114,9 +114,10 @@ a:not([class]) {
   header div ul li::after {
 	  content: '';
 	  position: absolute;
-	  left: 0;
+	  left: 50%;
+	  transform: translateX(-50%);
 	  bottom: 0;
-	  width: 100%;
+	  width: 80%;
 	  height: 3px;
 	  background-color: transparent;
 	  transition: background-color 0.3s ease;
@@ -126,6 +127,7 @@ a:not([class]) {
 	  background-color: var(--primary-color);
 	  cursor: pointer;
 	  border-radius: 20px;
+	  width: 80%;
   }
   .user-icon{
 	  font-size: 1.5rem; margin-block: auto;
@@ -148,13 +150,21 @@ li a{
 }
 
 .active{
-	background-color: #8142565f;
+	background-color: white;
 	border-top-left-radius: 20px;
 	border-top-right-radius: 20px;
 }
 .active::after{
-	background-color: var(--primary-color);
+	background-color: white;
 	  cursor: pointer;
-	  border-radius: 20px;
-	  z-index: 100;
+		width: 99%;
+	
+	  position: absolute;
+	  top: 47px;
+	  height: 1rem;
+}
+.active:hover::after {
+	background-color: white !important;
+	border-radius: 0px;
+	width: 99%;
 }
