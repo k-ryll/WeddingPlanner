@@ -42,7 +42,7 @@ public class ProjectController {
 
         model.addAttribute("guests", guests);
         model.addAttribute("projectId", id);
-
+        model.addAttribute("guest", new Guest());
         return "guestAdmin";
     }
 

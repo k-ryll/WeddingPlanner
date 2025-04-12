@@ -1,4 +1,52 @@
 document.addEventListener("DOMContentLoaded", function () {
+    // Search functionality
+    const searchInput = document.querySelector('.search-box input[type="text"]');
+    const projectGrid = document.querySelector('.projects-grid');
+    
+    if (searchInput && projectGrid) {
+        console.log('Search elements found');
+        
+        searchInput.addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase().trim();
+            console.log('Searching for:', searchTerm);
+            
+            const projectCards = projectGrid.querySelectorAll('.project-card');
+            console.log('Found project cards:', projectCards.length);
+            
+            projectCards.forEach(card => {
+                try {
+                    const projectName = card.querySelector('h3')?.textContent.toLowerCase().trim() || '';
+                    const brideName = card.querySelector('.detail-item:nth-child(1) span')?.textContent.toLowerCase().trim() || '';
+                    const groomName = card.querySelector('.detail-item:nth-child(2) span')?.textContent.toLowerCase().trim() || '';
+                    const weddingDate = card.querySelector('.detail-item:nth-child(4) span')?.textContent.toLowerCase().trim() || '';
+                    
+                    console.log('Checking card:', {
+                        projectName,
+                        brideName,
+                        groomName,
+                        weddingDate
+                    });
+                    
+                    if (projectName.includes(searchTerm) || 
+                        brideName.includes(searchTerm) || 
+                        groomName.includes(searchTerm) || 
+                        weddingDate.includes(searchTerm)) {
+                        card.style.display = '';
+                    } else {
+                        card.style.display = 'none';
+                    }
+                } catch (error) {
+                    console.error('Error processing project card:', error);
+                }
+            });
+        });
+    } else {
+        console.error('Search elements not found:', {
+            searchInput: !!searchInput,
+            projectGrid: !!projectGrid
+        });
+    }
+
     const modal = document.getElementById("projectModal");
     const openModalBtn = document.getElementById("openModal");
     const closeModalBtn = document.querySelector(".close");
@@ -53,18 +101,16 @@ document.addEventListener("DOMContentLoaded", function () {
             e.stopPropagation();
             if (confirm("Are you sure you want to delete this project?")) {
                 const projectId = button.getAttribute("data-project-id");
-                const form = document.createElement("form");
-                form.method = "POST";
-                form.action = "/project/delete";
-                
-                const input = document.createElement("input");
-                input.type = "hidden";
-                input.name = "projectId";
-                input.value = projectId;
-                
-                form.appendChild(input);
-                document.body.appendChild(form);
-                form.submit();
+                fetch(`/project/${projectId}/delete`, {
+                    method: 'DELETE'
+                })
+                .then(response => {
+                    if (response.ok) {
+                        button.closest('.project-card').remove();
+                    } else {
+                        alert('Failed to delete project');
+                    }
+                });
             }
         });
     });

@@ -124,4 +124,31 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         });
     });
+
+    // Search functionality
+    const searchInput = document.querySelector('.search-box input[type="text"]');
+    const guestTable = document.querySelector('table tbody');
+    
+    if (searchInput && guestTable) {
+        searchInput.addEventListener('input', function() {
+            const searchTerm = this.value.toLowerCase().trim();
+            const rows = guestTable.querySelectorAll('tr');
+            
+            rows.forEach(row => {
+                const cells = row.querySelectorAll('td');
+                let found = false;
+                
+                // Skip the last cell (actions column)
+                for (let i = 0; i < cells.length - 1; i++) {
+                    const cellText = cells[i].textContent.toLowerCase().trim();
+                    if (cellText.includes(searchTerm)) {
+                        found = true;
+                        break;
+                    }
+                }
+                
+                row.style.display = found ? '' : 'none';
+            });
+        });
+    }
 });

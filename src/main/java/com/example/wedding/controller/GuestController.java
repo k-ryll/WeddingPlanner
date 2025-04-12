@@ -114,6 +114,7 @@ public class GuestController {
         }
 
         guest.setRsvp(response.equals("accept") ? "Accepted" : "Declined");
+        guest.setRemarks(response.equals("accept") ? "Accepted via email" : "Declined via email");
         service.save(guest);
 
         redirectAttributes.addFlashAttribute("message", 

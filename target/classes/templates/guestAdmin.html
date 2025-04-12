@@ -27,7 +27,26 @@
 
 <div class="container">
   <h1>Guest Admin</h1>
-  <button id="addGuestBtn" class="btn btn-primary">Add Guest</button>
+  <div class="search-box">
+    <div class="">
+      <input type="text" class="search-box" placeholder="Search guest">
+      
+<i class="fas fa-search"></i>
+    </div>
+    
+      <button id="openModal" class="btn btn-primary">
+        <i class="fa-solid fa-plus"></i>
+        ADD GUEST
+      </button>
+      <form th:action="@{/guests/send-all-invitations}" method="post" style="display: inline;">
+        <button type="submit" class="btn btn-primary">
+          <i class="fas fa-paper-plane"></i>
+          SEND TO ALL
+        </button>
+      </form>
+    
+  </div>
+
   
   <div class="table-container">
     <table class="guest-table">
@@ -64,14 +83,88 @@
         </tr>
       </tbody>
     </table>
+
+    
+<!-- Modal -->
+<div id="guestModal" class="modal">
+  <div class="modal-content">
+    <span class="close">&times;</span>
+    <h4 class="modal-title">Add Guest</h4>
+    <form class="guestForm" th:action="@{/guest/create}" method="post" th:object="${guest}">
+      <div>
+        <label for="title">Title:</label>
+        <select name="title" id="title" th:field="*{title}">
+          <option value="">None</option>
+          <option value="Mr.">Mr.</option>
+          <option value="Mrs.">Mrs.</option>
+          <option value="Miss">Miss</option>
+          <option value="Dr.">Dr.</option>
+          <option value="Hon.">Hon.</option>
+          <option value="Rev.">Rev.</option>
+        </select>
+      </div>
+      <div>
+        <label for="name">Name:</label>
+        <input type="text" th:field="*{name}">
+      </div>
+      <div>
+        <label for="email">Email:</label>
+        <input type="email" name="email" id="email" th:field="*{email}">
+      </div>
+      
+      <div>
+        <label for="entourage">Entourage:</label>
+        <select name="entourage" id="entourage" th:field="*{entourage}">
+          <option value="" disabled selected>Select Role</option>
+          <option value="Guest">Guest</option>
+          <option value="Bride's Maid">Bride's Maid</option>
+          <option value="Maid of Honor">Maid of Honor</option>
+          <option value="Matron of Honor">Matron of Honor</option>
+          <option value="Groomsman">Groomsman</option>
+          <option value="Best Man">Best Man</option>
+          <option value="Flower Girl">Flower Girl</option>
+          <option value="Ring Bearer">Ring Bearer</option>
+          <option value="Junior Bridesmaid">Junior Bridesmaid</option>
+          <option value="Junior Groomsman">Junior Groomsman</option>
+          <option value="Father of the Bride">Father of the Bride</option>
+          <option value="Mother of the Bride">Mother of the Bride</option>
+          <option value="Father of the Groom">Father of the Groom</option>
+          <option value="Mother of the Groom">Mother of the Groom</option>
+        </select>
+      </div>
+      <div>
+        <label for="rsvp">RSVP:</label>
+        <select name="rsvp" id="rsvp" th:field="*{rsvp}" >
+          <option value="" selected>Select Response</option>
+          <option value="Pending">Pending</option>
+          <option value="Accepted">Accepted</option>
+          <option value="Declined">Declined</option>
+        </select>
+      </div>
+      <div>
+        <label for="remarks">Remarks:</label>
+        <select name="remarks" id="remarks" th:field="*{remarks}">
+          <option value="" selected>Select Remarks</option>
+          <option value="Accepted via call">Accepted via call</option>
+          <option value="Accepted via email">Accepted via email</option>
+          <option value="Declined via call">Declined via call</option>
+          <option value="Declined via email">Declined via email</option>
+        </select>
+      </div>
+      <div>
+        <button type="submit" class="btn btn-primary">Submit</button>
+      </div>
+    </form>
   </div>
+</div>
+ 
 
   
 </div>
 
 
 
-
+<script th:src="@{/js/guestPage.js}"></script>
 
 </body>
 </html>
