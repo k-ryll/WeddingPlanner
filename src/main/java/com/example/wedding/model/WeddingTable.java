@@ -1,6 +1,8 @@
 package com.example.wedding.model;
 
 import jakarta.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "wedding_table")
@@ -26,6 +28,9 @@ public class WeddingTable {
     @Column(nullable = false)
     private Integer positionY;
 
+    @OneToMany(mappedBy = "weddingTable", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Chair> chairs = new ArrayList<>();
+
     public WeddingTable() {}
 
     public WeddingTable(String tableName, Integer numberOfChairs, Integer positionX, Integer positionY) {
@@ -33,6 +38,15 @@ public class WeddingTable {
         this.numberOfChairs = numberOfChairs;
         this.positionX = positionX;
         this.positionY = positionY;
+        initializeChairs();
+    }
+
+    public void initializeChairs() {
+        chairs.clear();
+        for (int i = 0; i < numberOfChairs; i++) {
+            Chair chair = new Chair(this, i + 1);
+            chairs.add(chair);
+        }
     }
 
     // Getters and Setters
@@ -66,6 +80,7 @@ public class WeddingTable {
 
     public void setNumberOfChairs(Integer numberOfChairs) {
         this.numberOfChairs = numberOfChairs;
+        initializeChairs();
     }
 
     public Integer getPositionX() {
@@ -82,5 +97,13 @@ public class WeddingTable {
 
     public void setPositionY(Integer positionY) {
         this.positionY = positionY;
+    }
+
+    public List<Chair> getChairs() {
+        return chairs;
+    }
+
+    public void setChairs(List<Chair> chairs) {
+        this.chairs = chairs;
     }
 } 

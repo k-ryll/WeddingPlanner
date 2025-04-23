@@ -75,4 +75,8 @@ public class GuestService {
         }
         repo.delete(guest);
     }
+
+    public List<Guest> getGuestsByProject(Project project) {
+        return repo.findByProjectId(project);
+    }
 }

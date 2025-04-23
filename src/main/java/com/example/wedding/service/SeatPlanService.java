@@ -27,6 +27,12 @@ public class SeatPlanService {
 
     @Transactional
     public SeatPlan saveSeatPlan(SeatPlan seatPlan) {
+        // Ensure all tables have their chairs initialized
+        for (WeddingTable table : seatPlan.getTables()) {
+            if (table.getChairs().size() != table.getNumberOfChairs()) {
+                table.initializeChairs();
+            }
+        }
         return seatPlanRepository.save(seatPlan);
     }
 
