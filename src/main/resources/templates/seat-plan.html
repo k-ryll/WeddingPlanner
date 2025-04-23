@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Seat Plan</title>
+    <link rel="stylesheet" th:href="@{/styles/home.css}">
+    <link rel="stylesheet" th:href="@{/styles/seat-plan.css}">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.13.0/jquery-ui.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>Seat Plan for <span th:text="${project.projectName}"></span></h1>
+        
+        <div class="controls">
+            <button id="addTableBtn" class="btn btn-primary">Add Table</button>
+            <button id="saveBtn" class="btn btn-success">Save Layout</button>
+        </div>
+
+        <div id="seatPlanArea" class="seat-plan-area">
+            <div th:each="table : ${seatPlan.tables}" 
+                 class="table" 
+                 th:data-id="${table.id}"
+                 th:style="'left: ' + ${table.positionX} + 'px; top: ' + ${table.positionY} + 'px;'">
+                <div class="table-name" th:text="${table.tableName}"></div>
+                <div class="chair-count" th:text="${table.numberOfChairs} + ' chairs'"></div>
+                <div class="chairs-container">
+                    <div th:each="i : ${#numbers.sequence(1, table.numberOfChairs)}" class="chair"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="addTableModal" class="modal">
+        <div class="modal-content">
+            <h2>Add New Table</h2>
+            <form id="addTableForm">
+                <div class="form-group">
+                    <label for="tableName">Table Name:</label>
+                    <input type="text" id="tableName" name="tableName" required>
+                </div>
+                <div class="form-group">
+                    <label for="numberOfChairs">Number of Chairs:</label>
+                    <input type="number" id="numberOfChairs" name="numberOfChairs" min="1" max="12" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Add Table</button>
+                <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+            </form>
+        </div>
+    </div>
+
+    <script th:inline="javascript">
+        const projectId = /*[[${project.id}]]*/ 0;
+        const seatPlanId = /*[[${seatPlan.id}]]*/ 0;
+
+        $(document).ready(function() {
+            // Make tables draggable
+            $('.table').draggable({
+                containment: '#seatPlanArea',
+                stop: function(event, ui) {
+                    updateTablePosition($(this));
+                }
+            });
+
+            // Add table button click handler
+            $('#addTableBtn').click(function() {
+                $('#addTableModal').show();
+            });
+
+            // Add table form submission
+            $('#addTableForm').submit(function(e) {
+                e.preventDefault();
+                const tableName = $('#tableName').val();
+                const numberOfChairs = $('#numberOfChairs').val();
+                
+                $.ajax({
+                    url: '/project/' + projectId + '/seatplan/add-table',
+                    method: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify({
+                        tableName: tableName,
+                        numberOfChairs: numberOfChairs,
+                        positionX: 100,
+                        positionY: 100
+                    }),
+                    success: function(response) {
+                        addTableToPlan(response);
+                        closeModal();
+                    }
+                });
+            });
+
+            // Save button click handler
+            $('#saveBtn').click(function() {
+                const tables = [];
+                $('.table').each(function() {
+                    const position = $(this).position();
+                    tables.push({
+                        id: $(this).data('id'),
+                        positionX: Math.round(position.left),
+                        positionY: Math.round(position.top)
+                    });
+                });
+
+                $.ajax({
+                    url: '/project/' + projectId + '/seatplan/update-positions',
+                    method: 'POST',
+                    contentType: 'application/json',
+                    data: JSON.stringify(tables),
+                    success: function() {
+                        alert('Layout saved successfully!');
+                    }
+                });
+            });
+        });
+
+        function updateTablePosition(tableElement) {
+            const position = tableElement.position();
+            $.ajax({
+                url: '/project/' + projectId + '/seatplan/update-positions',
+                method: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify([{
+                    id: tableElement.data('id'),
+                    positionX: Math.round(position.left),
+                    positionY: Math.round(position.top)
+                }])
+            });
+        }
+
+        function addTableToPlan(table) {
+            const tableElement = $('<div>')
+                .addClass('table')
+                .data('id', table.id)
+                .css({
+                    left: table.positionX + 'px',
+                    top: table.positionY + 'px'
+                })
+                .append($('<div>').addClass('table-name').text(table.tableName))
+                .append($('<div>').addClass('chair-count').text(table.numberOfChairs + ' chairs'))
+                .append($('<div>').addClass('chairs-container'));
+
+            // Add chair circles
+            for (let i = 0; i < table.numberOfChairs; i++) {
+                tableElement.find('.chairs-container').append($('<div>').addClass('chair'));
+            }
+
+            tableElement.draggable({
+                containment: '#seatPlanArea',
+                stop: function(event, ui) {
+                    updateTablePosition($(this));
+                }
+            });
+
+            $('#seatPlanArea').append(tableElement);
+        }
+
+        function closeModal() {
+            $('#addTableModal').hide();
+            $('#addTableForm')[0].reset();
+        }
+    </script>
+</body>
+</html> 
