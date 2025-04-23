@@ -21,7 +21,17 @@
                  class="table" 
                  th:data-id="${table.id}"
                  th:style="'left: ' + ${table.positionX} + 'px; top: ' + ${table.positionY} + 'px;'">
-                <div class="table-name" th:text="${table.tableName}"></div>
+                <div class="table-header">
+                    <div class="table-name" th:text="${table.tableName}"></div>
+                    <div class="table-actions">
+                        <button class="table-action-btn edit-btn" th:data-id="${table.id}">
+                            <i class="fas fa-edit"></i> Edit
+                        </button>
+                        <button class="table-action-btn delete-btn" th:data-id="${table.id}">
+                            <i class="fas fa-trash"></i> Delete
+                        </button>
+                    </div>
+                </div>
                 <div class="chair-count" th:text="${table.numberOfChairs} + ' chairs'"></div>
                 <div class="chairs-container">
                     <div th:each="i : ${#numbers.sequence(1, table.numberOfChairs)}" class="chair"></div>
@@ -36,14 +46,37 @@
             <form id="addTableForm">
                 <div class="form-group">
                     <label for="tableName">Table Name:</label>
-                    <input type="text" id="tableName" name="tableName" required>
+                    <input type="text" id="tableName" name="tableName" required placeholder="Enter table name">
                 </div>
                 <div class="form-group">
                     <label for="numberOfChairs">Number of Chairs:</label>
                     <input type="number" id="numberOfChairs" name="numberOfChairs" min="1" max="12" required>
                 </div>
-                <button type="submit" class="btn btn-primary">Add Table</button>
-                <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Add Table</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="editTableModal" class="modal">
+        <div class="modal-content">
+            <h2>Edit Table</h2>
+            <form id="editTableForm">
+                <input type="hidden" id="editTableId">
+                <div class="form-group">
+                    <label for="editTableName">Table Name:</label>
+                    <input type="text" id="editTableName" name="tableName" required placeholder="Enter table name">
+                </div>
+                <div class="form-group">
+                    <label for="editNumberOfChairs">Number of Chairs:</label>
+                    <input type="number" id="editNumberOfChairs" name="numberOfChairs" min="1" max="12" required>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeEditModal()">Cancel</button>
+                </div>
             </form>
         </div>
     </div>
@@ -53,9 +86,15 @@
         const seatPlanId = /*[[${seatPlan.id}]]*/ 0;
 
         $(document).ready(function() {
-            // Make tables draggable
+            // Make tables draggable with improved handling
             $('.table').draggable({
                 containment: '#seatPlanArea',
+                start: function(e, ui) {
+                    // Prevent dragging when clicking buttons
+                    if ($(e.target).hasClass('table-action-btn')) {
+                        return false;
+                    }
+                },
                 stop: function(event, ui) {
                     updateTablePosition($(this));
                 }
@@ -83,10 +122,83 @@
                         positionY: 100
                     }),
                     success: function(response) {
-                        addTableToPlan(response);
-                        closeModal();
+                        if (response && response.id) {
+                            addTableToPlan(response);
+                            $('#addTableModal').hide();
+                            $('#addTableForm')[0].reset();
+                        } else {
+                            alert('Error: Invalid response from server');
+                        }
+                    },
+                    error: function(xhr) {
+                        console.error('Error adding table:', xhr);
+                        alert('Error adding table. Please try again.');
                     }
                 });
+            });
+
+            // Edit table button click handler
+            $(document).on('click', '.edit-btn', function(e) {
+                e.stopPropagation(); // Prevent table dragging when clicking edit
+                const tableId = $(this).data('id');
+                const table = $(this).closest('.table');
+                const tableName = table.find('.table-name').text();
+                const chairCount = table.find('.chair').length;
+                
+                $('#editTableId').val(tableId);
+                $('#editTableName').val(tableName);
+                $('#editNumberOfChairs').val(chairCount);
+                $('#editTableModal').show();
+            });
+
+            // Edit table form submission
+            $('#editTableForm').submit(function(e) {
+                e.preventDefault();
+                const tableId = $('#editTableId').val();
+                const tableName = $('#editTableName').val();
+                const numberOfChairs = $('#editNumberOfChairs').val();
+                
+                $.ajax({
+                    url: '/project/' + projectId + '/seatplan/update-table/' + tableId,
+                    method: 'PUT',
+                    contentType: 'application/json',
+                    data: JSON.stringify({
+                        tableName: tableName,
+                        numberOfChairs: numberOfChairs
+                    }),
+                    success: function(response) {
+                        if (response && response.id) {
+                            updateTableInPlan(response);
+                            $('#editTableModal').hide();
+                            $('#editTableForm')[0].reset();
+                        } else {
+                            alert('Error: Invalid response from server');
+                        }
+                    },
+                    error: function(xhr) {
+                        console.error('Error updating table:', xhr);
+                        alert('Error updating table. Please try again.');
+                    }
+                });
+            });
+
+            // Delete table button click handler
+            $(document).on('click', '.delete-btn', function(e) {
+                e.stopPropagation(); // Prevent table dragging when clicking delete
+                if (confirm('Are you sure you want to delete this table?')) {
+                    const tableId = $(this).data('id');
+                    $.ajax({
+                        url: '/project/' + projectId + '/seatplan/delete-table/' + tableId,
+                        method: 'DELETE',
+                        success: function() {
+                            $('.table[data-id="' + tableId + '"]').remove();
+                        },
+                        error: function(xhr) {
+                            console.error('Error deleting table:', xhr);
+                            alert('Error deleting table. Please try again.');
+                        }
+                    });
+                }
             });
 
             // Save button click handler
@@ -108,8 +220,26 @@
                     data: JSON.stringify(tables),
                     success: function() {
                         alert('Layout saved successfully!');
+                    },
+                    error: function(xhr) {
+                        alert('Error saving layout: ' + xhr.responseText);
                     }
                 });
+            });
+
+            // Close modals when clicking outside
+            $(window).click(function(e) {
+                if ($(e.target).hasClass('modal')) {
+                    $('#addTableModal').hide();
+                    $('#editTableModal').hide();
+                    $('#addTableForm')[0].reset();
+                    $('#editTableForm')[0].reset();
+                }
+            });
+
+            // Prevent modal from closing when clicking inside
+            $('.modal-content').click(function(e) {
+                e.stopPropagation();
             });
         });
 
@@ -123,7 +253,10 @@
                     id: tableElement.data('id'),
                     positionX: Math.round(position.left),
                     positionY: Math.round(position.top)
-                }])
+                }]),
+                error: function(xhr) {
+                    alert('Error updating table position: ' + xhr.responseText);
+                }
             });
         }
 
@@ -135,7 +268,11 @@
                     left: table.positionX + 'px',
                     top: table.positionY + 'px'
                 })
-                .append($('<div>').addClass('table-name').text(table.tableName))
+                .append($('<div>').addClass('table-header')
+                    .append($('<div>').addClass('table-name').text(table.tableName))
+                    .append($('<div>').addClass('table-actions')
+                        .append($('<button>').addClass('table-action-btn edit-btn').html('<i class="fas fa-edit"></i> Edit').data('id', table.id))
+                        .append($('<button>').addClass('table-action-btn delete-btn').html('<i class="fas fa-trash"></i> Delete').data('id', table.id))))
                 .append($('<div>').addClass('chair-count').text(table.numberOfChairs + ' chairs'))
                 .append($('<div>').addClass('chairs-container'));
 
@@ -154,9 +291,27 @@
             $('#seatPlanArea').append(tableElement);
         }
 
+        function updateTableInPlan(table) {
+            const tableElement = $('.table[data-id="' + table.id + '"]');
+            tableElement.find('.table-name').text(table.tableName);
+            tableElement.find('.chair-count').text(table.numberOfChairs + ' chairs');
+            
+            const chairsContainer = tableElement.find('.chairs-container');
+            chairsContainer.empty();
+            
+            for (let i = 0; i < table.numberOfChairs; i++) {
+                chairsContainer.append($('<div>').addClass('chair'));
+            }
+        }
+
         function closeModal() {
             $('#addTableModal').hide();
             $('#addTableForm')[0].reset();
+        }
+
+        function closeEditModal() {
+            $('#editTableModal').hide();
+            $('#editTableForm')[0].reset();
         }
     </script>
 </body>
