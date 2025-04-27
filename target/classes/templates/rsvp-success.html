@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>RSVP Response Received</title>
+    <link rel="stylesheet" th:href="@{/styles/styles.css}">
+    <style>
+        .rsvp-container {
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 30px;
+            text-align: center;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .success-icon {
+            color: #4CAF50;
+            font-size: 48px;
+            margin-bottom: 20px;
+        }
+        .message {
+            color: #333;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="rsvp-container">
+        <i class="fas fa-check-circle success-icon"></i>
+        <h1>Thank You!</h1>
+        <p class="message" th:text="${message}">Your RSVP has been recorded.</p>
+        <p>You can close this window now.</p>
+    </div>
+</body>
+</html> 
