@@ -34,8 +34,9 @@ public class AdminController {
     public String validateAdmin(
             @RequestParam("email") String email,
             @RequestParam("password") String password,
-            RedirectAttributes redi) {
+            RedirectAttributes redi, HttpSession session) {
         if(email.equals("admin") && password.equals("password")) {
+            session.setAttribute("isAdmin", true);
             return "redirect:/admin/home";
         }
         return "redirect:/admin/login";

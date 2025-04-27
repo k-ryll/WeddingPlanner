@@ -56,11 +56,12 @@ public class GuestController {
 	public String createGuest(Guest guest, HttpSession session, RedirectAttributes redirectAttributes) {
 	    // Retrieve the logged-in user from session
 	    User loggedUser = (User) session.getAttribute("loggedUser");
+        Boolean isAdmin = (Boolean) session.getAttribute("isAdmin");
 
-	    if (loggedUser == null) {
-	        redirectAttributes.addFlashAttribute("error", "You must be logged in to add a guest.");
-	        return "redirect:/user/login"; // Redirect to login if not logged in
-	    }
+        if (loggedUser == null && !Boolean.TRUE.equals(isAdmin)) {
+            redirectAttributes.addFlashAttribute("error", "You must be logged in to add a guest.");
+            return "redirect:/user/login";
+        }
 
 	    // Find the project associated with the logged-in user
 	    Project userProject = projectService.findProjectByUserEmail(loggedUser.getEmail());
@@ -73,6 +74,9 @@ public class GuestController {
 	    // Associate the guest with the logged-in user and their project
 	    guest.setAddedBy(loggedUser);
 	    guest.setProjectId(userProject);
+	    
+	    // Set default RSVP status
+	    guest.setRsvp("Pending");
 
 	    // Save the guest
 	    service.save(guest);
