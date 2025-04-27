@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Seat Plan</title>
+    <link rel="stylesheet" th:href="@{/styles/styles.css}">
+    <link rel="stylesheet" th:href="@{/styles/home.css}">
+    <link rel="stylesheet" th:href="@{/styles/seat-plan.css}">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.13.0/jquery-ui.min.js"></script>
+    <script src="https://kit.fontawesome.com/b80e3de11b.js"></script>
+    <script th:inline="javascript">
+        const projectId = /*[[${project.id}]]*/ 0;
+        const seatPlanId = /*[[${seatPlan.id}]]*/ 0;
+    </script>
+    <script th:src="@{/js/seat-plan.js}"></script>
+</head>
+<body>
+    <header>
+        <img src="/images/logo.svg" class="logo" alt="logo">
+        <div>
+            <ul>
+                <li ><a th:href="@{/project/{id}(id=${projectId})}">Home</a></li>
+                <li><a th:href="@{/project/{id}/guest(id=${projectId})}">Guests</a></li>
+                <li><a th:href="@{/project/{id}/planning(id=${projectId})}">Planning</a></li>
+                <li class="active"><a th:href="@{/project/{id}/seatplan(id=${projectId})}">Seat Plan</a></li>
+                <li>Vendors</li>
+                <li><a href="/admin/home">Admin Page</a></li>
+                <li><a th:href="@{/logout}">Logout</a></li>
+            </ul>
+            <i class="fa-regular fa-circle-user user-icon"></i>
+        </div>
+    </header>
+    <div class="container">
+        <h1>Seat Plan for <span th:text="${project.projectName}"></span></h1>
+        
+        <div class="controls">
+            <button id="addTableBtn" class="btn btn-primary">Add Table</button>
+            <button id="saveBtn" class="btn btn-success">Save Layout</button>
+        </div>
+
+        <div id="seatPlanArea" class="seat-plan-area">
+            <div th:each="table : ${seatPlan.tables}" 
+                 class="table" 
+                 th:data-id="${table.id}"
+                 th:style="'left: ' + ${table.positionX} + 'px; top: ' + ${table.positionY} + 'px;'">
+                <div class="table-header">
+                    <div class="table-name" th:text="${table.tableName}"></div>
+                    <div class="table-actions">
+                        <button class="table-action-btn edit-btn" th:data-id="${table.id}">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="table-action-btn delete-btn" th:data-id="${table.id}">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="chair-count" th:text="${table.numberOfChairs} + ' chairs'"></div>
+                <div class="chairs-container">
+                    <div th:each="chair : ${table.chairs}"
+                         class="chair"
+                         th:classappend="${chair.guest != null} ? 'occupied' : ''"
+                         th:data-chair-id="${chair.id}"
+                         th:data-guest-name="${chair.guest?.name}"
+                         th:text="${chair.guest != null} ? ${#strings.substring(chair.guest.name, 0, 1) + #strings.substring(chair.guest.name, #strings.indexOf(chair.guest.name, ' ') + 1, #strings.indexOf(chair.guest.name, ' ') + 2)} : ''"
+                         onclick="openGuestAssignmentModal(this)">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="addTableModal" class="modal">
+        <div class="modal-content">
+            <h2>Add New Table</h2>
+            <form id="addTableForm">
+                <div class="form-group">
+                    <label for="tableName">Table Name:</label>
+                    <input type="text" id="tableName" name="tableName" required placeholder="Enter table name">
+                </div>
+                <div class="form-group">
+                    <label for="numberOfChairs">Number of Chairs:</label>
+                    <input type="number" id="numberOfChairs" name="numberOfChairs" min="1" max="12" required>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Add Table</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="editTableModal" class="modal">
+        <div class="modal-content">
+            <h2>Edit Table</h2>
+            <form id="editTableForm">
+                <input type="hidden" id="editTableId">
+                <div class="form-group">
+                    <label for="editTableName">Table Name:</label>
+                    <input type="text" id="editTableName" name="tableName" required placeholder="Enter table name">
+                </div>
+                <div class="form-group">
+                    <label for="editNumberOfChairs">Number of Chairs:</label>
+                    <input type="number" id="editNumberOfChairs" name="numberOfChairs" min="1" max="12" required>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeEditModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Guest Assignment Modal -->
+    <div id="guestAssignmentModal" class="modal">
+        <div class="modal-content">
+            <h2>Assign Guest</h2>
+            <div class="modal-body">
+                <div id="currentGuestInfo" class="current-guest" style="display: none;">
+                    <p>Current Guest: <span id="currentGuestName"></span></p>
+                    <button class="btn btn-danger" onclick="removeGuest()">Remove Guest</button>
+                </div>
+                <div class="guest-selection">
+                    <label for="guestSelect">Select a guest:</label>
+                    <select id="guestSelect">
+                        <option value="">Select a guest</option>
+                        <option th:each="guest : ${guests}"
+                                th:value="${guest.guestId}"
+                                th:text="${guest.name}">
+                        </option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-primary" onclick="assignGuest()">Assign</button>
+                <button class="btn btn-secondary" onclick="closeGuestModal()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let selectedChairId = null;
+        let selectedChairElement = null;
+
+        function openGuestAssignmentModal(chairElement) {
+            selectedChairElement = $(chairElement);
+            selectedChairId = selectedChairElement.data('chair-id');
+            
+            // Show/hide current guest info
+            const currentGuestName = selectedChairElement.data('guest-name');
+            const currentGuestInfo = $('#currentGuestInfo');
+            const currentGuestNameSpan = $('#currentGuestName');
+            
+            if (currentGuestName) {
+                currentGuestInfo.show();
+                currentGuestNameSpan.text(currentGuestName);
+            } else {
+                currentGuestInfo.hide();
+            }
+            
+            document.getElementById('guestAssignmentModal').style.display = 'block';
+        }
+
+        function closeGuestModal() {
+            document.getElementById('guestAssignmentModal').style.display = 'none';
+            selectedChairId = null;
+            selectedChairElement = null;
+            document.getElementById('guestSelect').value = '';
+            $('#currentGuestInfo').hide();
+        }
+
+        function removeGuest() {
+            if (!selectedChairId) return;
+
+            $.ajax({
+                url: `/project/${projectId}/seatplan/remove-guest`,
+                method: 'POST',
+                data: {
+                    chairId: selectedChairId
+                },
+                success: function(response) {
+                    if (response && response.id) {
+                        selectedChairElement.removeClass('occupied');
+                        selectedChairElement.text('');
+                        selectedChairElement.data('guest-name', null);
+                        closeGuestModal();
+                    } else {
+                        window.location.reload();
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error removing guest:', error);
+                    window.location.reload();
+                }
+            });
+        }
+
+        function assignGuest() {
+            const guestId = document.getElementById('guestSelect').value;
+            if (!guestId) {
+                alert('Please select a guest');
+                return;
+            }
+
+            $.ajax({
+                url: `/project/${projectId}/seatplan/assign-guest`,
+                method: 'POST',
+                data: {
+                    chairId: selectedChairId,
+                    guestId: guestId
+                },
+                success: function(response) {
+                    if (response && response.id) {
+                        const chairElement = $(`[data-chair-id="${response.id}"]`);
+                        if (response.guest) {
+                            chairElement.addClass('occupied');
+                            chairElement.text(getInitials(response.guest.name));
+                        } else {
+                            chairElement.removeClass('occupied');
+                            chairElement.text('');
+                        }
+                        closeGuestModal();
+                    } else {
+                        window.location.reload();
+                    }
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error assigning guest:', error);
+                    window.location.reload();
+                }
+            });
+        }
+
+        function getInitials(name) {
+            if (!name) return '';
+            return name.split(' ')
+                .map(word => word.charAt(0))
+                .join('')
+                .toUpperCase();
+        }
+    </script>
+</body>
+</html> 

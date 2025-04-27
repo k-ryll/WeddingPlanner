@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>Guest Page</title>
+<link rel="stylesheet" th:href="@{/styles/guestsPage.css}">
+<link rel="stylesheet" th:href="@{/styles/styles.css}">
+
+<script src="https://kit.fontawesome.com/b80e3de11b.js" ></script>
+</head>
+<body>
+ 
+  <header>
+    <img src="/images/logo.svg" class="logo" alt="logo">
+    <div>
+        <ul>
+            <li> <a th:href="@{/home}">Home</a> </li>
+            <li class="active"><a th:href="@{/guests}">Guests</a></li>
+            <li>Planning</li>
+            <li>Vendors</li>
+            <li>About Us</li>
+            <li><a th:href="@{/logout}">Logout</a></li>
+        </ul>
+        <i class="fa-regular fa-circle-user user-icon"></i>
+    </div>
+</header>
+<div class="container">
+  <div class="search-box">
+    <div class="">
+      <input type="text" class="search-box" placeholder="Search guest">
+      
+<i class="fas fa-search"></i>
+    </div>
+    
+      <button id="openModal" class="btn btn-primary">
+        <i class="fa-solid fa-plus"></i>
+        ADD GUEST
+      </button>
+      <form th:action="@{/guests/send-all-invitations}" method="post" style="display: inline;">
+        <button type="submit" class="btn btn-primary">
+          <i class="fas fa-paper-plane"></i>
+          SEND TO ALL
+        </button>
+      </form>
+    
+  </div>
+
+
+ 
+	<div class="table-container">
+    <h1 class="text-success">Guest List</h1>
+    <p th:if="${message}" th:text="${message}" style="color: green;"></p>
+        <p th:if="${error}" th:text="${error}" style="color: red;"></p>
+<table>
+    <thead>
+        <tr>
+            <th>Title</th>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Entourage</th>
+            <th>RSVP</th>
+            <th>Remarks</th>
+            <th>Project</th>
+            <th>Added By</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr th:each="guest : ${guests}">
+            <td th:text="${guest.title}"></td>
+            <td th:text="${guest.name}"></td>
+            <td th:text="${guest.email}"></td>
+            <td th:text="${guest.entourage}"></td>
+            <td th:text="${guest.rsvp}"></td>
+            <td th:text="${guest.remarks}"></td>
+            <td th:text="${guest.projectId.projectName}"></td>
+            <td th:text="${guest.addedBy.firstName + ' ' + guest.addedBy.lastName}"></td>
+            <td class="actions">
+              <button class="email-btn" th:attr="data-guest-email=${guest.email}">
+                <i class="fas fa-envelope"></i>
+            </button>
+              <button class="edit-btn" th:attr="data-guest-id=${guest.guestId}">
+                  <i class="fas fa-edit"></i>
+              </button>
+              <button class="delete-btn" th:attr="data-guest-id=${guest.guestId}">
+                  <i class="fas fa-trash"></i>
+              </button>
+          </td>
+        </tr>
+    </tbody>
+</table>
+</div>
+<!-- Modal -->
+<div id="guestModal" class="modal">
+  <div class="modal-content">
+    <span class="close">&times;</span>
+    <h4 class="modal-title">Add Guest</h4>
+    <form class="guestForm" th:action="@{/guest/create}" method="post" th:object="${guest}">
+      <div>
+        <label for="title">Title:</label>
+        <select name="title" id="title" th:field="*{title}">
+          <option value="">None</option>
+          <option value="Mr.">Mr.</option>
+          <option value="Mrs.">Mrs.</option>
+          <option value="Miss">Miss</option>
+          <option value="Dr.">Dr.</option>
+          <option value="Hon.">Hon.</option>
+          <option value="Rev.">Rev.</option>
+        </select>
+      </div>
+      <div>
+        <label for="name">Name:</label>
+        <input type="text" th:field="*{name}">
+      </div>
+      <div>
+        <label for="email">Email:</label>
+        <input type="email" name="email" id="email" th:field="*{email}">
+      </div>
+      
+      <div>
+        <label for="entourage">Entourage:</label>
+        <select name="entourage" id="entourage" th:field="*{entourage}">
+          <option value="" disabled selected>Select Role</option>
+          <option value="Guest">Guest</option>
+          <option value="Bride's Maid">Bride's Maid</option>
+          <option value="Maid of Honor">Maid of Honor</option>
+          <option value="Matron of Honor">Matron of Honor</option>
+          <option value="Groomsman">Groomsman</option>
+          <option value="Best Man">Best Man</option>
+          <option value="Flower Girl">Flower Girl</option>
+          <option value="Ring Bearer">Ring Bearer</option>
+          <option value="Junior Bridesmaid">Junior Bridesmaid</option>
+          <option value="Junior Groomsman">Junior Groomsman</option>
+          <option value="Father of the Bride">Father of the Bride</option>
+          <option value="Mother of the Bride">Mother of the Bride</option>
+          <option value="Father of the Groom">Father of the Groom</option>
+          <option value="Mother of the Groom">Mother of the Groom</option>
+        </select>
+      </div>
+      <div>
+        <label for="rsvp">RSVP:</label>
+        <select name="rsvp" id="rsvp" th:field="*{rsvp}" disabled>
+          <option value="" disabled selected>Select Response</option>
+          <option value="Pending">Pending</option>
+          <option value="Accepted">Accepted</option>
+          <option value="Declined">Declined</option>
+        </select>
+      </div>
+      <div>
+        <button type="submit" class="btn btn-primary">Submit</button>
+      </div>
+    </form>
+  </div>
+</div>
+</div>
+
+ <script th:src="@{/js/guestPage.js}"></script>
+  
+</body>
+</html>
