@@ -5,6 +5,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -77,21 +78,29 @@ public class ProjectController {
 
     @PostMapping("/project/{taskId}/task/toggle")
     @ResponseBody
-    public String toggleTask(@PathVariable Integer taskId, @RequestBody Task task) {
-        Task existingTask = taskService.findById(taskId);
-        if (existingTask != null) {
-            existingTask.setCompleted(task.isCompleted());
-            taskService.save(existingTask);
-            return "{\"success\": true}";
+    public ResponseEntity<?> toggleTask(@PathVariable Integer taskId, @RequestParam boolean completed) {
+        try {
+            Task existingTask = taskService.findById(taskId);
+            if (existingTask != null) {
+                existingTask.setCompleted(completed);
+                taskService.save(existingTask);
+                return ResponseEntity.ok().body("{\"success\": true}");
+            }
+            return ResponseEntity.notFound().build();
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("{\"success\": false, \"error\": \"" + e.getMessage() + "\"}");
         }
-        return "{\"success\": false}";
     }
 
     @DeleteMapping("/project/{taskId}/task/delete")
     @ResponseBody
-    public String deleteTask(@PathVariable Integer taskId) {
-        taskService.delete(taskId);
-        return "{\"success\": true}";
+    public ResponseEntity<?> deleteTask(@PathVariable Integer taskId) {
+        try {
+            taskService.delete(taskId);
+            return ResponseEntity.ok().body("{\"success\": true}");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("{\"success\": false, \"error\": \"" + e.getMessage() + "\"}");
+        }
     }
 
     @PostMapping("/project/{id}/itinerary/add")
@@ -115,9 +124,13 @@ public class ProjectController {
 
     @DeleteMapping("/project/{itemId}/itinerary/delete")
     @ResponseBody
-    public String deleteItineraryItem(@PathVariable Integer itemId) {
-        itineraryService.delete(itemId);
-        return "{\"success\": true}";
+    public ResponseEntity<?> deleteItineraryItem(@PathVariable Integer itemId) {
+        try {
+            itineraryService.delete(itemId);
+            return ResponseEntity.ok().body("{\"success\": true}");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("{\"success\": false, \"error\": \"" + e.getMessage() + "\"}");
+        }
     }
 }
 
