@@ -2,6 +2,8 @@ package com.example.wedding.controller;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.math.BigDecimal;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -18,10 +20,19 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.example.wedding.dto.UserDto;
 import com.example.wedding.model.User;
+import com.example.wedding.model.Project;
+import com.example.wedding.model.Task;
+import com.example.wedding.model.ItineraryItem;
+import com.example.wedding.model.BudgetCategory;
 import com.example.wedding.service.DuplicateEmailException;
 import com.example.wedding.service.EmailService;
 import com.example.wedding.service.UserService;
 import com.example.wedding.service.VerificationService;
+import com.example.wedding.service.ProjectService;
+import com.example.wedding.service.TaskService;
+import com.example.wedding.service.ItineraryService;
+import com.example.wedding.service.BudgetService;
+import com.example.wedding.service.GuestService;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -42,21 +53,61 @@ public class UserController {
     @Autowired
     private VerificationService verificationService;
 
+    @Autowired
+    private ProjectService projectService;
+
+    @Autowired
+    private TaskService taskService;
+
+    @Autowired
+    private ItineraryService itineraryService;
+
+    @Autowired
+    private BudgetService budgetService;
+
+    @Autowired
+    private GuestService guestService;
 
     @GetMapping("/index")
     public String showIndexPage() {
-        
         return "index"; 
     }
+
     @GetMapping("/home")
     public String home(@SessionAttribute(name = "loggedUser", required = false) User user, Model model) {
         if (user == null) {
-            return "redirect:/user/login";    }
+            return "redirect:/user/login";
+        }
+        
+        // Get the user's project
+        Project project = projectService.findProjectByUserEmail(user.getEmail());
+        if (project != null) {
+            List<Task> tasks = taskService.findByProject(project);
+            List<ItineraryItem> itinerary = itineraryService.findByProject(project);
+            List<BudgetCategory> budgetCategories = budgetService.findByProject(project);
+            BigDecimal totalBudget = budgetService.getTotalBudget(project);
+            BigDecimal totalSpent = budgetService.getTotalSpent(project);
+            // Guest summary
+            List<com.example.wedding.model.Guest> guests = guestService.findByProject(project);
+            long totalGuests = guests.size();
+            long confirmedGuests = guests.stream().filter(g -> g.getRsvp() != null && g.getRsvp().equalsIgnoreCase("ACCEPTED")).count();
+            long pendingGuests = guests.stream().filter(g -> g.getRsvp() != null && g.getRsvp().equalsIgnoreCase("PENDING")).count();
+            System.out.println("User: " + user.getEmail());
+            System.out.println("Project: " + (project != null ? project.getProjectName() : "null"));
+            System.out.println("Guests: " + totalGuests + ", Confirmed: " + confirmedGuests + ", Pending: " + pendingGuests);
+            model.addAttribute("tasks", tasks);
+            model.addAttribute("itinerary", itinerary);
+            model.addAttribute("budgetCategories", budgetCategories);
+            model.addAttribute("totalBudget", totalBudget);
+            model.addAttribute("totalSpent", totalSpent);
+            model.addAttribute("totalGuests", totalGuests);
+            model.addAttribute("confirmedGuests", confirmedGuests);
+            model.addAttribute("pendingGuests", pendingGuests);
+        }
+        
         model.addAttribute("user", user);
         return "home"; 
     }
-
-
 
     @GetMapping("/user/login")
     public String showLoginPage(Model model) {

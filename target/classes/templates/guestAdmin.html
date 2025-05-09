@@ -100,7 +100,7 @@
   <div class="modal-content">
     <span class="close">&times;</span>
     <h4 class="modal-title">Add Guest</h4>
-    <form class="guestForm" th:action="@{/guest/create}" method="post" th:object="${guest}">
+    <form class="guestForm" th:action="@{/project/{id}/guest/add(id=${projectId})}" method="post" th:object="${guest}">
       <div>
         <label for="title">Title:</label>
         <select name="title" id="title" th:field="*{title}">

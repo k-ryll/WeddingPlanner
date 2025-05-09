@@ -35,10 +35,12 @@ public class AdminController {
             @RequestParam("email") String email,
             @RequestParam("password") String password,
             RedirectAttributes redi, HttpSession session) {
+        // Admin authentication without database user
         if(email.equals("admin") && password.equals("password")) {
             session.setAttribute("isAdmin", true);
             return "redirect:/admin/home";
         }
+        redi.addFlashAttribute("error", "Invalid admin credentials.");
         return "redirect:/admin/login";
     }
     

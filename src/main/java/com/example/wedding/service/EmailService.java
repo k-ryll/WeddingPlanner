@@ -7,11 +7,16 @@ import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.mail.SimpleMailMessage;
 
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import java.util.List;
+import java.util.stream.Collectors;
 import com.example.wedding.model.Guest;
+import com.example.wedding.model.Task;
+import com.example.wedding.model.Project;
+import com.example.wedding.model.ItineraryItem;
 
 @Service
 public class EmailService {
@@ -20,6 +25,9 @@ public class EmailService {
 
     @Autowired
     private JavaMailSender mailSender;
+
+    @Autowired
+    private GuestService guestService;
 
     public void sendVerificationEmail(String recipientEmail, String verificationCode) {
         try {
@@ -99,6 +107,180 @@ public class EmailService {
                 logger.info("Invitation sent successfully to {}", guest.getEmail());
             } catch (MessagingException e) {
                 logger.error("Failed to send invitation to {}: {}", guest.getEmail(), e.getMessage());
+            }
+        }
+    }
+
+    private void sendEmail(String to, String subject, String content) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(to);
+        message.setSubject(subject);
+        message.setText(content);
+        mailSender.send(message);
+    }
+
+    public void sendTaskToEntourage(Project project, String entourageType, String taskName, String taskDescription, String dueDate) {
+        List<Guest> entourageMembers;
+        
+        if ("ALL".equals(entourageType)) {
+            entourageMembers = guestService.findByProject(project).stream()
+                .filter(guest -> !"Guest".equals(guest.getEntourage()))
+                .collect(Collectors.toList());
+        } else if ("Father of the Bride".equals(entourageType)) {
+            // Get both parents of the bride
+            entourageMembers = guestService.findByProject(project).stream()
+                .filter(guest -> "Father of the Bride".equals(guest.getEntourage()) || 
+                               "Mother of the Bride".equals(guest.getEntourage()))
+                .collect(Collectors.toList());
+        } else if ("Father of the Groom".equals(entourageType)) {
+            // Get both parents of the groom
+            entourageMembers = guestService.findByProject(project).stream()
+                .filter(guest -> "Father of the Groom".equals(guest.getEntourage()) || 
+                               "Mother of the Groom".equals(guest.getEntourage()))
+                .collect(Collectors.toList());
+        } else {
+            entourageMembers = guestService.findByProject(project).stream()
+                .filter(guest -> entourageType.equals(guest.getEntourage()))
+                .collect(Collectors.toList());
+        }
+        
+        if (entourageMembers.isEmpty()) {
+            logger.warn("No entourage members found for type: {}", entourageType);
+            return;
+        }
+
+        String subject = "Wedding Task Assignment: " + taskName;
+        String content = String.format(
+            "Task: %s\n\nDescription: %s\nDue Date: %s\n\nPlease complete this task by the due date.",
+            taskName, taskDescription, dueDate
+        );
+
+        for (Guest member : entourageMembers) {
+            try {
+                sendEmail(member.getEmail(), subject, content);
+                logger.info("Task email sent to {} ({})", member.getName(), member.getEmail());
+            } catch (Exception e) {
+                logger.error("Failed to send task email to {}: {}", member.getEmail(), e.getMessage());
+            }
+        }
+    }
+
+    public void sendTaskToAllEntourage(Project project, String taskName, String taskDescription, String dueDate) {
+        // Get all guests except those marked as "Guest"
+        List<Guest> allEntourage = guestService.findByProject(project).stream()
+            .filter(guest -> !"Guest".equals(guest.getEntourage()))
+            .collect(Collectors.toList());
+        
+        if (allEntourage.isEmpty()) {
+            logger.warn("No entourage members found in the guest list");
+            return;
+        }
+
+        String subject = "Wedding Task Assignment: " + taskName;
+        String content = String.format(
+            "Task: %s\n\nDescription: %s\nDue Date: %s\n\nPlease complete this task by the due date.",
+            taskName, taskDescription, dueDate
+        );
+
+        for (Guest member : allEntourage) {
+            try {
+                sendEmail(member.getEmail(), subject, content);
+                logger.info("Task email sent to {} ({})", member.getName(), member.getEmail());
+            } catch (Exception e) {
+                logger.error("Failed to send task email to {}: {}", member.getEmail(), e.getMessage());
+            }
+        }
+    }
+
+    public void sendItineraryToEntourage(Project project, String entourageType, List<ItineraryItem> itinerary) {
+        List<Guest> entourageMembers;
+        
+        if ("Father of the Bride".equals(entourageType)) {
+            // Get both parents of the bride
+            entourageMembers = guestService.findByProject(project).stream()
+                .filter(guest -> "Father of the Bride".equals(guest.getEntourage()) || 
+                               "Mother of the Bride".equals(guest.getEntourage()))
+                .collect(Collectors.toList());
+        } else if ("Father of the Groom".equals(entourageType)) {
+            // Get both parents of the groom
+            entourageMembers = guestService.findByProject(project).stream()
+                .filter(guest -> "Father of the Groom".equals(guest.getEntourage()) || 
+                               "Mother of the Groom".equals(guest.getEntourage()))
+                .collect(Collectors.toList());
+        } else {
+            entourageMembers = guestService.findByProject(project).stream()
+                .filter(guest -> entourageType.equals(guest.getEntourage()))
+                .collect(Collectors.toList());
+        }
+        
+        if (entourageMembers.isEmpty()) {
+            logger.warn("No entourage members found for type: {}", entourageType);
+            return;
+        }
+
+        String subject = "Wedding Day Itinerary";
+        StringBuilder content = new StringBuilder();
+        content.append("Wedding Day Schedule:\n\n");
+        
+        for (ItineraryItem item : itinerary) {
+            content.append(String.format("%s - %s: %s\n", 
+                item.getStartTime(), 
+                item.getEndTime(), 
+                item.getTitle()));
+            if (item.getDescription() != null && !item.getDescription().isEmpty()) {
+                content.append("Description: ").append(item.getDescription()).append("\n");
+            }
+            if (item.getLocation() != null && !item.getLocation().isEmpty()) {
+                content.append("Location: ").append(item.getLocation()).append("\n");
+            }
+            content.append("\n");
+        }
+
+        for (Guest member : entourageMembers) {
+            try {
+                sendEmail(member.getEmail(), subject, content.toString());
+                logger.info("Itinerary email sent to {} ({})", member.getName(), member.getEmail());
+            } catch (Exception e) {
+                logger.error("Failed to send itinerary email to {}: {}", member.getEmail(), e.getMessage());
+            }
+        }
+    }
+
+    public void sendItineraryToAllEntourage(Project project, List<ItineraryItem> itinerary) {
+        // Get all guests except those marked as "Guest"
+        List<Guest> allEntourage = guestService.findByProject(project).stream()
+            .filter(guest -> !"Guest".equals(guest.getEntourage()))
+            .collect(Collectors.toList());
+        
+        if (allEntourage.isEmpty()) {
+            logger.warn("No entourage members found in the guest list");
+            return;
+        }
+
+        String subject = "Wedding Day Itinerary";
+        StringBuilder content = new StringBuilder();
+        content.append("Wedding Day Schedule:\n\n");
+        
+        for (ItineraryItem item : itinerary) {
+            content.append(String.format("%s - %s: %s\n", 
+                item.getStartTime(), 
+                item.getEndTime(), 
+                item.getTitle()));
+            if (item.getDescription() != null && !item.getDescription().isEmpty()) {
+                content.append("Description: ").append(item.getDescription()).append("\n");
+            }
+            if (item.getLocation() != null && !item.getLocation().isEmpty()) {
+                content.append("Location: ").append(item.getLocation()).append("\n");
+            }
+            content.append("\n");
+        }
+
+        for (Guest member : allEntourage) {
+            try {
+                sendEmail(member.getEmail(), subject, content.toString());
+                logger.info("Itinerary email sent to {} ({})", member.getName(), member.getEmail());
+            } catch (Exception e) {
+                logger.error("Failed to send itinerary email to {}: {}", member.getEmail(), e.getMessage());
             }
         }
     }

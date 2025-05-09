@@ -85,4 +85,54 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     });
-}); 
+});
+
+function deleteBudgetCategory(categoryId) {
+    if (confirm('Are you sure you want to delete this budget category? All expenses in this category will also be deleted.')) {
+        const projectId = document.querySelector('input[name="projectId"]').value;
+        fetch(`/project/${projectId}/budget/category/${categoryId}/delete`, {
+            method: 'DELETE'
+        })
+        .then(response => response.json())
+        .then(result => {
+            if (result.success) {
+                location.reload();
+            } else {
+                alert('Failed to delete category');
+            }
+        })
+        .catch(error => {
+            alert('Error deleting category: ' + error);
+        });
+    }
+}
+
+function deleteExpense(expenseId) {
+    if (confirm('Are you sure you want to delete this expense?')) {
+        const projectId = document.querySelector('input[name="projectId"]').value;
+        fetch(`/project/${projectId}/budget/expense/${expenseId}/delete`, {
+            method: 'DELETE'
+        })
+        .then(response => response.json())
+        .then(result => {
+            if (result.success) {
+                location.reload();
+            } else {
+                alert('Failed to delete expense');
+            }
+        })
+        .catch(error => {
+            alert('Error deleting expense: ' + error);
+        });
+    }
+}
+
+function editExpense(expenseId) {
+    // TODO: Implement edit expense functionality
+    alert('Edit expense functionality coming soon!');
+}
+
+function editBudgetCategory(categoryId) {
+    // TODO: Implement edit budget category functionality
+    alert('Edit budget category functionality coming soon!');
+} 

@@ -20,6 +20,9 @@ public class Guest {
     @Column(nullable = false, length = 50)
     private String email;
 
+    @Column(length = 20) // Assuming a max length for phone number
+    private String phone;
+
     @Column(nullable = false, length = 45)
     private String rsvp;
 
@@ -56,6 +59,9 @@ public class Guest {
 
     public String getEmail() { return email; }
     public void setEmail(String email) { this.email = email; }
+
+    public String getPhone() { return phone; }
+    public void setPhone(String phone) { this.phone = phone; }
 
     public String getRsvp() { return rsvp; }
     public void setRsvp(String rsvp) { this.rsvp = rsvp; }

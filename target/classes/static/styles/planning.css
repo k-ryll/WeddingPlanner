@@ -1,134 +1,533 @@
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.container h1 {
+    text-align: center;
+    color: #814256;
+    font-size: 2.5rem;
+    margin-bottom: 2rem;
+    font-weight: 600;
+}
+
 .planning-container {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr;
     gap: 2rem;
+    max-width: 1200px;
+    margin: 0 auto;
     padding: 2rem;
+}
+
+@media (min-width: 1024px) {
+    .planning-container {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .budget-section {
+        grid-column: 1 / -1;
+    }
 }
 
 .tasks-section, .itinerary-section {
-    background: white;
-    padding: 2rem;
+    background: #fff;
     border-radius: 8px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    padding: 1.5rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.task-form, .itinerary-form {
-    margin-bottom: 2rem;
-}
-
-.task-form form, .itinerary-form form {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-}
-
-.task-form input, .itinerary-form input,
-.task-form textarea, .itinerary-form textarea,
-.task-form select {
-    padding: 0.5rem;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-}
-
-.task-form button, .itinerary-form button {
-    padding: 0.5rem 1rem;
-    background-color: #4CAF50;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-}
-
-.task-list ul, .itinerary-list ul {
-    list-style: none;
-    padding: 0;
-}
-
-.task-item, .itinerary-item {
+.section-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    margin-bottom: 1.5rem;
+    border-bottom: 2px solid #f0e6e9;
+    padding-bottom: 1rem;
+}
+
+.section-header h2 {
+    color: #814256;
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+.add-button {
+    background: #814256;
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background-color 0.2s ease;
+}
+
+.add-button:hover {
+    background: #6b3748;
+}
+
+.task-list, .itinerary-list {
+    background: #faf7f8;
+    border-radius: 8px;
     padding: 1rem;
-    border-bottom: 1px solid #eee;
+}
+
+.task-item, .itinerary-item {
+    background: white;
+    border-radius: 8px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border: 1px solid #f0e6e9;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.task-item:hover, .itinerary-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(129, 66, 86, 0.1);
 }
 
 .task-content {
     display: flex;
     align-items: center;
     gap: 1rem;
+    margin-bottom: 0.75rem;
 }
 
-.task-content .completed {
+.task-checkbox {
+    width: 18px;
+    height: 18px;
+    accent-color: #814256;
+}
+
+.completed {
     text-decoration: line-through;
-    color: #888;
+    color: #999;
 }
 
 .due-date {
-    color: #666;
+    background: #f0e6e9;
+    padding: 0.25rem 0.75rem;
+    border-radius: 4px;
     font-size: 0.9rem;
+    color: #814256;
 }
 
 .priority {
-    padding: 0.25rem 0.5rem;
+    padding: 0.25rem 0.75rem;
     border-radius: 4px;
-    font-size: 0.8rem;
+    font-size: 0.9rem;
+    font-weight: 500;
 }
 
-.priority[value="HIGH"] {
-    background-color: #ffebee;
+.priority.HIGH { 
     color: #c62828;
+    background: #ffebee;
 }
 
-.priority[value="MEDIUM"] {
-    background-color: #fff3e0;
+.priority.MEDIUM { 
     color: #ef6c00;
+    background: #fff3e0;
 }
 
-.priority[value="LOW"] {
-    background-color: #e8f5e9;
+.priority.LOW { 
     color: #2e7d32;
+    background: #e8f5e9;
 }
 
 .task-actions, .itinerary-actions {
     display: flex;
-    gap: 0.5rem;
+    gap: 0.75rem;
+    margin-top: 0.75rem;
+}
+
+.email-dropdown {
+    position: relative;
+}
+
+.email-btn {
+    background: #814256;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background-color 0.2s ease;
+}
+
+.email-btn:hover {
+    background: #6b3748;
+}
+
+.email-dropdown-content {
+    display: none;
+    position: absolute;
+    right: 0;
+    background: white;
+    min-width: 200px;
+    box-shadow: 0 4px 12px rgba(129, 66, 86, 0.15);
+    border-radius: 8px;
+    z-index: 1000;
+    border: 1px solid #f0e6e9;
+}
+
+.email-dropdown-content button {
+    display: block;
+    width: 100%;
+    padding: 0.75rem 1rem;
+    text-align: left;
+    border: none;
+    background: none;
+    cursor: pointer;
+    color: #814256;
+    transition: background-color 0.2s ease;
+}
+
+.email-dropdown-content button:hover {
+    background: #faf7f8;
 }
 
 .edit-btn, .delete-btn {
-    padding: 0.25rem 0.5rem;
+    padding: 0.5rem 1rem;
     border: none;
-    border-radius: 4px;
+    border-radius: 6px;
     cursor: pointer;
+    font-weight: 500;
+    transition: background-color 0.2s ease;
 }
 
 .edit-btn {
-    background-color: #2196F3;
-    color: white;
+    background: #e3f2fd;
+    color: #1976d2;
+}
+
+.edit-btn:hover {
+    background: #bbdefb;
 }
 
 .delete-btn {
-    background-color: #f44336;
-    color: white;
+    background: #ffebee;
+    color: #c62828;
+}
+
+.delete-btn:hover {
+    background: #ffcdd2;
 }
 
 .itinerary-item {
     display: grid;
-    grid-template-columns: 1fr 2fr 1fr;
+    grid-template-columns: auto 1fr auto;
     gap: 1rem;
+    align-items: start;
 }
 
 .time {
-    font-weight: bold;
-    color: #333;
+    background: #f0e6e9;
+    padding: 0.75rem;
+    border-radius: 6px;
+    text-align: center;
+    min-width: 120px;
+    color: #814256;
+    font-weight: 500;
 }
 
 .event-details h4 {
     margin: 0 0 0.5rem 0;
-    color: #333;
+    color: #814256;
+    font-size: 1.1rem;
+}
+
+.event-details p {
+    margin: 0;
+    color: #666;
+    line-height: 1.5;
 }
 
 .location {
-    color: #666;
+    color: #814256;
     font-size: 0.9rem;
     margin-top: 0.5rem;
+    font-weight: 500;
+}
+
+.itinerary-actions-top {
+    display: flex;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+}
+
+.itinerary-actions-top .email-dropdown {
+    margin-left: auto;
+}
+
+/* Loading state */
+.email-btn.loading, .email-dropdown-content button.loading {
+    pointer-events: none;
+    opacity: 0.7;
+    position: relative;
+}
+
+.email-btn.loading::after, .email-dropdown-content button.loading::after {
+    content: '';
+    position: absolute;
+    width: 14px;
+    height: 14px;
+    top: 50%;
+    left: 50%;
+    margin: -7px 0 0 -7px;
+    border: 2px solid #fff;
+    border-top-color: transparent;
+    border-radius: 50%;
+    animation: button-loading-spinner 1s linear infinite;
+}
+
+.email-dropdown-content button.loading::after {
+    width: 12px;
+    height: 12px;
+    right: 10px;
+    left: auto;
+    margin-top: -6px;
+    border-color: #814256;
+    border-top-color: transparent;
+}
+
+@keyframes button-loading-spinner {
+    from { transform: rotate(0turn); }
+    to { transform: rotate(1turn); }
+}
+
+/* Modal styles */
+.modal-content {
+    background: white;
+    border-radius: 12px;
+    padding: 2rem;
+    max-width: 500px;
+    width: 90%;
+}
+
+.modal-content h2 {
+    color: #814256;
+    margin-bottom: 1.5rem;
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+
+.modal-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.modal-form input,
+.modal-form textarea,
+.modal-form select {
+    padding: 0.75rem;
+    border: 1px solid #f0e6e9;
+    border-radius: 6px;
+    font-size: 1rem;
+    transition: border-color 0.2s ease;
+}
+
+.modal-form input:focus,
+.modal-form textarea:focus,
+.modal-form select:focus {
+    outline: none;
+    border-color: #814256;
+}
+
+.modal-form textarea {
+    min-height: 100px;
+    resize: vertical;
+}
+
+.modal-form button {
+    background: #814256;
+    color: white;
+    border: none;
+    padding: 0.75rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 500;
+    font-size: 1rem;
+    transition: background-color 0.2s ease;
+}
+
+.modal-form button:hover {
+    background: #6b3748;
+}
+
+.close {
+    position: absolute;
+    right: 1.5rem;
+    top: 1.5rem;
+    font-size: 1.5rem;
+    cursor: pointer;
+    color: #814256;
+    transition: color 0.2s ease;
+}
+
+.close:hover {
+    color: #6b3748;
+}
+
+/* Budget Section Styles */
+.budget-section {
+    background: #fff;
+    border-radius: 8px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-top: 1rem;
+}
+
+.budget-actions {
+    display: flex;
+    gap: 0.75rem;
+}
+
+.budget-summary {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+    padding: 1.5rem;
+    background: #faf7f8;
+    border-radius: 8px;
+}
+
+.budget-total, .budget-spent, .budget-remaining {
+    text-align: center;
+}
+
+.budget-total h3, .budget-spent h3, .budget-remaining h3 {
+    color: #814256;
+    font-size: 1.1rem;
+    margin-bottom: 0.5rem;
+}
+
+.amount {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: #814256;
+}
+
+.budget-categories {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.budget-category {
+    background: #faf7f8;
+    border-radius: 8px;
+    padding: 1.25rem;
+    border: 1px solid #f0e6e9;
+}
+
+.category-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.category-header h4 {
+    color: #814256;
+    font-size: 1.2rem;
+    margin: 0;
+}
+
+.category-total {
+    font-weight: 600;
+    color: #814256;
+}
+
+.progress-bar {
+    height: 8px;
+    background: #f0e6e9;
+    border-radius: 4px;
+    margin-bottom: 1rem;
+    overflow: hidden;
+}
+
+.progress {
+    height: 100%;
+    background: #814256;
+    border-radius: 4px;
+    transition: width 0.3s ease;
+}
+
+.progress.over-budget {
+    background: #c62828;
+}
+
+.category-details {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 1rem;
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.expense-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.expense-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem;
+    background: white;
+    border-radius: 6px;
+    border: 1px solid #f0e6e9;
+}
+
+.expense-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.expense-name {
+    font-weight: 500;
+    color: #814256;
+}
+
+.expense-amount {
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.expense-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .budget-summary {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+
+    .category-details {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+
+    .expense-item {
+        flex-direction: column;
+        gap: 0.75rem;
+        align-items: flex-start;
+    }
+
+    .expense-actions {
+        width: 100%;
+        justify-content: flex-end;
+    }
 } 

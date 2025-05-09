@@ -9,6 +9,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.example.wedding.model.Guest;
@@ -149,6 +150,52 @@ public class GuestController {
         } catch (IllegalArgumentException e) {
             redirectAttributes.addFlashAttribute("error", e.getMessage());
             return "redirect:/guests";
+        }
+    }
+    
+    // New method for AJAX-based guest editing with detailed error reporting
+    @PostMapping("/guest/edit-ajax")
+    @ResponseBody
+    public String editGuestAjax(
+        @RequestParam(required = false) Integer guestId,
+        @RequestParam(required = false) String title,
+        @RequestParam(required = false) String name,
+        @RequestParam(required = false) String email,
+        @RequestParam(required = false) String entourage,
+        @RequestParam(required = false) String rsvp,
+        @RequestParam(required = false) String remarks
+    ) {
+        try {
+            if (guestId == null) {
+                return "{\"success\": false, \"error\": \"Missing guestId parameter\"}";
+            }
+            
+            Guest guest = service.findById(guestId);
+            if (guest == null) {
+                return "{\"success\": false, \"error\": \"Guest not found: " + guestId + "\"}";
+            }
+            
+            // Check required fields
+            if (title == null || title.isEmpty()) {
+                return "{\"success\": false, \"error\": \"Missing title parameter\"}";
+            }
+            if (name == null || name.isEmpty()) {
+                return "{\"success\": false, \"error\": \"Missing name parameter\"}";
+            }
+            if (email == null || email.isEmpty()) {
+                return "{\"success\": false, \"error\": \"Missing email parameter\"}";
+            }
+            if (entourage == null || entourage.isEmpty()) {
+                return "{\"success\": false, \"error\": \"Missing entourage parameter\"}";
+            }
+            if (rsvp == null || rsvp.isEmpty()) {
+                return "{\"success\": false, \"error\": \"Missing rsvp parameter\"}";
+            }
+            
+            service.updateGuest(guestId, title, name, email, entourage, rsvp, remarks);
+            return "{\"success\": true, \"message\": \"Guest updated successfully!\"}";
+        } catch (Exception e) {
+            return "{\"success\": false, \"error\": \"" + e.getMessage().replace("\"", "'") + "\"}";
         }
     }
 
