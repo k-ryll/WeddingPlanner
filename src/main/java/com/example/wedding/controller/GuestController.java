@@ -72,18 +72,24 @@ public class GuestController {
 	        return "redirect:/guests";
 	    }
 
-	    // Associate the guest with the logged-in user and their project
-	    guest.setAddedBy(loggedUser);
-	    guest.setProjectId(userProject);
-	    
-	    // Set default RSVP status
-	    guest.setRsvp("Pending");
+	    try {
+	        // Associate the guest with the logged-in user and their project
+	        guest.setAddedBy(loggedUser);
+	        guest.setProjectId(userProject);
+	        
+	        // Set default RSVP status
+	        guest.setRsvp("Pending");
 
-	    // Save the guest
-	    service.save(guest);
+	        // Save the guest
+	        service.save(guest);
 
-	    redirectAttributes.addFlashAttribute("message", "Guest has been saved!");
-	    return "redirect:/guests";
+	        redirectAttributes.addFlashAttribute("message", "Guest has been saved!");
+	        return "redirect:/guests";
+	    } catch (IllegalArgumentException e) {
+	        redirectAttributes.addFlashAttribute("error", e.getMessage());
+	        redirectAttributes.addFlashAttribute("guest", guest); // Keep the form data
+	        return "redirect:/guests";
+	    }
 	}
 
     @PostMapping("/guest/send-invitation")
@@ -149,6 +155,16 @@ public class GuestController {
             return "redirect:/guests";
         } catch (IllegalArgumentException e) {
             redirectAttributes.addFlashAttribute("error", e.getMessage());
+            // Add the form data back to the model
+            Guest guest = new Guest();
+            guest.setGuestId(guestId);
+            guest.setTitle(title);
+            guest.setName(name);
+            guest.setEmail(email);
+            guest.setEntourage(entourage);
+            guest.setRsvp(rsvp);
+            guest.setRemarks(remarks);
+            redirectAttributes.addFlashAttribute("guest", guest);
             return "redirect:/guests";
         }
     }

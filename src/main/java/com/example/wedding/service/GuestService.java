@@ -20,6 +20,9 @@ public class GuestService {
 	@Autowired
 	private ProjectService projectService;
 	
+	@Autowired
+	private UserService userService;
+	
 
     public List<Guest> findByUser(User user) {
         // Get the user's project
@@ -37,6 +40,40 @@ public class GuestService {
     
 	
 	public String save(Guest guest) {
+		// Check if trying to add Best Man or Maid of Honor
+		if ("Best Man".equals(guest.getEntourage()) || "Maid of Honor".equals(guest.getEntourage())) {
+			// Check if one already exists
+			List<Guest> existingGuests = repo.findByProjectId(guest.getProjectId());
+			boolean exists = existingGuests.stream()
+				.anyMatch(g -> g.getEntourage().equals(guest.getEntourage()));
+			
+			if (exists) {
+				throw new IllegalArgumentException("A " + guest.getEntourage() + " already exists for this project.");
+			}
+
+			// Get the project and update it with the new best man or maid of honor
+			Project project = guest.getProjectId();
+			User user = userService.findByEmail(guest.getEmail());
+			if (user == null) {
+				throw new IllegalArgumentException("User not found for email: " + guest.getEmail());
+			}
+
+			if ("Best Man".equals(guest.getEntourage())) {
+				project.setBestMan(user);
+			} else if ("Maid of Honor".equals(guest.getEntourage())) {
+				project.setMaidOfHonor(user);
+			}
+			projectService.updateProject(
+				project.getId(),
+				project.getProjectName(),
+				project.getGroom().getEmail(),
+				project.getBride().getEmail(),
+				project.getOrganizer() != null ? project.getOrganizer().getEmail() : null,
+				project.getWeddingDate().toString(),
+				project.getStatus()
+			);
+		}
+		
 		repo.save(guest);
 		return "redirect:/home";
 	}
@@ -55,6 +92,41 @@ public class GuestService {
         Guest guest = findById(guestId);
         if (guest == null) {
             throw new IllegalArgumentException("Guest not found");
+        }
+
+        // Check if trying to update to Best Man or Maid of Honor
+        if (("Best Man".equals(entourage) || "Maid of Honor".equals(entourage)) 
+            && !entourage.equals(guest.getEntourage())) {
+            // Check if one already exists
+            List<Guest> existingGuests = repo.findByProjectId(guest.getProjectId());
+            boolean exists = existingGuests.stream()
+                .anyMatch(g -> g.getEntourage().equals(entourage) && !g.getGuestId().equals(guestId));
+            
+            if (exists) {
+                throw new IllegalArgumentException("A " + entourage + " already exists for this project.");
+            }
+
+            // Get the project and update it with the new best man or maid of honor
+            Project project = guest.getProjectId();
+            User user = userService.findByEmail(email);
+            if (user == null) {
+                throw new IllegalArgumentException("User not found for email: " + email);
+            }
+
+            if ("Best Man".equals(entourage)) {
+                project.setBestMan(user);
+            } else if ("Maid of Honor".equals(entourage)) {
+                project.setMaidOfHonor(user);
+            }
+            projectService.updateProject(
+                project.getId(),
+                project.getProjectName(),
+                project.getGroom().getEmail(),
+                project.getBride().getEmail(),
+                project.getOrganizer() != null ? project.getOrganizer().getEmail() : null,
+                project.getWeddingDate().toString(),
+                project.getStatus()
+            );
         }
 
         guest.setTitle(title);

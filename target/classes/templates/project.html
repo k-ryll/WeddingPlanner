@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="../static/styles/home.css">
     <script src="https://kit.fontawesome.com/b80e3de11b.js" ></script>
     <script th:src="@{/js/userMenu.js}"></script>
+    <script th:src="@{/js/project.js}"></script>
     <title>Wedding Project</title>
 </head>
 <body>
@@ -21,8 +22,8 @@
             <li><a th:href="@{/project/{id}/guest(id=${projectId})}">Guests</a></li>
             <li><a th:href="@{/project/{id}/planning(id=${projectId})}">Planning</a></li>
             <li><a th:href="@{/project/{id}/seatplan(id=${projectId})}">Seat Plan</a></li>
-            <li><a href="/admin/home">Admin Page</a></li>
-            <li><a th:href="@{/logout}">Logout</a></li>
+            <li><a th:href="@{/admin/home}">Admin Page</a></li>
+            
         </ul>
         <div class="user-menu">
             <i class="fa-regular fa-circle-user user-icon"></i>
@@ -41,33 +42,54 @@
         <h1>Organize your Wedding in One Place</h1>
         <div class="dashboard">
             <section class="left">
-                <form action="" class="essential-details">
+                <div class="essential-details">
                     <h2>Essential Details</h2>
-                    <div>
-                        <label for="wife-name">Bride's Name:</label>
-                        <input type="text" name="wife-name">
-                    </div>
-                    <div>
-                        <label for="groom-name">Groom's Name:</label>
-                        <input type="text" name="groom-name">
-                    </div>
-                    <div>
-                        <label for="wedding-date">Wedding Date:</label>
-                        <input type="date" name="wedding-date" id="wedding-date">
-                    </div>
-                    <div>
-                        <label for="maid-of-honor">Maid of Honor:</label>
-                        <input type="text" name="maid-of-honor">
-                    </div>
-                    <div>
-                        <label for="best-man">Best Man:</label>
-                        <input type="text" name="best-man">
-                    </div>
-                    <div>
-                        <button>Edit</button>
-                        <button>Save</button>
-                    </div>
-                </form>
+                    <form th:action="@{/project/{id}/essential-details/update(id=${project.id})}" method="post">
+                        <div class="form-group">
+                            <label for="brideName">Bride's Name</label>
+                            <input type="text" id="brideName" name="brideName" 
+                                   th:value="${project.bride != null ? project.bride.firstName + ' ' + project.bride.lastName : ''}" 
+                                   required>
+                        </div>
+                        <div class="form-group">
+                            <label for="groomName">Groom's Name</label>
+                            <input type="text" id="groomName" name="groomName" 
+                                   th:value="${project.groom != null ? project.groom.firstName + ' ' + project.groom.lastName : ''}" 
+                                   required>
+                        </div>
+                        <div class="form-group">
+                            <label for="weddingDate">Wedding Date</label>
+                            <input type="date" id="weddingDate" name="weddingDate" 
+                                   th:value="${project.weddingDate != null ? #temporals.format(project.weddingDate, 'yyyy-MM-dd') : ''}" 
+                                   required>
+                        </div>
+                        <div class="form-group">
+                            <label for="maidOfHonor">Maid of Honor</label>
+                            <input type="text" id="maidOfHonor" name="maidOfHonor" 
+                                   th:value="${project.maidOfHonor != null ? project.maidOfHonor.email : ''}" 
+                                   placeholder="Enter email address">
+                        </div>
+                        <div class="form-group">
+                            <label for="bestMan">Best Man</label>
+                            <input type="text" id="bestMan" name="bestMan" 
+                                   th:value="${project.bestMan != null ? project.bestMan.email : ''}" 
+                                   placeholder="Enter email address">
+                        </div>
+                        <div class="form-group">
+                            <label for="projectName">Project Name</label>
+                            <input type="text" id="projectName" name="projectName" 
+                                   th:value="${project.projectName}" 
+                                   required>
+                        </div>
+                        <div class="form-group">
+                            <label for="status">Status</label>
+                            <input type="text" id="status" name="status" 
+                                   th:value="${project.status}" 
+                                   required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Update Details</button>
+                    </form>
+                </div>
                 <div class="guest-list">
                     <h2>Guest List</h2>
                     <div class="guest-stats">
@@ -226,90 +248,6 @@
         }
     </script>
 
-    <style>
-        .task-section {
-            cursor: pointer;
-            padding: 20px;
-            border-radius: 8px;
-            transition: all 0.2s ease;
-            background-color: #fff;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-            margin-bottom: 20px;
-            max-height: 300px;
-            overflow-y: auto;
-        }
-
-        .task-section:hover {
-            background-color: #f8f9fa;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-        }
-
-        .task-section h2 {
-            margin-bottom: 15px;
-            color: #333;
-            font-size: 1.2em;
-            font-weight: 600;
-            padding-bottom: 10px;
-            border-bottom: 2px solid #f0f0f0;
-        }
-
-        .task-section ul {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-
-        .task-section li {
-            display: flex;
-            align-items: center;
-            padding: 12px 0;
-            border-bottom: 1px solid #f0f0f0;
-        }
-
-        .task-section li:last-child {
-            border-bottom: none;
-        }
-
-        .task-checkbox {
-            margin-right: 12px;
-            width: 18px;
-            height: 18px;
-            cursor: pointer;
-        }
-
-        .task-section li span:first-of-type {
-            flex: 1;
-            color: #444;
-            font-size: 0.95em;
-        }
-
-        .task-section li span:last-child {
-            margin-left: 15px;
-            color: #666;
-            font-size: 0.85em;
-            background-color: #f8f9fa;
-            padding: 4px 8px;
-            border-radius: 4px;
-        }
-
-        /* Custom scrollbar styling */
-        .task-section::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        .task-section::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 4px;
-        }
-
-        .task-section::-webkit-scrollbar-thumb {
-            background: #ccc;
-            border-radius: 4px;
-        }
-
-        .task-section::-webkit-scrollbar-thumb:hover {
-            background: #999;
-        }
-    </style>
+    
 </body>
 </html>

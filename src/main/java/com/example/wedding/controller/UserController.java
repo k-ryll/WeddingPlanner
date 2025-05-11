@@ -88,6 +88,8 @@ public class UserController {
         
         // Get the user's project
         Project project = projectService.findProjectByUserEmail(user.getEmail());
+        model.addAttribute("project", project); // Add project to model regardless of null
+        
         if (project != null) {
             List<Task> tasks = taskService.findByProject(project);
             List<ItineraryItem> itinerary = itineraryService.findByProject(project);
@@ -99,9 +101,7 @@ public class UserController {
             long totalGuests = guests.size();
             long confirmedGuests = guests.stream().filter(g -> g.getRsvp() != null && g.getRsvp().equalsIgnoreCase("ACCEPTED")).count();
             long pendingGuests = guests.stream().filter(g -> g.getRsvp() != null && g.getRsvp().equalsIgnoreCase("PENDING")).count();
-            System.out.println("User: " + user.getEmail());
-            System.out.println("Project: " + (project != null ? project.getProjectName() : "null"));
-            System.out.println("Guests: " + totalGuests + ", Confirmed: " + confirmedGuests + ", Pending: " + pendingGuests);
+            
             model.addAttribute("tasks", tasks);
             model.addAttribute("itinerary", itinerary);
             model.addAttribute("budgetCategories", budgetCategories);
@@ -110,6 +110,18 @@ public class UserController {
             model.addAttribute("totalGuests", totalGuests);
             model.addAttribute("confirmedGuests", confirmedGuests);
             model.addAttribute("pendingGuests", pendingGuests);
+            model.addAttribute("guests", guests);
+        } else {
+            // Initialize empty collections and zero values when no project exists
+            model.addAttribute("tasks", Collections.emptyList());
+            model.addAttribute("itinerary", Collections.emptyList());
+            model.addAttribute("budgetCategories", Collections.emptyList());
+            model.addAttribute("totalBudget", BigDecimal.ZERO);
+            model.addAttribute("totalSpent", BigDecimal.ZERO);
+            model.addAttribute("totalGuests", 0);
+            model.addAttribute("confirmedGuests", 0);
+            model.addAttribute("pendingGuests", 0);
+            model.addAttribute("guests", Collections.emptyList());
         }
         
         model.addAttribute("user", user);

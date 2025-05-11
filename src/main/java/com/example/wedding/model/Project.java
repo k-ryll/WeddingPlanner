@@ -35,6 +35,14 @@ public class Project {
     @JoinColumn(name = "organizer", nullable = true) 
     private User organizer;
 	
+    @OneToOne
+    @JoinColumn(name = "best_man", nullable = true)
+    private User bestMan;
+
+    @OneToOne
+    @JoinColumn(name = "maid_of_honor", nullable = true)
+    private User maidOfHonor;
+    
     @Column(nullable = false)
     private LocalDateTime weddingDate;
     
@@ -109,6 +117,22 @@ public class Project {
         this.status = status;
     }
 
+    public User getBestMan() {
+        return bestMan;
+    }
+
+    public void setBestMan(User bestMan) {
+        this.bestMan = bestMan;
+    }
+
+    public User getMaidOfHonor() {
+        return maidOfHonor;
+    }
+
+    public void setMaidOfHonor(User maidOfHonor) {
+        this.maidOfHonor = maidOfHonor;
+    }
+
     @Override
     public String toString() {
         return "Project{" +
@@ -117,6 +141,8 @@ public class Project {
                 ", groom=" + groom +
                 ", bride=" + bride +
                 ", organizer=" + organizer +
+                ", bestMan=" + bestMan +
+                ", maidOfHonor=" + maidOfHonor +
                 ", weddingDate=" + weddingDate +
                 ", status='" + status + '\'' +
                 '}';

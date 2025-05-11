@@ -49,6 +49,10 @@ public class ProjectController {
     @GetMapping("/project/{id}")
     public String showProjectPage(@PathVariable Integer id, Model model) {
         Project project = projectService.findById(id);
+        if (project == null) {
+            return "redirect:/home";
+        }
+
         List<Task> tasks = taskService.findByProject(project);
         List<ItineraryItem> itinerary = itineraryService.findByProject(project);
         List<BudgetCategory> budgetCategories = budgetService.findByProject(project);
@@ -62,6 +66,7 @@ public class ProjectController {
         long confirmedGuests = guests.stream().filter(g -> g.getRsvp() != null && g.getRsvp().equalsIgnoreCase("ACCEPTED")).count();
         long pendingGuests = guests.stream().filter(g -> g.getRsvp() != null && g.getRsvp().equalsIgnoreCase("PENDING")).count();
         
+        model.addAttribute("project", project);
         model.addAttribute("projectId", id);
         model.addAttribute("tasks", tasks);
         model.addAttribute("itinerary", itinerary);
@@ -71,6 +76,7 @@ public class ProjectController {
         model.addAttribute("totalGuests", totalGuests);
         model.addAttribute("confirmedGuests", confirmedGuests);
         model.addAttribute("pendingGuests", pendingGuests);
+        model.addAttribute("guests", guests);
         return "project";
     }
     
@@ -397,6 +403,74 @@ public class ProjectController {
     public String deleteExpense(@PathVariable Integer id, @PathVariable Integer expenseId) {
         budgetService.deleteExpense(expenseId);
         return "{\"success\": true}";
+    }
+
+    @PostMapping("/project/{id}/essential-details/update")
+    public String updateEssentialDetails(@PathVariable Integer id,
+                                       @RequestParam String brideName,
+                                       @RequestParam String groomName,
+                                       @RequestParam String weddingDate,
+                                       @RequestParam(required = false) String maidOfHonor,
+                                       @RequestParam(required = false) String bestMan,
+                                       RedirectAttributes redirectAttributes) {
+        try {
+            Project project = projectService.findById(id);
+            if (project == null) {
+                redirectAttributes.addFlashAttribute("error", "Project not found.");
+                return "redirect:/project/" + id;
+            }
+
+            // Split names into first and last names
+            String[] brideNames = brideName.split(" ", 2);
+            String[] groomNames = groomName.split(" ", 2);
+            
+            // Update bride
+            User bride = project.getBride();
+            if (bride != null) {
+                bride.setFirstName(brideNames[0]);
+                bride.setLastName(brideNames.length > 1 ? brideNames[1] : "");
+                userService.save(bride);
+            }
+
+            // Update groom
+            User groom = project.getGroom();
+            if (groom != null) {
+                groom.setFirstName(groomNames[0]);
+                groom.setLastName(groomNames.length > 1 ? groomNames[1] : "");
+                userService.save(groom);
+            }
+
+            // Update wedding date
+            project.setWeddingDate(LocalDate.parse(weddingDate).atStartOfDay());
+
+            // Update best man and maid of honor if provided
+            if (bestMan != null && !bestMan.isEmpty()) {
+                User bestManUser = userService.findByEmail(bestMan);
+                if (bestManUser != null) {
+                    project.setBestMan(bestManUser);
+                }
+            }
+            if (maidOfHonor != null && !maidOfHonor.isEmpty()) {
+                User maidOfHonorUser = userService.findByEmail(maidOfHonor);
+                if (maidOfHonorUser != null) {
+                    project.setMaidOfHonor(maidOfHonorUser);
+                }
+            }
+
+            projectService.updateProject(
+                project.getId(),
+                project.getProjectName(),
+                groom.getEmail(),
+                bride.getEmail(),
+                project.getOrganizer() != null ? project.getOrganizer().getEmail() : null,
+                project.getWeddingDate().toString(),
+                project.getStatus()
+            );
+            redirectAttributes.addFlashAttribute("message", "Essential details updated successfully!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Failed to update essential details: " + e.getMessage());
+        }
+        return "redirect:/project/" + id;
     }
 }
 
