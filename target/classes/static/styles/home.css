@@ -3,6 +3,14 @@
 :root {
     --primary-color: #814256;
     --accent-color: #81425661;
+    --text-primary: #2d3436;
+    --text-secondary: #636e72;
+    --background-light: #f8f9fa;
+    --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+    --border-radius: 12px;
+    --transition: all 0.3s ease;
 }
 
 a:not([class]) {
@@ -11,48 +19,11 @@ a:not([class]) {
 }
 
 html, body {
-    height: 95%;
+    height: 100%;
+    color: var(--text-primary);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
 
-header {
-    display: flex;
-    justify-content: space-between;
-    margin-inline: 5rem;
-    padding-block: 1rem;
-}
-
-header div {
-    display: flex;
-}
-
-header div ul {
-    display: flex;
-    cursor: pointer;
-    padding-inline: 20px;
-}
-
-header div ul li {
-    position: relative;
-    padding-inline: 1.5rem;
-    padding-block: .5rem;
-}
-
-header div ul li::after {
-    content: '';
-    position: absolute;
-    left: 0;
-    bottom: 0;
-    width: 100%;
-    height: 3px;
-    background-color: transparent;
-    transition: background-color 0.3s ease;
-}
-
-header div ul li:hover::after {
-    background-color: var(--primary-color);
-    cursor: pointer;
-    border-radius: 20px;
-}
 
 .user-icon {
     font-size: 1.5rem;
@@ -66,16 +37,18 @@ header div ul li:hover::after {
 }
 
 .container {
-    margin-inline: 5%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    height: 100%;
+    max-width: 1400px;
+    margin: 2rem auto;
+    padding: 0 2rem;
 }
 
 .container h1 {
     font-family: "MonteCarlo", serif;
-    letter-spacing: 3px;
+    font-size: 3.5rem;
+    text-align: center;
+    margin-bottom: 3rem;
+    color: var(--primary-color);
+    text-shadow: 2px 2px 4px rgba(129, 66, 86, 0.1);
 }
 
 .container h2 {
@@ -84,68 +57,90 @@ header div ul li:hover::after {
 }
 
 .dashboard {
-    margin-block: 1.5rem;
-    display: flex;
-    width: 100%;
-    justify-content: space-between;
-    height: 100%;
+    display: grid;
+    grid-template-columns: 1fr 3fr;
+    gap: 2rem;
+    margin-top: 2rem;
 }
 
 .left {
-    width: 25%;
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
+    gap: 1.5rem;
 }
 
-.left form, .guest-list {
-    border: 2px solid var(--primary-color);
-    border-radius: 10px;
-    padding: 2%;
+.essential-details, .guest-list {
+    background: white;
+    border-radius: var(--border-radius);
+    padding: 1.5rem;
+    box-shadow: var(--shadow-md);
 }
 
-.left form {
-    display: flex;
-    flex-direction: column;
-    gap: .5rem;
+.essential-details h2, .guest-list h2 {
+    color: var(--primary-color);
+    font-size: 1.4rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid var(--accent-color);
 }
 
-.left form div {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+.essential-details div {
+    margin-bottom: 1rem;
 }
 
-.left form div input {
-    width: 60%;
+.essential-details input {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #dfe6e9;
     border-radius: 8px;
-    padding: 8px;
+    transition: var(--transition);
+}
+
+.essential-details input:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px var(--accent-color);
+    outline: none;
+}
+
+.guest-list p {
+    margin: 0.5rem 0;
+    color: var(--text-secondary);
+    display: flex;
+    justify-content: space-between;
+}
+
+.guest-list span {
+    color: var(--primary-color);
+    font-weight: 600;
+}
+
+button {
+    background-color: var(--primary-color);
+    color: white;
     border: none;
-    background-color: var(--accent-color);
+    padding: 1rem;
+    border-radius: var(--border-radius);
+    font-weight: 600;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+button:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
 }
 
 .right {
-    width: 70%;
-    display: flex;
-    flex-wrap: wrap;
-    column-gap: 2%;
-    align-content: space-around;
-    height: 100%;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
 }
 
-.right div {
-    border: 2px solid var(--primary-color);
-    border-radius: 10px;
-    width: 49%;
-    height: 45%;
-    padding: 1%;
-}
-
-.right div ul li {
-    background-color: var(--accent-color);
-    padding: 1rem 1rem;
-    border-radius: 8px;
-    margin-bottom: .5rem;
+.right > div {
+    background: white;
+    border-radius: var(--border-radius);
+    padding: 1.5rem;
+    box-shadow: var(--shadow-md);
 }
 
 .itinerary {
@@ -238,6 +233,7 @@ header div ul li:hover::after {
     gap: 1.2rem;
     margin-bottom: 2rem;
     padding: 0.5rem;
+    width: 100% !important;
 }
 
 .budget-summary > div {
@@ -252,6 +248,7 @@ header div ul li:hover::after {
     justify-content: center;
     align-items: center;
     min-height: 120px;
+    width: 100% !important;
 }
 
 .budget-summary > div:hover {
@@ -335,54 +332,45 @@ header div ul li:hover::after {
 }
 
 @media screen and (max-width: 1200px) {
-    body {
-        font-size: 1.5vw;
-    }
-    .container {
-        margin-inline: 3%;
-    }
-    .budget-summary {
-        grid-template-columns: repeat(2, 1fr);
+    .dashboard {
+        grid-template-columns: 1fr 2fr;
     }
     
-    .budget-summary > div:last-child {
-        grid-column: span 2;
+    .right {
+        grid-template-columns: 1fr;
+    }
+    
+    header {
+        padding: 1rem 2rem;
     }
 }
 
 @media screen and (max-width: 900px) {
-    body {
-        font-size: 1.8vw;
-    }
     .container {
-        margin-inline: 2%;
+        padding: 0 1rem;
+    }
+    
+    .dashboard {
+        grid-template-columns: 1fr;
+        gap: 1.5rem;
+    }
+    
+    .container h1 {
+        font-size: 2.5rem;
     }
 }
 
 @media screen and (max-width: 600px) {
-    body {
-        font-size: 2vw;
-    }
-    .container {
-        margin-inline: 1%;
-    }
-    .budget-summary {
-        grid-template-columns: 1fr;
+    header {
+        padding: 1rem;
     }
     
-    .budget-summary > div:last-child {
-        grid-column: span 1;
+    header div ul {
+        gap: 1rem;
     }
     
-    .budget-category {
-        flex-direction: column;
-        text-align: center;
-        gap: 0.8rem;
-    }
-    
-    .budget-category .category-amount {
-        width: 100%;
-        text-align: center;
+    .container h1 {
+        font-size: 2rem;
     }
 }
 

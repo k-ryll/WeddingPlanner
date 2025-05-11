@@ -21,7 +21,6 @@
             <li><a th:href="@{/project/{id}/guest(id=${projectId})}">Guests</a></li>
             <li><a th:href="@{/project/{id}/planning(id=${projectId})}">Planning</a></li>
             <li><a th:href="@{/project/{id}/seatplan(id=${projectId})}">Seat Plan</a></li>
-            <li>Vendors</li>
             <li><a href="/admin/home">Admin Page</a></li>
             <li><a th:href="@{/logout}">Logout</a></li>
         </ul>
@@ -77,44 +76,9 @@
                         <p>Pending: <span th:text="${pendingGuests}">0</span></p>
                     </div>
                     
-                    <div class="guest-table-container">
-                        <table class="guest-table">
-                            <thead>
-                                <tr>
-                                    <th>Name</th>
-                                    <th>Email</th>
-                                    <th>RSVP Status</th>
-                                    <th>Remarks</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr th:each="guest : ${guests}">
-                                    <td th:text="${guest.name}">Guest Name</td>
-                                    <td th:text="${guest.email}">guest@email.com</td>
-                                    <td>
-                                        <select th:field="*{guest.rsvpStatus}">
-                                            <option value="PENDING">Pending</option>
-                                            <option value="CONFIRMED">Confirmed</option>
-                                            <option value="DECLINED">Declined</option>
-                                        </select>
-                                    </td>
-                                    <td>
-                                        <input type="text" th:field="*{guest.remarks}" placeholder="Add remarks">
-                                    </td>
-                                    <td>
-                                        <button class="save-btn" th:data-guest-id="${guest.id}">Save</button>
-                                        <button class="delete-btn" th:data-guest-id="${guest.id}">Delete</button>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
+
                 </div>
-                <div class="guest-actions">
-                    <a th:href="@{/guestAdmin}" class="btn">Manage Guests</a>
-                    <button class="btn">+ ADD TASK</button>
-                </div>
+                
             </section>
             <section class="right">
                 
@@ -129,14 +93,6 @@
                                 <span th:if="${task.dueDate}" th:text="${#temporals.format(task.dueDate, 'MMM dd')}"></span>
                             </li>
                             <li th:if="${#lists.isEmpty(tasks)}">No upcoming tasks</li>
-                        </ul>
-                    </div>
-    
-                    <div>
-                        <h2>Vendor List</h2>
-                        <ul>
-                            <li>Catering</li>
-                            <li>Venue</li>
                         </ul>
                     </div>
     

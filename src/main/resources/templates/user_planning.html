@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" th:href="@{/styles/styles.css}">
+    <link rel="stylesheet" th:href="@{/styles/planning.css}">
+    <link rel="stylesheet" th:href="@{/styles/modal.css}">
+    <script src="https://kit.fontawesome.com/b80e3de11b.js"></script>
+    <script th:src="@{/js/userMenu.js}"></script>
+    <title>Wedding Planning</title>
+</head>
+<body>
+    <header>
+        <img src="/images/logo.svg" class="logo" alt="logo">
+        <div>
+            <ul>
+                <li><a th:href="@{/home}">Home</a></li>
+                <li><a th:href="@{/guests}">Guests</a></li>
+                <li class="active"><a th:href="@{/planning}">Planning</a></li>
+                <li><a th:href="@{/seatplan}">Seat Plan</a></li>
+                <li><a th:href="@{/vendors}">Vendors</a></li>
+                <li><a th:href="@{/logout}">Logout</a></li>
+            </ul>
+            <div class="user-menu">
+                <i class="fa-regular fa-circle-user user-icon"></i>
+                <div class="user-dropdown">
+                    <a th:href="@{/logout}" class="dropdown-item">
+                        <i class="fas fa-sign-out-alt"></i>
+                        Logout
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <input type="hidden" name="projectId" th:value="${projectId}">
+        <h1>Wedding Planning</h1>
+        
+        <div class="planning-container">
+            <!-- Budget Section -->
+            <section class="budget-section">
+                <div class="section-header">
+                    <h2>Budget</h2>
+                    <div class="budget-actions">
+                        <button class="add-button" onclick="openBudgetModal()">Add Expense</button>
+                        <button class="add-button" onclick="openBudgetCategoryModal()">Add Category</button>
+                    </div>
+                </div>
+
+                <div class="budget-summary">
+                    <div class="budget-total">
+                        <h3>Total Budget</h3>
+                        <p class="amount" th:text="${'₱' + #numbers.formatDecimal(totalBudget, 1, 'COMMA', 2, 'POINT')}">₱0.00</p>
+                    </div>
+                    <div class="budget-spent">
+                        <h3>Total Spent</h3>
+                        <p class="amount" th:text="${'₱' + #numbers.formatDecimal(totalSpent, 1, 'COMMA', 2, 'POINT')}">₱0.00</p>
+                    </div>
+                    <div class="budget-remaining">
+                        <h3>Remaining</h3>
+                        <p class="amount" th:text="${'₱' + #numbers.formatDecimal(totalBudget - totalSpent, 1, 'COMMA', 2, 'POINT')}">₱0.00</p>
+                    </div>
+                </div>
+
+                <div class="budget-categories">
+                    <div th:each="category : ${budgetCategories}" class="budget-category">
+                        <div class="category-header">
+                            <h4 th:text="${category.name}">Category Name</h4>
+                            <span class="category-total" th:text="${'₱' + #numbers.formatDecimal(category.totalSpent, 1, 'COMMA', 2, 'POINT')}">₱0.00</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress" th:style="${'width: ' + (category.totalSpent / category.budget * 100) + '%'}"
+                                 th:class="${category.totalSpent > category.budget ? 'over-budget' : ''}"></div>
+                        </div>
+                        <div class="category-details">
+                            <span class="budget-amount" th:text="${'Budget: ₱' + #numbers.formatDecimal(category.budget, 1, 'COMMA', 2, 'POINT')}">Budget: ₱0.00</span>
+                            <span class="remaining-amount" th:text="${'Remaining: ₱' + #numbers.formatDecimal(category.budget - category.totalSpent, 1, 'COMMA', 2, 'POINT')}">Remaining: ₱0.00</span>
+                        </div>
+                        <div class="expense-list">
+                            <div th:each="expense : ${category.expenses}" class="expense-item">
+                                <div class="expense-info">
+                                    <span class="expense-name" th:text="${expense.name}">Expense Name</span>
+                                    <span class="expense-amount" th:text="${'₱' + #numbers.formatDecimal(expense.amount, 1, 'COMMA', 2, 'POINT')}">₱0.00</span>
+                                </div>
+                                <div class="expense-actions">
+                                    <button class="edit-btn" th:data-expense-id="${expense.id}">Edit</button>
+                                    <button class="delete-btn" th:data-expense-id="${expense.id}">Delete</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Tasks Section -->
+            <section class="tasks-section">
+                <div class="section-header">
+                    <h2>Tasks</h2>
+                    <button class="add-button" onclick="openTaskModal()">Add Task</button>
+                </div>
+                
+                <div class="task-list">
+                    <ul>
+                        <li th:each="task : ${tasks}" class="task-item">
+                            <div class="task-content">
+                                <input type="checkbox" th:checked="${task.completed}" 
+                                       th:data-task-id="${task.id}" class="task-checkbox">
+                                <span th:text="${task.title}" th:class="${task.completed ? 'completed' : ''}"></span>
+                                <span class="due-date" th:text="${task.dueDate}"></span>
+                                <span class="priority" th:text="${task.priority}" th:class="${task.priority}"></span>
+                            </div>
+                            <div class="task-actions">
+                                <div class="email-dropdown">
+                                    <button class="email-btn">Send Task</button>
+                                    <div class="email-dropdown-content">
+                                        <button onclick="sendTaskToEntourage(this)" th:data-task-id="${task.id}" data-entourage="ALL">Send to All Entourage</button>
+                                        <button onclick="sendTaskToEntourage(this)" th:data-task-id="${task.id}" data-entourage="Bride's Maid">Send to Bridesmaids</button>
+                                        <button onclick="sendTaskToEntourage(this)" th:data-task-id="${task.id}" data-entourage="Groomsman">Send to Groomsmen</button>
+                                        <button onclick="sendTaskToEntourage(this)" th:data-task-id="${task.id}" data-entourage="Maid of Honor">Send to Maid of Honor</button>
+                                        <button onclick="sendTaskToEntourage(this)" th:data-task-id="${task.id}" data-entourage="Matron of Honor">Send to Matron of Honor</button>
+                                        <button onclick="sendTaskToEntourage(this)" th:data-task-id="${task.id}" data-entourage="Father of the Bride">Send to Parents of the Bride</button>
+                                        <button onclick="sendTaskToEntourage(this)" th:data-task-id="${task.id}" data-entourage="Father of the Groom">Send to Parents of the Groom</button>
+                                        <button onclick="sendTaskToEntourage(this)" th:data-task-id="${task.id}" data-entourage="Flower Girl">Send to Flower Girls</button>
+                                        <button onclick="sendTaskToEntourage(this)" th:data-task-id="${task.id}" data-entourage="Ring Bearer">Send to Ring Bearers</button>
+                                    </div>
+                                </div>
+                                <button class="edit-btn" th:data-task-id="${task.id}">Edit</button>
+                                <button class="delete-btn" th:data-task-id="${task.id}">Delete</button>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </section>
+
+            <!-- Itinerary Section -->
+            <section class="itinerary-section">
+                <div class="section-header">
+                    <h2>Wedding Day Itinerary</h2>
+                    <div class="itinerary-actions-top">
+                        <button class="add-button" onclick="openItineraryModal()">Add Event</button>
+                        <div class="email-dropdown">
+                            <button class="email-btn">Email Itinerary</button>
+                            <div class="email-dropdown-content">
+                                <button onclick="sendItineraryToEntourage(this)" data-entourage="ALL">Send to All Entourage</button>
+                                <button onclick="sendItineraryToEntourage(this)" data-entourage="Bride's Maid">Send to Bridesmaids</button>
+                                <button onclick="sendItineraryToEntourage(this)" data-entourage="Groomsman">Send to Groomsmen</button>
+                                <button onclick="sendItineraryToEntourage(this)" data-entourage="Maid of Honor">Send to Maid of Honor</button>
+                                <button onclick="sendItineraryToEntourage(this)" data-entourage="Matron of Honor">Send to Matron of Honor</button>
+                                <button onclick="sendItineraryToEntourage(this)" data-entourage="Father of the Bride">Send to Parents of the Bride</button>
+                                <button onclick="sendItineraryToEntourage(this)" data-entourage="Father of the Groom">Send to Parents of the Groom</button>
+                                <button onclick="sendItineraryToEntourage(this)" data-entourage="Flower Girl">Send to Flower Girls</button>
+                                <button onclick="sendItineraryToEntourage(this)" data-entourage="Ring Bearer">Send to Ring Bearers</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="itinerary-list">
+                    <ul>
+                        <li th:each="item : ${itinerary}" class="itinerary-item">
+                            <div class="time">
+                                <span th:text="${item.startTime}"></span> - 
+                                <span th:text="${item.endTime}"></span>
+                            </div>
+                            <div class="event-details">
+                                <h4 th:text="${item.title}"></h4>
+                                <p th:text="${item.description}"></p>
+                                <p class="location" th:text="${item.location}"></p>
+                            </div>
+                            <div class="itinerary-actions">
+                                <button class="edit-btn" th:data-item-id="${item.id}">Edit</button>
+                                <button class="delete-btn" th:data-item-id="${item.id}">Delete</button>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <!-- Budget Modal -->
+    <div id="budgetModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeBudgetModal()">&times;</span>
+            <h2>Add Expense</h2>
+            <form id="budgetForm" th:action="@{/budget/add}" method="post" class="modal-form">
+                <select name="categoryId" required>
+                    <option value="">Select Category</option>
+                    <option th:each="category : ${budgetCategories}" 
+                            th:value="${category.id}" 
+                            th:text="${category.name}">Category</option>
+                </select>
+                <input type="text" name="name" placeholder="Expense name" required>
+                <input type="number" name="amount" placeholder="Amount" step="0.01" required>
+                <input type="date" name="date" required>
+                <textarea name="description" placeholder="Description"></textarea>
+                <button type="submit">Add Expense</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Budget Category Modal -->
+    <div id="budgetCategoryModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeBudgetCategoryModal()">&times;</span>
+            <h2>Add Budget Category</h2>
+            <form id="budgetCategoryForm" th:action="@{/budget/category/add}" method="post" class="modal-form">
+                <input type="text" name="name" placeholder="Category name" required>
+                <input type="number" name="budget" placeholder="Budget amount" step="0.01" required>
+                <textarea name="description" placeholder="Description"></textarea>
+                <button type="submit">Add Category</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Task Modal -->
+    <div id="taskModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeTaskModal()">&times;</span>
+            <h2>Add New Task</h2>
+            <form id="taskForm" th:action="@{/task/add}" method="post" class="modal-form">
+                <input type="text" name="title" placeholder="Task title" required>
+                <textarea name="description" placeholder="Task description"></textarea>
+                <input type="date" name="dueDate" required>
+                <select name="priority" required>
+                    <option value="HIGH">High Priority</option>
+                    <option value="MEDIUM">Medium Priority</option>
+                    <option value="LOW">Low Priority</option>
+                </select>
+                <button type="submit">Add Task</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Itinerary Modal -->
+    <div id="itineraryModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeItineraryModal()">&times;</span>
+            <h2>Add New Event</h2>
+            <form id="itineraryForm" th:action="@{/itinerary/add}" method="post" class="modal-form">
+                <input type="text" name="title" placeholder="Event title" required>
+                <textarea name="description" placeholder="Event description"></textarea>
+                <input type="time" name="startTime" required>
+                <input type="time" name="endTime" required>
+                <input type="text" name="location" placeholder="Location">
+                <button type="submit">Add Event</button>
+            </form>
+        </div>
+    </div>
+
+    <script th:src="@{/js/planning.js}"></script>
+    <script>
+        function sendTaskToEntourage(button) {
+            if (button.classList.contains('loading')) {
+                return;
+            }
+
+            button.classList.add('loading');
+            const originalText = button.textContent;
+            button.textContent = 'Sending...';
+
+            const taskId = button.getAttribute('data-task-id');
+            const entourageType = button.getAttribute('data-entourage');
+            const projectId = document.querySelector('input[name="projectId"]').value;
+
+            fetch(`/task/${taskId}/send-email`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `entourageType=${encodeURIComponent(entourageType)}`
+            })
+            .then(response => response.text())
+            .then(result => {
+                alert(result);
+            })
+            .catch(error => {
+                alert('Error sending task email: ' + error);
+            })
+            .finally(() => {
+                button.classList.remove('loading');
+                button.textContent = originalText;
+            });
+        }
+
+        function sendItineraryToEntourage(button) {
+            if (button.classList.contains('loading')) {
+                return;
+            }
+
+            button.classList.add('loading');
+            const originalText = button.textContent;
+            button.textContent = 'Sending...';
+
+            const entourageType = button.getAttribute('data-entourage');
+
+            fetch(`/itinerary/send-email`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `entourageType=${encodeURIComponent(entourageType)}`
+            })
+            .then(response => response.text())
+            .then(result => {
+                alert(result);
+            })
+            .catch(error => {
+                alert('Error sending itinerary email: ' + error);
+            })
+            .finally(() => {
+                button.classList.remove('loading');
+                button.textContent = originalText;
+            });
+        }
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(event) {
+            const dropdowns = document.querySelectorAll('.email-dropdown');
+            dropdowns.forEach(dropdown => {
+                if (!dropdown.contains(event.target)) {
+                    dropdown.querySelector('.email-dropdown-content').style.display = 'none';
+                }
+            });
+        });
+
+        // Toggle dropdown
+        document.querySelectorAll('.email-btn').forEach(button => {
+            button.addEventListener('click', function(event) {
+                event.stopPropagation();
+                const dropdown = this.nextElementSibling;
+                dropdown.style.display = dropdown.style.display === 'block' ? 'none' : 'block';
+            });
+        });
+
+        function openBudgetModal() {
+            document.getElementById('budgetModal').style.display = 'block';
+        }
+
+        function closeBudgetModal() {
+            document.getElementById('budgetModal').style.display = 'none';
+        }
+
+        function openBudgetCategoryModal() {
+            document.getElementById('budgetCategoryModal').style.display = 'block';
+        }
+
+        function closeBudgetCategoryModal() {
+            document.getElementById('budgetCategoryModal').style.display = 'none';
+        }
+
+        function openTaskModal() {
+            document.getElementById('taskModal').style.display = 'block';
+        }
+
+        function closeTaskModal() {
+            document.getElementById('taskModal').style.display = 'none';
+        }
+
+        function openItineraryModal() {
+            document.getElementById('itineraryModal').style.display = 'block';
+        }
+
+        function closeItineraryModal() {
+            document.getElementById('itineraryModal').style.display = 'none';
+        }
+
+        // Close modals when clicking outside
+        window.onclick = function(event) {
+            if (event.target.className === 'modal') {
+                event.target.style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html> 

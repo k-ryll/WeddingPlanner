@@ -17,10 +17,9 @@
     <img src="/images/logo.svg" class="logo" alt="logo">
     <div>
         <ul>
-            <li><a th:href="@{/home}">Home</a></li>
+            <li class="active"><a th:href="@{/home}">Home</a></li>
             <li><a th:href="@{/guests}">Guests</a></li>
-            <li>Planning</li>
-            <li>Vendors</li>
+            <li><a th:href="@{/planning}">Planning</a></li>
             
         </ul>
         <div class="user-menu">
@@ -89,14 +88,6 @@
                                 <span th:if="${task.dueDate}" th:text="${#temporals.format(task.dueDate, 'MMM dd')}"></span>
                             </li>
                             <li th:if="${#lists.isEmpty(tasks)}">No upcoming tasks</li>
-                        </ul>
-                    </div>
-    
-                    <div>
-                        <h2>Vendor List</h2>
-                        <ul>
-                            <li>Catering</li>
-                            <li>Venue</li>
                         </ul>
                     </div>
     
