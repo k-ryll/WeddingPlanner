@@ -17,26 +17,36 @@ public class SecurityConfig {
 	        .csrf(csrf -> csrf.disable()) 
 	        .authorizeHttpRequests(auth -> auth
 	            .requestMatchers(
-	                "/user/signup", "/index", "/user/save",
+	                "/", "/index", "/user/signup", "/user/save",
 	                "/user/resetpassword", "/user/reset", "/user/reset-password",
-	                "/verify", "/user/login", "/home", "/guests", "/guests/**", "/user/validate", "/project/**", 
-	                "/admin/login", "/admin/**","/project/**","/guest/**", "/rsvp-success", "/styles/**", "/js/**", "/images/**",
-	                "/planning", "/budget/add", "/budget/category/add", "/task/add", "/itinerary/add", 
-	                "/task/*/send-email", "/itinerary/send-email", "/seatplan", "/vendors"
+	                "/verify", "/user/login", "/user/validate",
+	                "/admin/login", "/admin/validate",
+	                "/styles/**", "/js/**", "/images/**",
+	                "/error", "/403"
 	            ).permitAll()
-	            
+	            .requestMatchers("/admin/**").hasRole("ADMIN")
 	            .anyRequest().authenticated()
 	        )
 				
 				 .formLogin(login -> login .loginPage("/user/login")
+				 .loginProcessingUrl("/user/validate")
 				 .defaultSuccessUrl("/home", true) .failureUrl("/user/login?error=true")
 				 .permitAll() )
 				 
+	        .formLogin(login -> login
+	            .loginPage("/admin/login")
+	            .loginProcessingUrl("/admin/validate")
+	            .defaultSuccessUrl("/admin/home", true)
+	            .failureUrl("/admin/login?error=true")
+	            .permitAll()
+	        )
 	        .logout(logout -> logout
 	            .logoutRequestMatcher(new AntPathRequestMatcher("/logout"))
 	            .logoutSuccessUrl("/user/login")
 	            .invalidateHttpSession(true)
+	            .clearAuthentication(true)
 	            .deleteCookies("JSESSIONID")
+	            .permitAll()
 	        )
 	        .exceptionHandling(exception -> exception
 	            .accessDeniedPage("/403")

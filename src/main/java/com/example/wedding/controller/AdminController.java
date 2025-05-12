@@ -3,6 +3,10 @@ package com.example.wedding.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,6 +20,7 @@ import com.example.wedding.service.ProjectService;
 import com.example.wedding.service.UserService;
 
 import jakarta.servlet.http.HttpSession;
+import java.util.Collections;
 
 @Controller
 public class AdminController {
@@ -37,7 +42,17 @@ public class AdminController {
             RedirectAttributes redi, HttpSession session) {
         // Admin authentication without database user
         if(email.equals("admin") && password.equals("password")) {
-            session.setAttribute("isAdmin", true);
+            // Create admin authentication
+            Authentication auth = new UsernamePasswordAuthenticationToken(
+                email,
+                null,
+                Collections.singletonList(new SimpleGrantedAuthority("ROLE_ADMIN"))
+            );
+            
+            // Set the authentication in SecurityContext
+            SecurityContextHolder.getContext().setAuthentication(auth);
+            session.setAttribute("SPRING_SECURITY_CONTEXT", SecurityContextHolder.getContext());
+            
             return "redirect:/admin/home";
         }
         redi.addFlashAttribute("error", "Invalid admin credentials.");

@@ -8,6 +8,9 @@ com\example\wedding\WeddingPlannerApplication.class
 com\example\wedding\model\WeddingTable.class
 com\example\wedding\model\ItineraryItem.class
 com\example\wedding\service\SeatPlanService.class
+com\example\wedding\model\Expense.class
+com\example\wedding\model\BudgetCategory.class
+com\example\wedding\repository\BudgetCategoryRepository.class
 com\example\wedding\repository\VerificationTokenRepository.class
 com\example\wedding\repository\TaskRepository.class
 com\example\wedding\repository\UserRepository.class
@@ -23,10 +26,12 @@ com\example\wedding\model\ResetPasswordToken.class
 com\example\wedding\service\GuestService.class
 com\example\wedding\repository\GuestRepository.class
 com\example\wedding\service\ProjectService.class
+com\example\wedding\repository\ExpenseRepository.class
 com\example\wedding\controller\UserController.class
 com\example\wedding\config\SecurityConfig.class
 com\example\wedding\controller\SeatPlanController.class
 com\example\wedding\model\Guest.class
+com\example\wedding\service\BudgetService.class
 com\example\wedding\service\VerificationService.class
 com\example\wedding\model\SeatPlan.class
 com\example\wedding\service\DuplicateEmailException.class

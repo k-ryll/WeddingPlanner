@@ -161,8 +161,8 @@ public class UserController {
 
     @GetMapping("/user/login")
     public String showLoginPage(Model model) {
-    	model.addAttribute("userDto", new UserDto());  
-        return "Login"; 
+        model.addAttribute("userDto", new UserDto());  
+        return "login";
     }
 
     @GetMapping("/user/signup")
@@ -178,35 +178,30 @@ public class UserController {
             RedirectAttributes redi, 
             HttpSession session) {
         
-        System.out.println("Email: " + email);
         User user = service.findByEmail(email);
         
-        if (user != null) {
-            System.out.println("User found: " + user.getEmail());
-        } else {
-            System.out.println("User not found!");
-        }
-        
         if (user != null && BCrypt.checkpw(password, user.getPassword()) && user.isVerified()) {
-            
+            // Set session attribute
             session.setAttribute("loggedUser", user);
             
-
+            // Create authentication token
             Authentication auth = new UsernamePasswordAuthenticationToken(
-                    user, 
-                    null, 
+                    user.getEmail(), // Use email as principal
+                    null, // No credentials needed after authentication
                     Collections.singletonList(new SimpleGrantedAuthority("ROLE_USER"))
             );
             
-
+            // Set authentication in SecurityContext
             SecurityContextHolder.getContext().setAuthentication(auth);
-            
-      
             session.setAttribute("SPRING_SECURITY_CONTEXT", SecurityContextHolder.getContext());
-         
+            
             return "redirect:/home";
         } else {
-            redi.addFlashAttribute("error", "Invalid email or password.");
+            String errorMessage = "Invalid email or password.";
+            if (user != null && !user.isVerified()) {
+                errorMessage = "Please verify your email before logging in.";
+            }
+            redi.addFlashAttribute("error", errorMessage);
             return "redirect:/user/login";
         }
     }
