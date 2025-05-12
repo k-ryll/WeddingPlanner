@@ -145,6 +145,7 @@
 
 .email-dropdown {
     position: relative;
+
 }
 
 .email-btn {
@@ -156,6 +157,7 @@
     cursor: pointer;
     font-weight: 500;
     transition: background-color 0.2s ease;
+    z-index: 10;
 }
 
 .email-btn:hover {
@@ -164,13 +166,13 @@
 
 .email-dropdown-content {
     display: none;
-    position: absolute;
+    position:absolute;
     right: 0;
     background: white;
     min-width: 200px;
     box-shadow: 0 4px 12px rgba(129, 66, 86, 0.15);
     border-radius: 8px;
-    z-index: 1000;
+    z-index: 10000;
     border: 1px solid #f0e6e9;
 }
 
@@ -184,6 +186,7 @@
     cursor: pointer;
     color: #814256;
     transition: background-color 0.2s ease;
+    z-index: 10000;
 }
 
 .email-dropdown-content button:hover {

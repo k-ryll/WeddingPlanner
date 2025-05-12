@@ -79,6 +79,15 @@ public class GuestService {
 	}
 
     public Guest findByEmail(String email) {
+        List<Guest> guests = repo.findByEmail(email);
+        if (guests.isEmpty()) {
+            return null;
+        }
+        // If multiple guests exist, return the most recently added one
+        return guests.get(guests.size() - 1);
+    }
+
+    public List<Guest> findAllByEmail(String email) {
         return repo.findByEmail(email);
     }
 

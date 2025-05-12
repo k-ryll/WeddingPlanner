@@ -21,9 +21,13 @@ import com.example.wedding.service.EmailService;
 
 import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpSession;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Controller
 public class GuestController {
+	
+	private static final Logger logger = LoggerFactory.getLogger(GuestController.class);
 	
 	@Autowired
 	private GuestService service;
@@ -77,8 +81,11 @@ public class GuestController {
 	        guest.setAddedBy(loggedUser);
 	        guest.setProjectId(userProject);
 	        
-	        // Set default RSVP status
-	        guest.setRsvp("Pending");
+	        // Set default RSVP status and remarks for non-admin users
+	        if (!Boolean.TRUE.equals(isAdmin)) {
+	            guest.setRsvp("Pending");
+	            guest.setRemarks(null);
+	        }
 
 	        // Save the guest
 	        service.save(guest);
@@ -97,7 +104,19 @@ public class GuestController {
         try {
             Guest guest = service.findByEmail(email);
             if (guest == null) {
-                return ResponseEntity.badRequest().body("Guest not found");
+                return ResponseEntity.badRequest()
+                    .body("{\"success\": false, \"error\": \"Guest not found\"}");
+            }
+            
+            if (guest.getProjectId() == null) {
+                return ResponseEntity.badRequest()
+                    .body("{\"success\": false, \"error\": \"Guest is not associated with any project\"}");
+            }
+            
+            // Log warning if multiple guests with same email exist
+            List<Guest> allGuestsWithEmail = service.findAllByEmail(email);
+            if (allGuestsWithEmail.size() > 1) {
+                logger.warn("Multiple guests found with email {}: {}", email, allGuestsWithEmail.size());
             }
             
             emailService.sendInvitationEmail(
@@ -106,9 +125,15 @@ public class GuestController {
                 guest.getProjectId().getProjectName()
             );
             
-            return ResponseEntity.ok("Invitation sent successfully");
+            return ResponseEntity.ok("{\"success\": true, \"message\": \"Invitation sent successfully\"}");
         } catch (MessagingException e) {
-            return ResponseEntity.internalServerError().body("Failed to send invitation: " + e.getMessage());
+            logger.error("Failed to send invitation to {}: {}", email, e.getMessage(), e);
+            return ResponseEntity.internalServerError()
+                .body("{\"success\": false, \"error\": \"Failed to send invitation: " + e.getMessage().replace("\"", "'") + "\"}");
+        } catch (Exception e) {
+            logger.error("Unexpected error while sending invitation to {}: {}", email, e.getMessage(), e);
+            return ResponseEntity.internalServerError()
+                .body("{\"success\": false, \"error\": \"Unexpected error: " + e.getMessage().replace("\"", "'") + "\"}");
         }
     }
 

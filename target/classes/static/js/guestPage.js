@@ -170,6 +170,46 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     });
 
+    // Handle email button clicks
+    document.querySelectorAll(".email-btn").forEach(button => {
+        button.addEventListener("click", (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            const email = button.getAttribute("data-guest-email");
+            
+            // Show loading state
+            const originalIcon = button.innerHTML;
+            button.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            button.disabled = true;
+            
+            // Send invitation
+            fetch('/guest/send-invitation', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `email=${encodeURIComponent(email)}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Invitation sent successfully!');
+                } else {
+                    alert('Failed to send invitation: ' + (data.error || 'Unknown error'));
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Failed to send invitation. Please try again.');
+            })
+            .finally(() => {
+                // Restore button state
+                button.innerHTML = originalIcon;
+                button.disabled = false;
+            });
+        });
+    });
+
     // Handle form submission
     guestForm.addEventListener("submit", (e) => {
         e.preventDefault();
@@ -311,33 +351,6 @@ document.addEventListener("DOMContentLoaded", function () {
             console.log("Submitting new guest to: " + form.action);
             form.submit();
         }
-    });
-
-    // Email button click handler
-    document.querySelectorAll('.email-btn').forEach(button => {
-        button.addEventListener('click', async function() {
-            const guestEmail = this.getAttribute('data-guest-email');
-            
-            try {
-                const response = await fetch('/guest/send-invitation', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                    },
-                    body: `email=${encodeURIComponent(guestEmail)}`
-                });
-
-                const result = await response.text();
-                
-                if (response.ok) {
-                    alert('Invitation sent successfully!');
-                } else {
-                    alert('Failed to send invitation: ' + result);
-                }
-            } catch (error) {
-                alert('Error sending invitation: ' + error.message);
-            }
-        });
     });
 
     // Search functionality

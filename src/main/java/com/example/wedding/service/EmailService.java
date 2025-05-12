@@ -68,36 +68,48 @@ public class EmailService {
     }
 
     public void sendInvitationEmail(String to, String guestName, String projectName) throws MessagingException {
-        MimeMessage message = mailSender.createMimeMessage();
-        MimeMessageHelper helper = new MimeMessageHelper(message, true);
-        
-        helper.setTo(to);
-        helper.setSubject("Wedding Invitation - " + projectName);
-        
-        String htmlContent = String.format("""
-            <html>
-            <body style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;'>
-                <h2 style='color: #814256; text-align: center;'>Wedding Invitation</h2>
-                <p>Dear %s,</p>
-                <p>You have been invited to the wedding of %s. </p>
-                <p>Please click one of the following buttons to respond to the invitation:</p>
-                <div style='text-align: center; margin: 30px 0;'>
-                    <a href='http://localhost:8080/guest/rsvp?email=%s&response=accept' 
-                       style='background-color: #4CAF50; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; margin-right: 10px;'>
-                        Accept
-                    </a>
-                    <a href='http://localhost:8080/guest/rsvp?email=%s&response=decline' 
-                       style='background-color: #f44336; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;'>
-                        Decline
-                    </a>
-                </div>
-                <p style='color: #666; font-size: 14px;'>If you have any questions, please don't hesitate to contact us.</p>
-            </body>
-            </html>
-        """, guestName, projectName, to, to);
-        
-        helper.setText(htmlContent, true);
-        mailSender.send(message);
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true);
+            
+            helper.setTo(to);
+            helper.setSubject("Wedding Invitation - " + projectName);
+            
+            String htmlContent = String.format("""
+                <html>
+                <body style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;'>
+                    <h2 style='color: #814256; text-align: center;'>Wedding Invitation</h2>
+                    <p>Dear %s,</p>
+                    <p>You have been invited to the wedding of %s. </p>
+                    <p>Please click one of the following buttons to respond to the invitation:</p>
+                    <div style='text-align: center; margin: 30px 0;'>
+                        <a href='http://localhost:8080/guest/rsvp?email=%s&response=accept' 
+                           style='background-color: #4CAF50; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; margin-right: 10px;'>
+                            Accept
+                        </a>
+                        <a href='http://localhost:8080/guest/rsvp?email=%s&response=decline' 
+                           style='background-color: #f44336; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;'>
+                            Decline
+                        </a>
+                    </div>
+                    <p style='color: #666; font-size: 14px;'>If you have any questions, please don't hesitate to contact us.</p>
+                </body>
+                </html>
+            """, guestName, projectName, to, to);
+            
+            helper.setText(htmlContent, true);
+            
+            logger.info("Attempting to send invitation email to: {}", to);
+            mailSender.send(message);
+            logger.info("Successfully sent invitation email to: {}", to);
+            
+        } catch (MailException e) {
+            logger.error("MailException while sending invitation to {}: {}", to, e.getMessage(), e);
+            throw new MessagingException("Failed to send email: " + e.getMessage(), e);
+        } catch (Exception e) {
+            logger.error("Unexpected error while sending invitation to {}: {}", to, e.getMessage(), e);
+            throw new MessagingException("Unexpected error while sending email: " + e.getMessage(), e);
+        }
     }
 
     public void sendBulkInvitations(List<Guest> guests, String projectName) {

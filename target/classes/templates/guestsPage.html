@@ -154,24 +154,6 @@
                         <option value="Mother of the Groom">Mother of the Groom</option>
                     </select>
                 </div>
-                <div>
-                    <label for="rsvp">RSVP Status</label>
-                    <select name="rsvp" id="rsvp" th:field="*{rsvp}" required>
-                        <option value="Pending" selected>Pending</option>
-                        <option value="Accepted">Accepted</option>
-                        <option value="Declined">Declined</option>
-                    </select>
-                </div>
-                <div>
-                    <label for="remarks">Additional Notes</label>
-                    <select name="remarks" id="remarks" th:field="*{remarks}">
-                        <option value="">Select Remarks</option>
-                        <option value="Accepted via call">Accepted via call</option>
-                        <option value="Accepted via email">Accepted via email</option>
-                        <option value="Declined via call">Declined via call</option>
-                        <option value="Declined via email">Declined via email</option>
-                    </select>
-                </div>
                 <div class="form-actions">
                     <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
                     <button type="submit" class="btn btn-primary">Add Guest</button>
