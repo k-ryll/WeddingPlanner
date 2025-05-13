@@ -54,6 +54,17 @@ public class AdminController {
         return "adminDashboard";  
     }
 
+    @GetMapping("/admin/users")
+    public String showAdminUsers(Model model, HttpSession session) {
+        // Basic check if admin is logged in (improve security as needed)
+        if (session.getAttribute("isAdmin") == null || !(Boolean)session.getAttribute("isAdmin")) {
+            return "redirect:/admin/login";
+        }
+        List<User> users = userService.findAllUsers(); // Assuming userService has a method to find all users
+        model.addAttribute("users", users);
+        return "adminUsers";
+    }
+
     @PostMapping("/project/create")
     public String createProject(
         @RequestParam String projectName,

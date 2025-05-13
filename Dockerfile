@@ -1,13 +1,20 @@
-# Build stage
-FROM maven:3.8.4-openjdk-17-slim AS build
+# Stage 1: Build the application JAR
+FROM maven:3.8-openjdk-17-slim AS build
 WORKDIR /app
-COPY pom.xml .
+# Copy only necessary files for build
+COPY pom.xml ./
+# COPY .mvn/ .mvn
+# COPY mvnw pom.xml ./
+# Ensure mvnw is executable
+# RUN chmod +x mvnw
+# RUN ./mvnw dependency:go-offline -B
 COPY src ./src
-RUN mvn clean package -DskipTests
+# Use system mvn command provided by the base image
+RUN mvn package -DskipTests -B
 
-# Run stage
-FROM openjdk:17-slim
+# Stage 2: Create the final lightweight image
+FROM openjdk:17-jdk-slim
 WORKDIR /app
-COPY --from=build /app/target/*.jar app.jar
+COPY --from=build /app/target/*.jar application.jar
 EXPOSE 8080
-ENTRYPOINT ["java", "-jar", "app.jar"] 
+ENTRYPOINT ["java", "-jar", "application.jar"] 

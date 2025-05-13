@@ -17,8 +17,9 @@
         <ul>
             <li> <a th:href="@{/home}">Home</a> </li>
             <li class="active"><a th:href="@{/guests}">Guests</a></li>
-            <li>Planning</li>
-            <li>Vendors</li>
+            
+            <li><a th:href="@{/planning}">Planning</a></li>
+            <li><a th:href="@{/seatplan}">Seat Plan</a></li>
         </ul>
         <div class="user-menu">
             <i class="fa-regular fa-circle-user user-icon"></i>
@@ -56,16 +57,6 @@
     <div class="table-container" style="overflow-x:auto;">
         <div class="table-header">
             <h2>Guest List</h2>
-            <div class="table-actions">
-                <button class="btn btn-secondary" id="exportBtn">
-                    <i class="fas fa-download"></i>
-                    Export
-                </button>
-                <button class="btn btn-secondary" id="printBtn">
-                    <i class="fas fa-print"></i>
-                    Print
-                </button>
-            </div>
         </div>
         <p th:if="${message}" th:text="${message}" style="color: green;"></p>
         <p th:if="${error}" th:text="${error}" style="color: red;"></p>

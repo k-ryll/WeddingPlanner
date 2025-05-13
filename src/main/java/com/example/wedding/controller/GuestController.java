@@ -112,6 +112,12 @@ public class GuestController {
                 return ResponseEntity.badRequest()
                     .body("{\"success\": false, \"error\": \"Guest is not associated with any project\"}");
             }
+
+            // Check if guest has already responded
+            if ("Accepted".equals(guest.getRsvp()) || "Declined".equals(guest.getRsvp())) {
+                return ResponseEntity.badRequest()
+                    .body("{\"success\": false, \"error\": \"Guest has already responded to the invitation\"}");
+            }
             
             // Log warning if multiple guests with same email exist
             List<Guest> allGuestsWithEmail = service.findAllByEmail(email);
@@ -269,15 +275,26 @@ public class GuestController {
             return "redirect:/guests";
         }
 
-        List<Guest> guests = service.findByUser(loggedUser);
-        if (guests.isEmpty()) {
+        List<Guest> allGuests = service.findByUser(loggedUser);
+        if (allGuests.isEmpty()) {
             redirectAttributes.addFlashAttribute("error", "No guests found to send invitations to.");
             return "redirect:/guests";
         }
 
+        // Filter out guests who have already responded
+        List<Guest> pendingGuests = allGuests.stream()
+            .filter(guest -> !"Accepted".equals(guest.getRsvp()) && !"Declined".equals(guest.getRsvp()))
+            .toList();
+
+        if (pendingGuests.isEmpty()) {
+            redirectAttributes.addFlashAttribute("error", "No pending guests found to send invitations to.");
+            return "redirect:/guests";
+        }
+
         try {
-            emailService.sendBulkInvitations(guests, userProject.getProjectName());
-            redirectAttributes.addFlashAttribute("message", "Invitations sent successfully to all guests!");
+            emailService.sendBulkInvitations(pendingGuests, userProject.getProjectName());
+            redirectAttributes.addFlashAttribute("message", 
+                String.format("Invitations sent successfully to %d pending guests!", pendingGuests.size()));
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "Failed to send some invitations: " + e.getMessage());
         }

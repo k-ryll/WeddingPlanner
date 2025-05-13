@@ -496,3 +496,75 @@ select {
     border-left: 1px solid #eee;
     border-top: 1px solid #eee;
 }
+
+/* User List Table Styling */
+.user-list {
+    margin-top: 2rem;
+    overflow-x: auto; /* Add scroll for smaller screens */
+}
+
+.user-list table {
+    width: 100%;
+    border-collapse: collapse; /* Remove default spacing between cells */
+    margin-top: 1rem;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    background-color: #fff;
+    border-radius: 8px;
+    overflow: hidden; /* Ensures border-radius is applied to table */
+}
+
+.user-list th,
+.user-list td {
+    padding: 12px 15px; /* Add padding */
+    text-align: left; /* Align text to the left */
+    border-bottom: 1px solid #e0e0e0; /* Add subtle separators */
+}
+
+.user-list th {
+    background-color: #f8f9fa; /* Light grey background for headers */
+    font-weight: 600; /* Make header text bolder */
+    color: #495057;
+    text-transform: uppercase;
+    font-size: 0.85em;
+}
+
+.user-list tr:last-child td {
+    border-bottom: none; /* Remove border from last row */
+}
+
+.user-list tr:hover {
+    background-color: #f1f1f1; /* Highlight row on hover */
+}
+
+/* Style action buttons */
+.user-list td button {
+    padding: 5px 10px;
+    margin-right: 5px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9em;
+}
+
+.user-list .edit-btn {
+    background-color: #ffc107; /* Yellow */
+    color: #333;
+}
+.user-list .edit-btn:hover {
+    background-color: #e0a800;
+}
+
+
+.user-list .delete-btn {
+    background-color: #dc3545; /* Red */
+    color: white;
+}
+.user-list .delete-btn:hover {
+    background-color: #c82333;
+}
+
+.user-list .edit-btn:disabled,
+.user-list .delete-btn:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+}

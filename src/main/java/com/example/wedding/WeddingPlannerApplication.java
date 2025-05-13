@@ -1,3 +1,4 @@
+
 package com.example.wedding;
 
 import org.springframework.boot.SpringApplication;

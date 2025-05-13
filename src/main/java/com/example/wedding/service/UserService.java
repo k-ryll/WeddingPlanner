@@ -52,6 +52,10 @@ public class UserService {
             .collect(Collectors.toList());
     }
 
+    public List<User> findAllUsers() {
+        return repo.findAll();
+    }
+
     public String save(User user) throws DuplicateEmailException {
         if (repo.findByEmail(user.getEmail()) != null) {
             throw new DuplicateEmailException("An account with this email already exists.");
