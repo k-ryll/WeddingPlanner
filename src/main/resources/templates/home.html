@@ -65,11 +65,11 @@
                     </div>
                     <div>
                         <label for="project-name">Project Name:</label>
-                        <input type="text" name="project-name" th:value="${project.projectName}" readonly>
+                        <input type="text" name="project-name" th:value="${project != null ? project.projectName : ''}" readonly>
                     </div>
                     <div>
                         <label for="status">Status:</label>
-                        <input type="text" name="status" th:value="${project.status}" readonly>
+                        <input type="text" name="status" th:value="${project != null ? project.status : ''}" readonly>
                     </div>
                 </form>
                 <div class="guest-list">
