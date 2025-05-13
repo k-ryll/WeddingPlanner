@@ -5,6 +5,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
+import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 @Configuration
@@ -19,7 +21,8 @@ public class SecurityConfig {
 	            .requestMatchers(
 	                "/user/signup", "/index", "/user/save",
 	                "/user/resetpassword", "/user/reset", "/user/reset-password",
-	                "/verify", "/user/login", "/home", "/guests", "/guests/**", "/user/validate", "/project/**", 
+	                "/verify", "/user/login**",
+	                "/home", "/guests", "/guests/**", "/user/validate", "/project/**", 
 	                "/admin/login", "/admin/**","/project/**","/guest/**", "/rsvp-success", "/styles/**", "/js/**", "/images/**",
 	                "/planning", "/budget/add", "/budget/category/add", "/task/add", "/itinerary/add", 
 	                "/task/*/send-email", "/itinerary/send-email", "/seatplan", "/vendors"
@@ -29,7 +32,8 @@ public class SecurityConfig {
 	        )
 				
 				 .formLogin(login -> login .loginPage("/user/login")
-				 .defaultSuccessUrl("/home", true) .failureUrl("/user/login?error=true")
+				 .successHandler(successHandler())
+				 .failureUrl("/user/login?error=true")
 				 .permitAll() )
 				 
 	        .logout(logout -> logout
@@ -43,6 +47,14 @@ public class SecurityConfig {
 	        );
 
 	    return http.build();
+	}
+
+	@Bean
+	public AuthenticationSuccessHandler successHandler() {
+	    SimpleUrlAuthenticationSuccessHandler handler = new SimpleUrlAuthenticationSuccessHandler();
+	    handler.setDefaultTargetUrl("/home");
+	    handler.setAlwaysUseDefaultTargetUrl(true);
+	    return handler;
 	}
 
 

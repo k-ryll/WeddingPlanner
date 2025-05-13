@@ -81,8 +81,27 @@ public class UserController {
     }
 
     @GetMapping("/home")
-    public String home(@SessionAttribute(name = "loggedUser", required = false) User user, Model model) {
+    public String home(@AuthenticationPrincipal UserDetails userDetails, Model model, HttpSession session) {
+        // Try to get User from SecurityContextHolder first
+        User user = null;
+        if (userDetails instanceof User) { // Check if the principal is indeed your User class
+            user = (User) userDetails;
+        } else if (userDetails != null) {
+             // If principal is not User type, maybe try fetching from DB using username?
+             // Or maybe try the session attribute as a fallback? (less ideal)
+             user = service.findByEmail(userDetails.getUsername());
+             // Optionally, ensure the session attribute is also consistent
+             // session.setAttribute("loggedUser", user); 
+        } else {
+             // Fallback: Try getting from session directly ONLY if AuthenticationPrincipal is null
+             Object loggedUserAttr = session.getAttribute("loggedUser");
+             if (loggedUserAttr instanceof User) {
+                user = (User) loggedUserAttr;
+             }
+        }
+
         if (user == null) {
+            // If still null after checking principal and session, redirect to login
             return "redirect:/user/login";
         }
         
@@ -161,8 +180,8 @@ public class UserController {
 
     @GetMapping("/user/login")
     public String showLoginPage(Model model) {
-    	model.addAttribute("userDto", new UserDto());  
-        return "Login"; 
+        model.addAttribute("userDto", new UserDto());
+        return "login";
     }
 
     @GetMapping("/user/signup")
