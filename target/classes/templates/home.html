@@ -45,11 +45,11 @@
                     <h2>Essential Details</h2>
                     <div>
                         <label for="wife-name">Bride's Name:</label>
-                        <input type="text" name="wife-name" th:value="${project.bride.firstName + ' ' + project.bride.lastName}" readonly>
+                        <input type="text" name="wife-name" th:value="${project?.bride?.firstName != null ? project.bride.firstName + ' ' + project.bride.lastName : ''}" readonly>
                     </div>
                     <div>
                         <label for="groom-name">Groom's Name:</label>
-                        <input type="text" name="groom-name" th:value="${project.groom.firstName + ' ' + project.groom.lastName}" readonly>
+                        <input type="text" name="groom-name" th:value="${project?.groom?.firstName != null ? project.groom.firstName + ' ' + project.groom.lastName : ''}" readonly>
                     </div>
                     <div>
                         <label for="wedding-date">Wedding Date:</label>
