@@ -53,9 +53,9 @@
                     </div>
                     <div>
                         <label for="wedding-date">Wedding Date:</label>
-                        <input type="date" name="wedding-date" id="wedding-date" th:value="${#temporals.format(project.weddingDate, 'yyyy-MM-dd')}" readonly>
+                        <input type="date" name="wedding-date" id="wedding-date" th:value="${project != null ? #temporals.format(project.weddingDate, 'yyyy-MM-dd') : ''}" readonly>
                     </div>
-                    <div th:if="${project.organizer != null}">
+                    <div th:if="${project?.organizer != null}">
                         <label for="organizer">Wedding Organizer:</label>
                         <input type="text" name="organizer" th:value="${project.organizer.firstName + ' ' + project.organizer.lastName}" readonly>
                     </div>
