@@ -10,20 +10,23 @@
     <script src="https://kit.fontawesome.com/b80e3de11b.js"></script>
     <script th:src="@{/js/userMenu.js}"></script>
     <script th:inline="javascript">
-        const projectId = /*[[${project.id}]]*/ 0;
-        const seatPlanId = /*[[${seatPlan.id}]]*/ 0;
+        /*<![CDATA[*/
+        const projectId = /*[[${project?.id}]]*/ null;
+        const seatPlanId = /*[[${seatPlan?.id}]]*/ null;
+        /*]]>*/
     </script>
-    <script th:src="@{/js/seat-plan.js}"></script>
+    <!-- seat-plan.js is project specific, ensure it's also robust or loaded conditionally if necessary -->
+    <script th:if="${project != null && seatPlan != null}" th:src="@{/js/seat-plan.js}"></script>
 </head>
 <body>
     <header>
         <img src="/images/logo.svg" class="logo" alt="logo">
         <div>
             <ul>
-                <li ><a th:href="@{/project/{id}(id=${projectId})}">Home</a></li>
-                <li><a th:href="@{/project/{id}/guest(id=${projectId})}">Guests</a></li>
-                <li><a th:href="@{/project/{id}/planning(id=${projectId})}">Planning</a></li>
-                <li class="active"><a th:href="@{/project/{id}/seatplan(id=${projectId})}">Seat Plan</a></li>
+                <li ><a th:href="@{/project/{id}(id=${project?.id})}">Home</a></li>
+                <li><a th:href="@{/project/{id}/guest(id=${project?.id})}">Guests</a></li>
+                <li><a th:href="@{/project/{id}/planning(id=${project?.id})}">Planning</a></li>
+                <li class="active"><a th:href="@{/project/{id}/seatplan(id=${project?.id})}">Seat Plan</a></li>
                 <li><a href="/admin/home">Admin Page</a></li>
             </ul>
             <div class="user-menu">
@@ -38,46 +41,73 @@
         </div>
     </header>
     <div class="container">
-        <h1>Seat Plan for <span th:text="${project.projectName}"></span></h1>
-        
-        <div class="controls">
-            <button id="addTableBtn" class="btn btn-primary">Add Table</button>
-            <button id="saveBtn" class="btn btn-success">Save Layout</button>
+        <div th:if="${info}" class="info-message">
+            <p th:text="${info}"></p>
+        </div>
+        <div th:if="${error}" class="error-message"> <!-- From controller if project not found -->
+            <p th:text="${error}"></p>
         </div>
 
-        <div id="seatPlanArea" class="seat-plan-area">
-            <div th:each="table : ${seatPlan.tables}" 
-                 class="table" 
-                 th:data-id="${table.id}"
-                 th:style="'left: ' + ${table.positionX} + 'px; top: ' + ${table.positionY} + 'px;'">
-                <div class="table-header">
-                    <div class="table-name" th:text="${table.tableName}"></div>
-                    <div class="table-actions">
-                        <button class="table-action-btn edit-btn" th:data-id="${table.id}">
-                            <i class="fas fa-edit"></i>
-                        </button>
-                        <button class="table-action-btn delete-btn" th:data-id="${table.id}">
-                            <i class="fas fa-trash"></i>
-                        </button>
-                    </div>
+        <div th:if="${project == null and error == null}">
+             <p>No project selected or project not found.</p>
+        </div>
+
+        <div th:if="${project != null}">
+            <h1>Seat Plan for <span th:text="${project.projectName}">Project Name</span></h1>
+            
+            <div th:if="${seatPlan == null}">
+                <p>Seat plan data is not available for this project.</p>
+                <!-- Controller should now always create one, so this case is less likely -->
+            </div>
+
+            <div th:if="${seatPlan != null}">
+                <div class="controls">
+                    <button id="addTableBtn" class="btn btn-primary">Add Table</button>
+                    <button id="saveBtn" class="btn btn-success">Save Layout</button>
                 </div>
-                <div class="chair-count" th:text="${table.numberOfChairs} + ' chairs'"></div>
-                <div class="chairs-container">
-                    <div th:each="chair : ${table.chairs}"
-                         class="chair"
-                         th:classappend="${chair.guest != null} ? 'occupied' : ''"
-                         th:data-chair-id="${chair.id}"
-                         th:data-guest-name="${chair.guest?.name}"
-                         th:text="${chair.guest != null} ? ${#strings.substring(chair.guest.name, 0, 1) + #strings.substring(chair.guest.name, #strings.indexOf(chair.guest.name, ' ') + 1, #strings.indexOf(chair.guest.name, ' ') + 2)} : ''"
-                         onclick="openGuestAssignmentModal(this)">
+
+                <div id="seatPlanArea" class="seat-plan-area">
+                    <th:block th:if="${seatPlan.tables != null && !#lists.isEmpty(seatPlan.tables)}">
+                        <div th:each="table : ${seatPlan.tables}" 
+                             class="table" 
+                             th:data-id="${table.id}"
+                             th:style="'left: ' + ${table.positionX} + 'px; top: ' + ${table.positionY} + 'px;'">
+                            <div class="table-header">
+                                <div class="table-name" th:text="${table.tableName}">Table Name</div>
+                                <div class="table-actions">
+                                    <button class="table-action-btn edit-btn" th:data-id="${table.id}">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="table-action-btn delete-btn" th:data-id="${table.id}">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="chair-count" th:text="${table.numberOfChairs} + ' chairs'">0 chairs</div>
+                            <div class="chairs-container">
+                                <div th:each="chair : ${table.chairs}"
+                                     class="chair"
+                                     th:classappend="${chair.guest != null} ? 'occupied' : ''"
+                                     th:data-chair-id="${chair.id}"
+                                     th:data-guest-name="${chair.guest?.name}"
+                                     th:text="${chair.guest != null} ? ${#strings.substring(chair.guest.name, 0, 1) + (#strings.contains(chair.guest.name, ' ') ? #strings.substring(chair.guest.name, #strings.indexOf(chair.guest.name, ' ') + 1, #strings.indexOf(chair.guest.name, ' ') + 2) : '')} : ''"
+                                     onclick="openGuestAssignmentModal(this)">
+                                </div>
+                            </div>
+                        </div>
+                    </th:block>
+                    <div th:if="${seatPlan.tables == null || #lists.isEmpty(seatPlan.tables)}" class="empty-state">
+                        <p>No tables added yet. Click 'Add Table' to get started.</p>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <div id="addTableModal" class="modal">
+    <!-- Modals: Conditionally rendered/usable based on project/seatPlan existence -->
+    <div id="addTableModal" class="modal" th:if="${project != null && seatPlan != null}">
         <div class="modal-content">
+            <span class="close" onclick="closeModal('#addTableModal')">&times;</span>
             <h2>Add New Table</h2>
             <form id="addTableForm">
                 <div class="form-group">
@@ -90,14 +120,15 @@
                 </div>
                 <div class="form-actions">
                     <button type="submit" class="btn btn-primary">Add Table</button>
-                    <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('#addTableModal')">Cancel</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <div id="editTableModal" class="modal">
+    <div id="editTableModal" class="modal" th:if="${project != null && seatPlan != null}">
         <div class="modal-content">
+             <span class="close" onclick="closeModal('#editTableModal')">&times;</span>
             <h2>Edit Table</h2>
             <form id="editTableForm">
                 <input type="hidden" id="editTableId">
@@ -111,15 +142,15 @@
                 </div>
                 <div class="form-actions">
                     <button type="submit" class="btn btn-primary">Save Changes</button>
-                    <button type="button" class="btn btn-secondary" onclick="closeEditModal()">Cancel</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('#editTableModal')">Cancel</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- Guest Assignment Modal -->
-    <div id="guestAssignmentModal" class="modal">
+    <div id="guestAssignmentModal" class="modal" th:if="${project != null && seatPlan != null}">
         <div class="modal-content">
+            <span class="close" onclick="closeModal('#guestAssignmentModal')">&times;</span>
             <h2>Assign Guest</h2>
             <div class="modal-body">
                 <div id="currentGuestInfo" class="current-guest" style="display: none;">
@@ -131,7 +162,7 @@
                     <select id="guestSelect">
                         <option value="">Select a guest</option>
                         <option th:each="guest : ${guests}"
-                                th:value="${guest.guestId}"
+                                th:value="${guest.guestId}" <!-- Assuming guests list from controller has guestId -->
                                 th:text="${guest.name}">
                         </option>
                     </select>
@@ -139,20 +170,22 @@
             </div>
             <div class="modal-actions">
                 <button class="btn btn-primary" onclick="assignGuest()">Assign</button>
-                <button class="btn btn-secondary" onclick="closeGuestModal()">Cancel</button>
+                <button class="btn btn-secondary" onclick="closeModal('#guestAssignmentModal')">Cancel</button>
             </div>
         </div>
     </div>
 
-    <script>
+    <script th:if="${project != null && seatPlan != null}">
         let selectedChairId = null;
         let selectedChairElement = null;
 
         function openGuestAssignmentModal(chairElement) {
+            if (!projectId || !seatPlanId) {
+                alert("Seat plan not available for operations."); return;
+            }
             selectedChairElement = $(chairElement);
             selectedChairId = selectedChairElement.data('chair-id');
             
-            // Show/hide current guest info
             const currentGuestName = selectedChairElement.data('guest-name');
             const currentGuestInfo = $('#currentGuestInfo');
             const currentGuestNameSpan = $('#currentGuestName');
@@ -163,87 +196,215 @@
             } else {
                 currentGuestInfo.hide();
             }
-            
-            document.getElementById('guestAssignmentModal').style.display = 'block';
+            $('#guestSelect').val(''); // Reset selection
+            $('#guestAssignmentModal').show();
         }
 
-        function closeGuestModal() {
-            document.getElementById('guestAssignmentModal').style.display = 'none';
-            selectedChairId = null;
-            selectedChairElement = null;
-            document.getElementById('guestSelect').value = '';
-            $('#currentGuestInfo').hide();
+        function closeModal(modalId) {
+            $(modalId).hide();
+            if (modalId === '#guestAssignmentModal') {
+                 selectedChairId = null;
+                 selectedChairElement = null;
+                 $('#guestSelect').val('');
+                 $('#currentGuestInfo').hide();
+            }
         }
+        
+        // Make tables draggable
+        $(function() {
+            if (projectId && seatPlanId && $('#seatPlanArea .table').length) {
+                 $("#seatPlanArea .table").draggable({
+                    containment: "parent",
+                    handle: ".table-header"
+                });
+            }
+        });
 
         function removeGuest() {
-            if (!selectedChairId) return;
-
+            if (!selectedChairId || !projectId || !seatPlanId) {
+                 alert("Cannot remove guest. Seat plan or project data missing."); return;
+            }
             $.ajax({
-                url: `/project/${projectId}/seatplan/remove-guest`,
+                url: `/project/${projectId}/seatplan/remove-guest`, // Admin endpoint
                 method: 'POST',
-                data: {
-                    chairId: selectedChairId
-                },
+                data: { chairId: selectedChairId },
                 success: function(response) {
-                    if (response && response.id) {
-                        selectedChairElement.removeClass('occupied');
-                        selectedChairElement.text('');
-                        selectedChairElement.data('guest-name', null);
-                        closeGuestModal();
+                    if (response && response.id != null) { // Check for ID, not the whole guest object for removal
+                        selectedChairElement.removeClass('occupied').text('').data('guest-name', null);
+                        closeModal('#guestAssignmentModal');
                     } else {
-                        window.location.reload();
+                        alert("Failed to remove guest. Please try again.");
                     }
                 },
                 error: function(xhr, status, error) {
                     console.error('Error removing guest:', error);
-                    window.location.reload();
+                    alert('Error removing guest. ' + (xhr.responseText || ''));
                 }
             });
         }
 
         function assignGuest() {
-            const guestId = document.getElementById('guestSelect').value;
+            if (!selectedChairId || !projectId || !seatPlanId) {
+                alert("Cannot assign guest. Seat plan or project data missing."); return;
+            }
+            const guestId = $('#guestSelect').val();
             if (!guestId) {
-                alert('Please select a guest');
-                return;
+                alert('Please select a guest.'); return;
             }
 
             $.ajax({
-                url: `/project/${projectId}/seatplan/assign-guest`,
+                url: `/project/${projectId}/seatplan/assign-guest`, // Admin endpoint
                 method: 'POST',
-                data: {
-                    chairId: selectedChairId,
-                    guestId: guestId
-                },
+                data: { chairId: selectedChairId, guestId: guestId },
                 success: function(response) {
-                    if (response && response.id) {
-                        const chairElement = $(`[data-chair-id="${response.id}"]`);
-                        if (response.guest) {
-                            chairElement.addClass('occupied');
-                            chairElement.text(getInitials(response.guest.name));
-                        } else {
-                            chairElement.removeClass('occupied');
-                            chairElement.text('');
-                        }
-                        closeGuestModal();
+                    if (response && response.guest) {
+                        selectedChairElement.addClass('occupied')
+                                          .text(getInitials(response.guest.name))
+                                          .data('guest-name', response.guest.name);
+                        closeModal('#guestAssignmentModal');
                     } else {
-                        window.location.reload();
+                         selectedChairElement.removeClass('occupied').text('').data('guest-name', null);
+                        alert("Failed to assign guest. The guest might already be seated or an error occurred.");
                     }
                 },
                 error: function(xhr, status, error) {
                     console.error('Error assigning guest:', error);
-                    window.location.reload();
+                     alert('Error assigning guest. ' + (xhr.responseText || ''));
                 }
             });
         }
 
         function getInitials(name) {
             if (!name) return '';
-            return name.split(' ')
-                .map(word => word.charAt(0))
-                .join('')
-                .toUpperCase();
+            const parts = String(name).trim().split(' ');
+            if (parts.length > 1) {
+                return (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase();
+            }
+            return parts[0].charAt(0).toUpperCase();
         }
+
+        $('#addTableBtn').click(function() {
+            if (!projectId || !seatPlanId) {
+                alert("Cannot add table. Seat plan or project data missing."); return;
+            }
+            $('#addTableForm')[0].reset();
+            $('#addTableModal').show();
+        });
+
+        $('#addTableForm').submit(function(e) {
+            e.preventDefault();
+            if (!projectId || !seatPlanId) {
+                 alert("Cannot add table. Seat plan or project data missing."); return;
+            }
+            const tableData = {
+                tableName: $('#tableName').val(),
+                numberOfChairs: parseInt($('#numberOfChairs').val())
+            };
+            $.ajax({
+                url: `/project/${projectId}/seatplan/add-table`, // Admin endpoint
+                method: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(tableData),
+                success: function(response) { window.location.reload(); },
+                error: function(xhr, status, error) {
+                    console.error('Error adding table:', error);
+                    alert('Error adding table. ' + (xhr.responseText || ''));
+                }
+            });
+        });
+
+        $(document).on('click', '.edit-btn', function() {
+            if (!projectId || !seatPlanId) {
+                alert("Cannot edit table. Seat plan or project data missing."); return;
+            }
+            const tableId = $(this).data('id');
+            const tableElement = $(this).closest('.table');
+            const tableName = tableElement.find('.table-name').text();
+            const chairCountText = tableElement.find('.chair-count').text(); // "X chairs"
+            const numberOfChairs = parseInt(chairCountText.split(' ')[0]) || 0;
+
+            $('#editTableId').val(tableId);
+            $('#editTableName').val(tableName);
+            $('#editNumberOfChairs').val(numberOfChairs);
+            $('#editTableModal').show();
+        });
+
+        $('#editTableForm').submit(function(e) {
+            e.preventDefault();
+             if (!projectId || !seatPlanId) {
+                alert("Cannot update table. Seat plan or project data missing."); return;
+            }
+            const tableId = $('#editTableId').val();
+            const tableData = {
+                tableName: $('#editTableName').val(),
+                numberOfChairs: parseInt($('#editNumberOfChairs').val())
+            };
+            $.ajax({
+                url: `/project/${projectId}/seatplan/update-table/${tableId}`, // Admin endpoint
+                method: 'PUT',
+                contentType: 'application/json',
+                data: JSON.stringify(tableData),
+                success: function(response) { window.location.reload(); },
+                error: function(xhr, status, error) {
+                    console.error('Error updating table:', error);
+                    alert('Error updating table. ' + (xhr.responseText || ''));
+                }
+            });
+        });
+
+        $(document).on('click', '.delete-btn', function() {
+            if (!projectId || !seatPlanId) {
+                alert("Cannot delete table. Seat plan or project data missing."); return;
+            }
+            if (confirm('Are you sure you want to delete this table? This will unassign all guests from its chairs.')) {
+                const tableId = $(this).data('id');
+                $.ajax({
+                    url: `/project/${projectId}/seatplan/delete-table/${tableId}`, // Admin endpoint
+                    method: 'DELETE',
+                    success: function() { window.location.reload(); },
+                    error: function(xhr, status, error) {
+                        console.error('Error deleting table:', error);
+                        alert('Error deleting table. ' + (xhr.responseText || ''));
+                    }
+                });
+            }
+        });
+
+        $('#saveBtn').click(function() {
+            if (!projectId || !seatPlanId) {
+                alert("Cannot save layout. Seat plan or project data missing."); return;
+            }
+            const tables = [];
+            $('#seatPlanArea .table').each(function() {
+                const table = $(this);
+                tables.push({
+                    id: table.data('id'),
+                    positionX: parseInt(table.css('left')),
+                    positionY: parseInt(table.css('top')),
+                    // Send other table properties if your backend expects them for update
+                    tableName: table.find('.table-name').text(),
+                    numberOfChairs: parseInt(table.find('.chair-count').text().split(' ')[0])
+                });
+            });
+            $.ajax({
+                url: `/project/${projectId}/seatplan/update-positions`, // Admin endpoint
+                method: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(tables),
+                success: function(response) { alert('Layout saved successfully!'); },
+                error: function(xhr, status, error) {
+                    console.error('Error saving layout:', error);
+                    alert('Error saving layout. ' + (xhr.responseText || ''));
+                }
+            });
+        });
+        
+        // Close modals when clicking outside of them (general handler)
+        $(window).click(function(event) {
+            if ($(event.target).is('.modal')) {
+                $(event.target).hide();
+            }
+        });
     </script>
 </body>
 </html> 

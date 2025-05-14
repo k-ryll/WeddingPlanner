@@ -37,34 +37,32 @@ public class SeatPlanController {
         
         if (project == null) {
             model.addAttribute("project", null);
-            model.addAttribute("seatPlan", null); // Or new SeatPlan() if you prefer an empty object
+            model.addAttribute("seatPlan", null);
             model.addAttribute("guests", Collections.emptyList());
             model.addAttribute("error", "No project found. Please create a project to use the seat planning tool.");
-            return "user-seat-plan"; // Proceed to the page but with an error/disabled state
+            return "user-seat-plan";
         }
         
-        final SeatPlan seatPlan = seatPlanService.getSeatPlanByProjectId(project.getId());
-        if (seatPlan == null) {
-            // This case might mean a project exists but has no seat plan yet.
-            // You might want to create a new SeatPlan here or handle it in the template.
-            model.addAttribute("project", project);
-            model.addAttribute("seatPlan", null); // Or new SeatPlan() and save it if that's the desired flow
-            model.addAttribute("guests", guestService.getGuestsByProject(project)); // Still might want to show guests
-            model.addAttribute("warning", "Seat plan not initialized for this project. Some features may be limited.");
-            // return "user-seat-plan"; // Or redirect to a page to initialize the seat plan
-        } else {
-            model.addAttribute("seatPlan", seatPlan);
-            // Filter out assigned guests
-            List<Guest> allGuests = guestService.getGuestsByProject(project);
-            List<Guest> unassignedGuests = allGuests.stream()
-                .filter(guest -> !seatPlan.getTables().stream()
-                    .flatMap(table -> table.getChairs().stream())
-                    .anyMatch(chair -> guest.equals(chair.getGuest())))
-                .collect(Collectors.toList());
-            model.addAttribute("guests", unassignedGuests);
+        SeatPlan seatPlanInstance = seatPlanService.getSeatPlanByProjectId(project.getId());
+        if (seatPlanInstance == null) {
+            seatPlanInstance = new SeatPlan();
+            seatPlanInstance.setProject(project);
+            seatPlanInstance.setTables(new java.util.ArrayList<>()); 
+            seatPlanInstance = seatPlanService.saveSeatPlan(seatPlanInstance);
+            model.addAttribute("info", "A new seat plan has been initialized for your project.");
         }
         
-        model.addAttribute("project", project); // Ensure project is always added if not null
+        final SeatPlan finalSeatPlan = seatPlanInstance;
+        List<Guest> allGuests = guestService.getGuestsByProject(project);
+        List<Guest> unassignedGuests = allGuests.stream()
+            .filter(g -> finalSeatPlan.getTables().stream()
+                .flatMap(table -> table.getChairs().stream())
+                .anyMatch(chair -> g.equals(chair.getGuest())))
+            .collect(Collectors.toList());
+        
+        model.addAttribute("project", project);
+        model.addAttribute("seatPlan", finalSeatPlan);
+        model.addAttribute("guests", unassignedGuests);
         return "user-seat-plan";
     }
 
@@ -73,24 +71,28 @@ public class SeatPlanController {
     public String getAdminSeatPlan(@PathVariable Integer projectId, Model model) {
         Project project = projectService.findById(projectId);
         if (project == null) {
-            throw new IllegalArgumentException("Project not found");
+            return "redirect:/admin/home?error=ProjectNotFound"; 
         }
         
-        final SeatPlan seatPlan = seatPlanService.getSeatPlanByProjectId(projectId);
-        if (seatPlan == null) {
-            return "redirect:/project/" + projectId;
+        SeatPlan seatPlanInstance = seatPlanService.getSeatPlanByProjectId(project.getId());
+        if (seatPlanInstance == null) {
+            seatPlanInstance = new SeatPlan();
+            seatPlanInstance.setProject(project);
+            seatPlanInstance.setTables(new java.util.ArrayList<>());
+            seatPlanInstance = seatPlanService.saveSeatPlan(seatPlanInstance); 
+            model.addAttribute("info", "A new seat plan has been initialized for this project.");
         }
         
-        // Get all guests and filter out those already assigned to chairs
+        final SeatPlan finalSeatPlan = seatPlanInstance;
         List<Guest> allGuests = guestService.getGuestsByProject(project);
-        List<Guest> unassignedGuests = allGuests.stream()
-            .filter(guest -> !seatPlan.getTables().stream()
+         List<Guest> unassignedGuests = allGuests.stream()
+            .filter(g -> finalSeatPlan.getTables().stream()
                 .flatMap(table -> table.getChairs().stream())
-                .anyMatch(chair -> guest.equals(chair.getGuest())))
+                .anyMatch(chair -> g.equals(chair.getGuest())))
             .collect(Collectors.toList());
         
         model.addAttribute("project", project);
-        model.addAttribute("seatPlan", seatPlan);
+        model.addAttribute("seatPlan", finalSeatPlan);
         model.addAttribute("guests", unassignedGuests);
         return "seat-plan";
     }

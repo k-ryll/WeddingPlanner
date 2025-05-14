@@ -12,6 +12,10 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
+// Import SeatPlan and SeatPlanService
+import com.example.wedding.model.SeatPlan;
+import com.example.wedding.service.SeatPlanService;
+
 @Service
 public class ProjectService {
 
@@ -20,6 +24,9 @@ public class ProjectService {
 
     @Autowired
     private UserService userService;  
+    
+    @Autowired // Add SeatPlanService
+    private SeatPlanService seatPlanService;
     
     public boolean isUserInProject(String email) {
         List<Project> allProjects = projectRepository.findAll();
@@ -60,7 +67,17 @@ public class ProjectService {
         project.setWeddingDate(java.time.LocalDateTime.parse(weddingDate)); 
         project.setStatus(status);
 
-        return projectRepository.save(project);
+        Project savedProject = projectRepository.save(project);
+
+        // Automatically create a SeatPlan for the new project
+        if (savedProject != null && savedProject.getId() != null) {
+            SeatPlan newSeatPlan = new SeatPlan();
+            newSeatPlan.setProject(savedProject);
+            newSeatPlan.setTables(new java.util.ArrayList<>()); // Initialize with empty tables
+            seatPlanService.saveSeatPlan(newSeatPlan);
+        }
+
+        return savedProject;
     }
 
     public Project findProjectByUserEmail(String email) {
