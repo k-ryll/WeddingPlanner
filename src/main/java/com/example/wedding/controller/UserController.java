@@ -153,29 +153,33 @@ public class UserController {
             return "redirect:/user/login";
         }
         
-        // Get the user's project
         Project project = projectService.findProjectByUserEmail(user.getEmail());
+        
         if (project != null) {
-            // Add necessary data to model for planning page
+            model.addAttribute("projectId", project.getId());
             List<Task> tasks = taskService.findByProject(project);
             List<ItineraryItem> itinerary = itineraryService.findByProject(project);
             List<BudgetCategory> budgetCategories = budgetService.findByProject(project);
             BigDecimal totalBudget = budgetService.getTotalBudget(project);
             BigDecimal totalSpent = budgetService.getTotalSpent(project);
             
-            model.addAttribute("projectId", project.getId());
             model.addAttribute("tasks", tasks);
             model.addAttribute("itinerary", itinerary);
             model.addAttribute("budgetCategories", budgetCategories);
             model.addAttribute("totalBudget", totalBudget);
             model.addAttribute("totalSpent", totalSpent);
-            
-            return "user_planning";
         } else {
-            // Handle case when user has no project
-            model.addAttribute("error", "No project found. Please create a project first.");
-            return "home";
+            // Initialize with defaults if no project
+            model.addAttribute("projectId", null); // Or a suitable default/flag
+            model.addAttribute("tasks", Collections.emptyList());
+            model.addAttribute("itinerary", Collections.emptyList());
+            model.addAttribute("budgetCategories", Collections.emptyList());
+            model.addAttribute("totalBudget", BigDecimal.ZERO);
+            model.addAttribute("totalSpent", BigDecimal.ZERO);
+            model.addAttribute("error", "No project found. Some features might be disabled until a project is created."); // Optional: inform the user
         }
+        
+        return "user_planning";
     }
 
     @GetMapping("/user/login")

@@ -8,6 +8,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -33,26 +34,37 @@ public class SeatPlanController {
         }
         
         Project project = projectService.findProjectByUserEmail(user.getEmail());
+        
         if (project == null) {
-            return "redirect:/home";
+            model.addAttribute("project", null);
+            model.addAttribute("seatPlan", null); // Or new SeatPlan() if you prefer an empty object
+            model.addAttribute("guests", Collections.emptyList());
+            model.addAttribute("error", "No project found. Please create a project to use the seat planning tool.");
+            return "user-seat-plan"; // Proceed to the page but with an error/disabled state
         }
         
         final SeatPlan seatPlan = seatPlanService.getSeatPlanByProjectId(project.getId());
         if (seatPlan == null) {
-            return "redirect:/home";
+            // This case might mean a project exists but has no seat plan yet.
+            // You might want to create a new SeatPlan here or handle it in the template.
+            model.addAttribute("project", project);
+            model.addAttribute("seatPlan", null); // Or new SeatPlan() and save it if that's the desired flow
+            model.addAttribute("guests", guestService.getGuestsByProject(project)); // Still might want to show guests
+            model.addAttribute("warning", "Seat plan not initialized for this project. Some features may be limited.");
+            // return "user-seat-plan"; // Or redirect to a page to initialize the seat plan
+        } else {
+            model.addAttribute("seatPlan", seatPlan);
+            // Filter out assigned guests
+            List<Guest> allGuests = guestService.getGuestsByProject(project);
+            List<Guest> unassignedGuests = allGuests.stream()
+                .filter(guest -> !seatPlan.getTables().stream()
+                    .flatMap(table -> table.getChairs().stream())
+                    .anyMatch(chair -> guest.equals(chair.getGuest())))
+                .collect(Collectors.toList());
+            model.addAttribute("guests", unassignedGuests);
         }
         
-        // Get all guests and filter out those already assigned to chairs
-        List<Guest> allGuests = guestService.getGuestsByProject(project);
-        List<Guest> unassignedGuests = allGuests.stream()
-            .filter(guest -> !seatPlan.getTables().stream()
-                .flatMap(table -> table.getChairs().stream())
-                .anyMatch(chair -> guest.equals(chair.getGuest())))
-            .collect(Collectors.toList());
-        
-        model.addAttribute("project", project);
-        model.addAttribute("seatPlan", seatPlan);
-        model.addAttribute("guests", unassignedGuests);
+        model.addAttribute("project", project); // Ensure project is always added if not null
         return "user-seat-plan";
     }
 

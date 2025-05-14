@@ -15,10 +15,10 @@
         <img src="/images/logo.svg" class="logo" alt="logo">
         <div>
             <ul>
-                <li><a th:href="@{/project/{id}(id=${projectId})}">Home</a></li>
-                <li><a th:href="@{/project/{id}/guest(id=${projectId})}">Guests</a></li>
-                <li class="active"><a th:href="@{/project/{id}/planning(id=${projectId})}">Planning</a></li>
-                <li><a th:href="@{/project/{id}/seatplan(id=${projectId})}">Seat Plan</a></li>
+                <li><a th:href="${projectId != null ? '/project/' + projectId : '/home'}">Home</a></li>
+                <li><a th:href="${projectId != null ? '/project/' + projectId + '/guest' : '#nogo'}">Guests</a></li>
+                <li class="active"><a th:href="${projectId != null ? '/project/' + projectId + '/planning' : '/planning'}">Planning</a></li>
+                <li><a th:href="${projectId != null ? '/project/' + projectId + '/seatplan' : '#nogo'}">Seat Plan</a></li>
                 <li><a href="/admin/home">Admin Page</a></li>
             </ul>
             <div class="user-menu">
@@ -37,14 +37,22 @@
         <input type="hidden" name="projectId" th:value="${projectId}">
         <h1>Wedding Planning</h1>
         
+        <div th:if="${error}" class="error-message">
+            <p th:text="${error}"></p>
+            <p>Please <a th:href="@{/home}">create or select a project</a> to enable all features.</p>
+        </div>
+
         <div class="planning-container">
             <!-- Budget Section -->
             <section class="budget-section">
                 <div class="section-header">
                     <h2>Budget</h2>
-                    <div class="budget-actions">
+                    <div class="budget-actions" th:if="${projectId != null}">
                         <button class="add-button" onclick="openBudgetModal()">Add Expense</button>
                         <button class="add-button" onclick="openBudgetCategoryModal()">Add Category</button>
+                    </div>
+                    <div th:unless="${projectId != null}">
+                        <p>Create a project to manage your budget.</p>
                     </div>
                 </div>
 
@@ -97,10 +105,11 @@
             <section class="tasks-section">
                 <div class="section-header">
                     <h2>Tasks</h2>
-                    <button class="add-button" onclick="openTaskModal()">Add Task</button>
+                    <button class="add-button" onclick="openTaskModal()" th:if="${projectId != null}">Add Task</button>
+                    <p th:unless="${projectId != null}">Create a project to manage tasks.</p>
                 </div>
                 
-                <div class="task-list">
+                <div class="task-list" th:if="${projectId != null and not #lists.isEmpty(tasks)}">
                     <ul>
                         <li th:each="task : ${tasks}" class="task-item">
                             <div class="task-content">
@@ -131,13 +140,16 @@
                         </li>
                     </ul>
                 </div>
+                <div th:if="${projectId != null and #lists.isEmpty(tasks)}">
+                    <p>No tasks added yet.</p>
+                </div>
             </section>
 
             <!-- Itinerary Section -->
             <section class="itinerary-section">
                 <div class="section-header">
                     <h2>Wedding Day Itinerary</h2>
-                    <div class="itinerary-actions-top">
+                    <div class="itinerary-actions-top" th:if="${projectId != null}">
                         <button class="add-button" onclick="openItineraryModal()">Add Event</button>
                         <div class="email-dropdown">
                             <button class="email-btn">Email Itinerary</button>
@@ -154,9 +166,10 @@
                             </div>
                         </div>
                     </div>
+                    <p th:unless="${projectId != null}">Create a project to manage the itinerary.</p>
                 </div>
 
-                <div class="itinerary-list">
+                <div class="itinerary-list" th:if="${projectId != null and not #lists.isEmpty(itinerary)}">
                     <ul>
                         <li th:each="item : ${itinerary}" class="itinerary-item">
                             <div class="time">
@@ -175,12 +188,15 @@
                         </li>
                     </ul>
                 </div>
+                <div th:if="${projectId != null and #lists.isEmpty(itinerary)}">
+                     <p>No itinerary items added yet.</p>
+                </div>
             </section>
         </div>
     </div>
 
     <!-- Budget Modal -->
-    <div id="budgetModal" class="modal">
+    <div id="budgetModal" class="modal" th:if="${projectId != null}">
         <div class="modal-content">
             <span class="close" onclick="closeBudgetModal()">&times;</span>
             <h2>Add Expense</h2>
@@ -201,7 +217,7 @@
     </div>
 
     <!-- Budget Category Modal -->
-    <div id="budgetCategoryModal" class="modal">
+    <div id="budgetCategoryModal" class="modal" th:if="${projectId != null}">
         <div class="modal-content">
             <span class="close" onclick="closeBudgetCategoryModal()">&times;</span>
             <h2>Add Budget Category</h2>
@@ -215,7 +231,7 @@
     </div>
 
     <!-- Task Modal -->
-    <div id="taskModal" class="modal">
+    <div id="taskModal" class="modal" th:if="${projectId != null}">
         <div class="modal-content">
             <span class="close" onclick="closeTaskModal()">&times;</span>
             <h2>Add New Task</h2>
@@ -234,7 +250,7 @@
     </div>
 
     <!-- Itinerary Modal -->
-    <div id="itineraryModal" class="modal">
+    <div id="itineraryModal" class="modal" th:if="${projectId != null}">
         <div class="modal-content">
             <span class="close" onclick="closeItineraryModal()">&times;</span>
             <h2>Add New Event</h2>
@@ -252,6 +268,14 @@
     <script th:src="@{/js/planning.js}"></script>
     <script>
         function sendTaskToEntourage(button) {
+            const projectIdInput = document.querySelector('input[name="projectId"]');
+            const projectId = projectIdInput ? projectIdInput.value : null;
+
+            if (!projectId) {
+                alert("Please create or select a project first.");
+                return;
+            }
+
             if (button.classList.contains('loading')) {
                 return;
             }
@@ -262,7 +286,6 @@
 
             const taskId = button.getAttribute('data-task-id');
             const entourageType = button.getAttribute('data-entourage');
-            const projectId = document.querySelector('input[name="projectId"]').value;
 
             fetch(`/project/${projectId}/task/${taskId}/send-email`, {
                 method: 'POST',
@@ -285,6 +308,14 @@
         }
 
         function sendItineraryToEntourage(button) {
+            const projectIdInput = document.querySelector('input[name="projectId"]');
+            const projectId = projectIdInput ? projectIdInput.value : null;
+
+            if (!projectId) {
+                alert("Please create or select a project first.");
+                return;
+            }
+            
             if (button.classList.contains('loading')) {
                 return;
             }
@@ -294,7 +325,6 @@
             button.textContent = 'Sending...';
 
             const entourageType = button.getAttribute('data-entourage');
-            const projectId = document.querySelector('input[name="projectId"]').value;
 
             fetch(`/project/${projectId}/itinerary/send-email`, {
                 method: 'POST',
@@ -349,6 +379,22 @@
 
         function closeBudgetCategoryModal() {
             document.getElementById('budgetCategoryModal').style.display = 'none';
+        }
+
+        function openTaskModal() {
+            document.getElementById('taskModal').style.display = 'block';
+        }
+
+        function closeTaskModal() {
+            document.getElementById('taskModal').style.display = 'none';
+        }
+
+        function openItineraryModal() {
+            document.getElementById('itineraryModal').style.display = 'block';
+        }
+
+        function closeItineraryModal() {
+            document.getElementById('itineraryModal').style.display = 'none';
         }
 
         // Close modals when clicking outside
