@@ -57,7 +57,7 @@ public class SeatPlanController {
         List<Guest> unassignedGuests = allGuests.stream()
             .filter(g -> finalSeatPlan.getTables().stream()
                 .flatMap(table -> table.getChairs().stream())
-                .anyMatch(chair -> g.equals(chair.getGuest())))
+                .noneMatch(chair -> g.equals(chair.getGuest())))
             .collect(Collectors.toList());
         
         model.addAttribute("project", project);
@@ -85,10 +85,10 @@ public class SeatPlanController {
         
         final SeatPlan finalSeatPlan = seatPlanInstance;
         List<Guest> allGuests = guestService.getGuestsByProject(project);
-         List<Guest> unassignedGuests = allGuests.stream()
+        List<Guest> unassignedGuests = allGuests.stream()
             .filter(g -> finalSeatPlan.getTables().stream()
                 .flatMap(table -> table.getChairs().stream())
-                .anyMatch(chair -> g.equals(chair.getGuest())))
+                .noneMatch(chair -> g.equals(chair.getGuest())))
             .collect(Collectors.toList());
         
         model.addAttribute("project", project);
