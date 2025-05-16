@@ -3,14 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home - EverVows</title>
+    
+    <!-- CSS -->
     <link rel="stylesheet" th:href="@{/styles/styles.css}">
-    <link rel="stylesheet" href="../static/styles/styles.css">
     <link rel="stylesheet" th:href="@{/styles/home.css}">
-    <link rel="stylesheet" href="../static/styles/home.css">
-    <script src="https://kit.fontawesome.com/b80e3de11b.js" ></script>
-    <script th:src="@{/js/userMenu.js}"></script>
-    <script th:src="@{/js/tasks.js}"></script>
-    <title>Document</title>
+    
+    <!-- Scripts -->
+    <script src="https://kit.fontawesome.com/b80e3de11b.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script th:src="@{/js/userMenu.js}" defer></script>
+    <script th:src="@{/js/tasks.js}" defer></script>
 </head>
 <body>
 
@@ -21,7 +24,9 @@
             <li class="active"><a th:href="@{/home}">Home</a></li>
             <li><a th:href="@{/guests}">Guests</a></li>
             <li><a th:href="@{/planning}">Planning</a></li>
+            <li><a th:href="@{/budget}">Budget</a></li>
             <li><a th:href="@{/seatplan}">Seat Plan</a></li>
+            <li><a th:href="@{/vendors}">Vendors</a></li>
             
         </ul>
         <div class="user-menu">
@@ -114,7 +119,14 @@
                     </div>
                 
 
-                <div class="budget-overview">
+                <div class="budget-chart" th:if="${not #lists.isEmpty(budgetCategories)}" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 20px;">
+                    <h2>Budget Distribution</h2>
+                    <div style="height: 400px; width: 100%;">
+                        <canvas id="budgetPieChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="budget-overview" th:if="${not #lists.isEmpty(budgetCategories)}">
                     <h2>Budget Overview</h2>
                     <div class="budget-summary">
                         <div class="budget-total">
@@ -131,11 +143,18 @@
                         </div>
                     </div>
                     <ul class="budget-categories">
-                        <li th:each="category : ${budgetCategories}" class="budget-category">
-                            <span class="category-name" th:text="${category.name}"></span>
-                            <span class="category-amount" th:text="${'₱' + #numbers.formatDecimal(category.budget, 1, 'COMMA', 2, 'POINT')}"></span>
+                        <li th:each="category, stat : ${budgetCategories}" class="budget-category">
+                            <div class="category-info">
+                                <span class="category-name" th:text="${stat.count + '. ' + category.name}"></span>
+                                <div class="category-details">
+                                    <span class="budget-amount" th:text="${'Budget: ₱' + #numbers.formatDecimal(category.budget != null ? category.budget : 0, 1, 'COMMA', 2, 'POINT')}"></span>
+                                    <span class="expense-amount" th:text="${'Spent: ₱' + #numbers.formatDecimal(totalSpent, 1, 'COMMA', 2, 'POINT')}"></span>
+                                </div>
+                            </div>
+                            <div class="category-progress">
+                                <div class="progress-bar" th:style="${'width: ' + (totalBudget > 0 ? (totalSpent / totalBudget * 100) : 0) + '%'}"></div>
+                            </div>
                         </li>
-                        <li th:if="${#lists.isEmpty(budgetCategories)}">No budget categories added yet</li>
                     </ul>
                 </div>
             </section>
@@ -144,6 +163,76 @@
     </div>
     
     <script>
+        // Initialize budget chart
+        document.addEventListener('DOMContentLoaded', function() {
+            const budgetChart = document.getElementById('budgetPieChart');
+            if (!budgetChart) return;
+
+            const categories = document.querySelectorAll('.budget-category');
+            if (!categories || categories.length === 0) return;
+
+            const labels = [];
+            const data = [];
+            
+            categories.forEach(category => {
+                const nameElement = category.querySelector('.category-name');
+                const amountElement = category.querySelector('.budget-amount');
+                
+                if (nameElement && amountElement) {
+                    const name = nameElement.textContent;
+                    const amount = amountElement.textContent
+                        .replace('Budget: ₱', '')
+                        .replace(/,/g, '');
+                    
+                    if (name && amount) {
+                        labels.push(name);
+                        data.push(parseFloat(amount));
+                    }
+                }
+            });
+
+            if (labels.length > 0 && data.length > 0) {
+                new Chart(budgetChart, {
+                    type: 'pie',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            data: data,
+                            backgroundColor: [
+                                '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', 
+                                '#9966FF', '#FF9F40', '#8AC249', '#EA526F',
+                                '#23B5D3', '#279AF1'
+                            ]
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'right',
+                                labels: {
+                                    font: {
+                                        size: 14
+                                    }
+                                }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        const value = context.raw;
+                                        const total = data.reduce((a, b) => a + b, 0);
+                                        const percentage = ((value / total) * 100).toFixed(1);
+                                        return `${context.label}: ₱${value.toLocaleString()} (${percentage}%)`;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        });
+
         function toggleTask(checkbox) {
             const taskId = checkbox.dataset.taskId;
             const completed = checkbox.checked;

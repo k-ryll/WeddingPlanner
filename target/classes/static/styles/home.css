@@ -37,7 +37,7 @@ html, body {
 }
 
 .container {
-    max-width: 1400px;
+    max-width: 1800px;
     margin: 2rem auto;
     padding: 0 2rem;
 }
@@ -432,8 +432,8 @@ button:hover {
     border-radius: 10px;
     margin-bottom: 0.8rem;
     display: flex;
-    justify-content: space-between;
-    align-items: center;
+    flex-direction: column;
+    gap: 0.8rem;
     transition: all 0.2s ease;
     border: 1px solid rgba(129, 66, 86, 0.1);
 }
@@ -444,19 +444,52 @@ button:hover {
     box-shadow: 0 4px 8px rgba(129, 66, 86, 0.1);
 }
 
-.budget-category .category-name {
+.category-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+}
+
+.category-name {
     font-weight: 500;
     color: #333;
     font-size: 1rem;
+    flex: 1;
 }
 
-.budget-category .category-amount {
+.category-details {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.3rem;
+}
+
+.budget-amount {
     font-weight: 600;
     color: var(--primary-color);
-    font-size: 1.1rem;
+    font-size: 0.9rem;
+}
+
+.expense-amount {
+    font-weight: 500;
+    color: #666;
+    font-size: 0.9rem;
+}
+
+.category-progress {
+    width: 100%;
+    height: 6px;
     background: rgba(129, 66, 86, 0.1);
-    padding: 0.4rem 0.8rem;
-    border-radius: 6px;
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.progress-bar {
+    height: 100%;
+    background: var(--primary-color);
+    border-radius: 3px;
+    transition: width 0.3s ease;
 }
 
 @media screen and (max-width: 1200px) {
@@ -499,6 +532,16 @@ button:hover {
     
     .container h1 {
         font-size: 2rem;
+    }
+    
+    .category-info {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .category-details {
+        align-items: flex-start;
+        margin-top: 0.5rem;
     }
 }
 

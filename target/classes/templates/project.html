@@ -3,41 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" th:href="@{/styles/styles.css}">
-    <link rel="stylesheet" href="../static/styles/styles.css">
-    <link rel="stylesheet" th:href="@{/styles/home.css}">
-    <link rel="stylesheet" href="../static/styles/home.css">
-    <script src="https://kit.fontawesome.com/b80e3de11b.js" ></script>
-    <script th:src="@{/js/userMenu.js}"></script>
-    <script th:src="@{/js/project.js}"></script>
     <title>Wedding Project</title>
+    
+    <!-- CSS -->
+    <link rel="stylesheet" th:href="@{/styles/styles.css}">
+    <link rel="stylesheet" th:href="@{/styles/home.css}">
+    
+    <!-- Scripts -->
+    <script src="https://kit.fontawesome.com/b80e3de11b.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 </head>
 <body>
-
     <header>
-    <img src="/images/logo.svg" class="logo" alt="logo">
-    <div>
-        <ul>
-            <li class="active"><a th:href="@{/project/{id}(id=${projectId})}">Home</a></li>
-            <li><a th:href="@{/project/{id}/guest(id=${projectId})}">Guests</a></li>
-            <li><a th:href="@{/project/{id}/planning(id=${projectId})}">Planning</a></li>
-            <li><a th:href="@{/project/{id}/seatplan(id=${projectId})}">Seat Plan</a></li>
-            <li><a th:href="@{/admin/home}">Admin Page</a></li>
-            
-        </ul>
-        <div class="user-menu">
-            <i class="fa-regular fa-circle-user user-icon"></i>
-            <div class="user-dropdown">
-                <a th:href="@{/logout}" class="dropdown-item">
-                    <i class="fas fa-sign-out-alt"></i>
-                    Logout
-                </a>
+        <img th:src="@{/images/logo.svg}" class="logo" alt="logo">
+        <div>
+            <ul>
+                <li class="active"><a th:href="@{/project/{id}(id=${projectId})}">Home</a></li>
+                <li><a th:href="@{/project/{id}/guest(id=${projectId})}">Guests</a></li>
+                <li><a th:href="@{/project/{id}/planning(id=${projectId})}">Planning</a></li>
+                <li><a th:href="@{/project/{id}/budget(id=${projectId})}">Budget</a></li>
+                <li><a th:href="@{/project/{id}/seatplan(id=${projectId})}">Seat Plan</a></li>
+                <li><a th:href="@{/admin/home}">Admin Page</a></li>
+            </ul>
+            <div class="user-menu">
+                <i class="fa-regular fa-circle-user user-icon"></i>
+                <div class="user-dropdown">
+                    <a th:href="@{/logout}" class="dropdown-item">
+                        <i class="fas fa-sign-out-alt"></i>
+                        Logout
+                    </a>
+                </div>
             </div>
         </div>
-    </div>
-</header>
+    </header>
 
-     
     <div class="container">
         <h1>Organize your Wedding in One Place</h1>
         <div class="dashboard">
@@ -97,47 +96,49 @@
                         <p>Confirmed: <span th:text="${confirmedGuests}">0</span></p>
                         <p>Pending: <span th:text="${pendingGuests}">0</span></p>
                     </div>
-                    
-
                 </div>
-                
             </section>
             <section class="right">
-                
-                    <div class="task-section" th:onclick="'window.location.href=\'' + @{/project/{id}/planning(id=${projectId})} + '\''">
-                        <h2>Upcoming Tasks</h2>
-                        <ul>
-                            <li th:each="task : ${tasks}" th:if="${not task.completed}">
-                                <input type="checkbox" th:checked="${task.completed}" 
-                                       th:data-task-id="${task.id}" class="task-checkbox" 
-                                       onclick="event.stopPropagation(); toggleTask(this);">
-                                <span th:text="${task.title}"></span>
-                                <span th:if="${task.dueDate}" th:text="${#temporals.format(task.dueDate, 'MMM dd')}"></span>
-                            </li>
-                            <li th:if="${#lists.isEmpty(tasks)}">No upcoming tasks</li>
-                        </ul>
-                    </div>
-    
-                    <div class="itinerary">
-                        <h2>Wedding Day Itinerary</h2>
-                        <ul>
-                            <li th:each="item : ${itinerary}" class="itinerary-item">
-                                <div class="time">
-                                    <span th:text="${item.startTime}"></span> - 
-                                    <span th:text="${item.endTime}"></span>
-                                </div>
-                                <div class="event-details">
-                                    <h4 th:text="${item.title}"></h4>
-                                    <p th:text="${item.description}"></p>
-                                    <p class="location" th:text="${item.location}"></p>
-                                </div>
-                            </li>
-                            <li th:if="${#lists.isEmpty(itinerary)}">No itinerary items added yet</li>
-                        </ul>
-                    </div>
-                
+                <div class="task-section" th:onclick="'window.location.href=\'' + @{/project/{id}/planning(id=${projectId})} + '\''">
+                    <h2>Upcoming Tasks</h2>
+                    <ul>
+                        <li th:each="task : ${tasks}" th:if="${not task.completed}">
+                            <input type="checkbox" th:checked="${task.completed}" 
+                                   th:data-task-id="${task.id}" class="task-checkbox" 
+                                   onclick="event.stopPropagation(); toggleTask(this);">
+                            <span th:text="${task.title}"></span>
+                            <span th:if="${task.dueDate}" th:text="${#temporals.format(task.dueDate, 'MMM dd')}"></span>
+                        </li>
+                        <li th:if="${#lists.isEmpty(tasks)}">No upcoming tasks</li>
+                    </ul>
+                </div>
 
-                <div class="budget-overview">
+                <div class="itinerary">
+                    <h2>Wedding Day Itinerary</h2>
+                    <ul>
+                        <li th:each="item : ${itinerary}" class="itinerary-item">
+                            <div class="time">
+                                <span th:text="${item.startTime}"></span> - 
+                                <span th:text="${item.endTime}"></span>
+                            </div>
+                            <div class="event-details">
+                                <h4 th:text="${item.title}"></h4>
+                                <p th:text="${item.description}"></p>
+                                <p class="location" th:text="${item.location}"></p>
+                            </div>
+                        </li>
+                        <li th:if="${#lists.isEmpty(itinerary)}">No itinerary items added yet</li>
+                    </ul>
+                </div>
+
+                <div class="budget-chart" th:if="${not #lists.isEmpty(budgetCategories)}" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 20px;">
+                    <h2>Budget Distribution</h2>
+                    <div style="height: 400px; width: 100%;">
+                        <canvas id="budgetPieChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="budget-overview" th:if="${not #lists.isEmpty(budgetCategories)}">
                     <h2>Budget Overview</h2>
                     <div class="budget-summary">
                         <div class="budget-total">
@@ -154,70 +155,96 @@
                         </div>
                     </div>
                     <ul class="budget-categories">
-                        <li th:each="category : ${budgetCategories}" class="budget-category">
-                            <span class="category-name" th:text="${category.name}"></span>
-                            <span class="category-amount" th:text="${'₱' + #numbers.formatDecimal(category.budget, 1, 'COMMA', 2, 'POINT')}"></span>
+                        <li th:each="category, stat : ${budgetCategories}" class="budget-category">
+                            <div class="category-info">
+                                <span class="category-name" th:text="${stat.count + '. ' + category.name}"></span>
+                                <div class="category-details">
+                                    <span class="budget-amount" th:text="${'Budget: ₱' + #numbers.formatDecimal(category.budget != null ? category.budget : 0, 1, 'COMMA', 2, 'POINT')}"></span>
+                                    <span class="expense-amount" th:text="${'Spent: ₱' + #numbers.formatDecimal(totalSpent, 1, 'COMMA', 2, 'POINT')}"></span>
+                                </div>
+                            </div>
+                            <div class="category-progress">
+                                <div class="progress-bar" th:style="${'width: ' + (totalBudget > 0 ? (totalSpent / totalBudget * 100) : 0) + '%'}"></div>
+                            </div>
                         </li>
-                        <li th:if="${#lists.isEmpty(budgetCategories)}">No budget categories added yet</li>
                     </ul>
                 </div>
             </section>
         </div>
-        
     </div>
-    
-    <script>
+
+    <!-- Load scripts at the end of body -->
+    <script th:src="@{/js/userMenu.js}"></script>
+    <script th:src="@{/js/project.js}"></script>
+    <script th:inline="javascript">
+        // Initialize budget chart
         document.addEventListener('DOMContentLoaded', function() {
-            // Handle save button clicks
-            document.querySelectorAll('.save-btn').forEach(button => {
-                button.addEventListener('click', function() {
-                    const guestId = this.dataset.guestId;
-                    const row = this.closest('tr');
-                    const rsvpStatus = row.querySelector('select').value;
-                    const remarks = row.querySelector('input[type="text"]').value;
+            const budgetChart = document.getElementById('budgetPieChart');
+            if (!budgetChart) return;
+
+            const categories = document.querySelectorAll('.budget-category');
+            if (!categories || categories.length === 0) return;
+
+            const labels = [];
+            const data = [];
+            
+            categories.forEach(category => {
+                const nameElement = category.querySelector('.category-name');
+                const amountElement = category.querySelector('.budget-amount');
+                
+                if (nameElement && amountElement) {
+                    const name = nameElement.textContent;
+                    const amount = amountElement.textContent
+                        .replace('Budget: ₱', '')
+                        .replace(/,/g, '');
                     
-                    // Send update to server
-                    fetch(`/guestAdmin/${guestId}/update`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            rsvpStatus: rsvpStatus,
-                            remarks: remarks
-                        })
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            alert('Guest information updated successfully!');
-                        } else {
-                            alert('Failed to update guest information.');
-                        }
-                    });
-                });
+                    if (name && amount) {
+                        labels.push(name);
+                        data.push(parseFloat(amount));
+                    }
+                }
             });
 
-            // Handle delete button clicks
-            document.querySelectorAll('.delete-btn').forEach(button => {
-                button.addEventListener('click', function() {
-                    if (confirm('Are you sure you want to delete this guest?')) {
-                        const guestId = this.dataset.guestId;
-                        fetch(`/guestAdmin/${guestId}/delete`, {
-                            method: 'DELETE'
-                        })
-                        .then(response => response.json())
-                        .then(data => {
-                            if (data.success) {
-                                this.closest('tr').remove();
-                                alert('Guest deleted successfully!');
-                            } else {
-                                alert('Failed to delete guest.');
+            if (labels.length > 0 && data.length > 0) {
+                new Chart(budgetChart, {
+                    type: 'pie',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            data: data,
+                            backgroundColor: [
+                                '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', 
+                                '#9966FF', '#FF9F40', '#8AC249', '#EA526F',
+                                '#23B5D3', '#279AF1'
+                            ]
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'right',
+                                labels: {
+                                    font: {
+                                        size: 14
+                                    }
+                                }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        const value = context.raw;
+                                        const total = data.reduce((a, b) => a + b, 0);
+                                        const percentage = ((value / total) * 100).toFixed(1);
+                                        return `${context.label}: ₱${value.toLocaleString()} (${percentage}%)`;
+                                    }
+                                }
                             }
-                        });
+                        }
                     }
                 });
-            });
+            }
         });
 
         function toggleTask(checkbox) {
@@ -247,7 +274,5 @@
             });
         }
     </script>
-
-    
 </body>
 </html>

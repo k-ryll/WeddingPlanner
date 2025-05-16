@@ -32,7 +32,9 @@
                 <li><a th:href="@{/home}">Home</a></li>
                 <li><a th:href="${project != null ? '/guests' : '#nogo'}">Guests</a></li>
                 <li><a th:href="${project != null ? '/planning' : '#nogo'}">Planning</a></li>
+                <li><a th:href="${project != null ? '/budget' : '#nogo'}">Budget</a></li>
                 <li class="active"><a th:href="${project != null ? '/seatplan' : '#nogo'}">Seat Plan</a></li>
+                <li><a th:href="@{/vendors}">Vendors</a></li>
             </ul>
             <div class="user-menu">
                 <i class="fa-regular fa-circle-user user-icon"></i>

@@ -1,0 +1,305 @@
+/* Admin-specific form styles */
+.add-vendor-container {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1.5rem;
+    align-items: flex-start;
+}
+
+.add-vendor-form {
+    flex: 1;
+    background-color: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(129, 66, 86, 0.1);
+    padding: 1.5rem;
+}
+
+.add-vendor-form h2 {
+    color: #814256;
+    margin-top: 0;
+    margin-bottom: 1.5rem;
+    border-bottom: 2px solid #f0e6e9;
+    padding-bottom: 0.75rem;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.form-group label {
+    font-weight: 500;
+    color: #814256;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    padding: 0.75rem;
+    border: 1px solid #f0e6e9;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    transition: border-color 0.2s;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: #814256;
+}
+
+.form-group.price-input {
+    display: none;
+}
+
+.form-group textarea {
+    min-height: 100px;
+    resize: vertical;
+}
+
+.submit-btn {
+    background-color: #814256;
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background-color 0.2s;
+    margin-top: 1rem;
+}
+
+.submit-btn:hover {
+    background-color: #6b3748;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Count badge in vendor group header */
+.vendor-count {
+    font-size: 0.9rem;
+    background-color: rgba(255,255,255,0.2);
+    padding: 0.25rem 0.5rem;
+    border-radius: 10px;
+}
+
+.vendor-group-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* Add vendor button */
+.action-buttons {
+    margin: 1rem 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.add-vendor-btn {
+    background-color: #814256;
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background-color 0.2s;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.add-vendor-btn:hover {
+    background-color: #6b3748;
+}
+
+.add-vendor-btn i {
+    font-size: 0.9rem;
+}
+
+/* Search bar styles */
+.search-container {
+    display: flex;
+    max-width: 500px;
+    width: 100%;
+}
+
+.search-input {
+    flex: 1;
+    padding: 0.75rem;
+    border: 1px solid #f0e6e9;
+    border-radius: 6px 0 0 6px;
+    font-size: 0.95rem;
+}
+
+.search-btn {
+    background-color: #814256;
+    color: white;
+    border: none;
+    border-radius: 0 6px 6px 0;
+    padding: 0 1rem;
+    cursor: pointer;
+}
+
+/* Vendor card actions */
+.vendor-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    margin-top: 1rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid #f0e6e9;
+}
+
+.action-btn {
+    padding: 0.5rem 0.75rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    border: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+.edit-btn {
+    background-color: #eaeaea;
+    color: #333;
+}
+
+.edit-btn:hover {
+    background-color: #d5d5d5;
+}
+
+.delete-btn {
+    background-color: #ffebee;
+    color: #d32f2f;
+}
+
+.delete-btn:hover {
+    background-color: #ffcdd2;
+}
+
+/* Categories Input Styles */
+.categories-input-container {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.categories-input {
+    padding: 0.75rem;
+    border: 1px solid #f0e6e9;
+    border-radius: 6px;
+    font-size: 0.95rem;
+}
+
+.categories-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    min-height: 1.5rem;
+}
+
+.tag {
+    background-color: #f0e6e9;
+    color: #814256;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.tag-remove {
+    cursor: pointer;
+    font-size: 0.8rem;
+    color: #814256;
+}
+
+.categories-suggestions {
+    margin-top: 0.5rem;
+}
+
+.suggestions-header {
+    font-size: 0.85rem;
+    color: #666;
+    margin-bottom: 0.25rem;
+}
+
+.suggestions-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+}
+
+.suggestion-item {
+    background-color: #eee;
+    color: #333;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.suggestion-item:hover {
+    background-color: #ddd;
+}
+
+/* Required field and help text styles */
+.required-field {
+    color: #d32f2f;
+    margin-left: 4px;
+}
+
+.help-text {
+    font-size: 0.85rem;
+    color: #666;
+    margin-top: 0.25rem;
+}
+
+/* Vendor Grid Layout */
+.vendor-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+}
+
+.vendor-card {
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(129, 66, 86, 0.1);
+    padding: 1.25rem;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.vendor-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 12px rgba(129, 66, 86, 0.15);
+}
+
+@media (max-width: 768px) {
+    .vendor-grid {
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    }
+} 

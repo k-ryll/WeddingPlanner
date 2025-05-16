@@ -10,6 +10,48 @@
     <script src="https://kit.fontawesome.com/b80e3de11b.js"></script>
     <script th:src="@{/js/userMenu.js}"></script>
     <title>Wedding Vendors</title>
+    <style>
+        .vendor-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+            padding: 1.5rem;
+        }
+        
+        .vendor-card {
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(129, 66, 86, 0.1);
+            padding: 1.25rem;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        
+        .vendor-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 12px rgba(129, 66, 86, 0.15);
+        }
+        
+        .filter-controls {
+            display: flex;
+            gap: 1rem;
+            margin: 1rem 0;
+            padding: 0 1.5rem;
+        }
+        
+        .search-input {
+            flex: 1;
+            padding: 0.75rem;
+            border: 1px solid #e0d0d5;
+            border-radius: 4px;
+        }
+        
+        .filter-select {
+            padding: 0.75rem;
+            border: 1px solid #e0d0d5;
+            border-radius: 4px;
+            min-width: 200px;
+        }
+    </style>
 </head>
 <body>
     <header>
@@ -42,59 +84,51 @@
             <input type="text" id="vendorSearch" placeholder="Search vendors..." class="search-input">
             <select id="categoryFilter" class="filter-select">
                 <option value="">All Categories</option>
-                <option th:each="vendorType : ${vendorTypes}" th:value="${vendorType.name}" th:text="${vendorType.name}">Category</option>
+                <option th:each="category : ${categories}" th:value="${category}" th:text="${category}">Category</option>
             </select>
         </div>
         
-        <div class="vendor-groups">
-            <div th:each="vendorType : ${vendorTypes}" th:id="'category-' + ${#strings.toLowerCase(vendorType.name)}" class="vendor-group">
-                <div class="vendor-group-header">
-                    <span th:text="${vendorType.name}">Category Name</span>
+        <div class="vendor-grid">
+            <div th:each="vendor : ${vendors}" class="vendor-card" th:data-name="${vendor.name}" th:data-category="${vendor.getCategoryNames()}" th:data-location="${vendor.location != null ? vendor.location : ''}">
+                <div class="vendor-header">
+                    <h3 class="vendor-name" th:text="${vendor.name}">Vendor Name</h3>
+                    <div class="vendor-category">
+                        <i class="fas fa-tag"></i>
+                        <span th:text="${vendor.getCategoryNames()}">Category</span>
+                    </div>
                 </div>
                 
-                <div class="vendor-cards">
-                    <div th:each="vendor : ${vendorType.vendors}" class="vendor-card">
-                        <div class="vendor-header">
-                            <h3 class="vendor-name" th:text="${vendor.name}">Vendor Name</h3>
-                            <div class="vendor-category">
-                                <i class="fas fa-tag"></i>
-                                <span th:text="${vendor.category}">Category</span>
-                            </div>
-                        </div>
-                        
-                        <div class="vendor-body">
-                            <div class="vendor-detail" th:if="${vendor.location}">
-                                <span class="detail-label">Location:</span>
-                                <span th:text="${vendor.location}">Location</span>
-                            </div>
-                            
-                            <div class="vendor-detail" th:if="${vendor.priceType == 'per_guest'}">
-                                <span class="detail-label">Price:</span>
-                                <span class="price-highlight" th:text="${'₱' + #numbers.formatDecimal(vendor.pricePerGuest, 1, 'COMMA', 2, 'POINT') + ' per guest'}">₱0.00 per guest</span>
-                            </div>
-                            
-                            <div class="vendor-detail" th:if="${vendor.priceType == 'fixed'}">
-                                <span class="detail-label">Price:</span>
-                                <span class="price-highlight" th:text="${'₱' + #numbers.formatDecimal(vendor.totalPrice, 1, 'COMMA', 2, 'POINT')}">₱0.00</span>
-                            </div>
-                            
-                            <div class="vendor-detail" th:if="${vendor.description}">
-                                <span class="detail-label">Description:</span>
-                                <p th:text="${vendor.description}">Description</p>
-                            </div>
-                            
-                            <div class="vendor-contact" th:if="${vendor.contact}">
-                                <a th:href="${vendor.contact}" target="_blank" class="contact-button">
-                                    <i class="fas fa-external-link-alt"></i> Contact
-                                </a>
-                            </div>
-                            
-                            <div class="vendor-actions" style="margin-top: 0.75rem; display: flex; gap: 0.5rem;">
-                                <a th:href="@{/budget(vendorId=${vendor.id})}" class="add-expense-button">
-                                    <i class="fas fa-plus-circle"></i> Add to Expense
-                                </a>
-                            </div>
-                        </div>
+                <div class="vendor-body">
+                    <div class="vendor-detail" th:if="${vendor.location}">
+                        <span class="detail-label">Location:</span>
+                        <span th:text="${vendor.location}">Location</span>
+                    </div>
+                    
+                    <div class="vendor-detail" th:if="${vendor.priceType == 'per_guest'}">
+                        <span class="detail-label">Price:</span>
+                        <span class="price-highlight" th:text="${'₱' + #numbers.formatDecimal(vendor.pricePerGuest, 1, 'COMMA', 2, 'POINT') + ' per guest'}">₱0.00 per guest</span>
+                    </div>
+                    
+                    <div class="vendor-detail" th:if="${vendor.priceType == 'fixed'}">
+                        <span class="detail-label">Price:</span>
+                        <span class="price-highlight" th:text="${'₱' + #numbers.formatDecimal(vendor.totalPrice, 1, 'COMMA', 2, 'POINT')}">₱0.00</span>
+                    </div>
+                    
+                    <div class="vendor-detail" th:if="${vendor.description}">
+                        <span class="detail-label">Description:</span>
+                        <p th:text="${vendor.description}">Description</p>
+                    </div>
+                    
+                    <div class="vendor-contact" th:if="${vendor.contact}">
+                        <a th:href="${vendor.contact}" target="_blank" class="contact-button">
+                            <i class="fas fa-external-link-alt"></i> Contact
+                        </a>
+                    </div>
+                    
+                    <div class="vendor-actions" style="margin-top: 0.75rem; display: flex; gap: 0.5rem;">
+                        <a th:href="@{/budget(vendorId=${vendor.id})}" class="add-expense-button">
+                            <i class="fas fa-plus-circle"></i> Add to Expense
+                        </a>
                     </div>
                 </div>
             </div>
@@ -106,47 +140,24 @@
             const searchInput = document.getElementById('vendorSearch');
             const categoryFilter = document.getElementById('categoryFilter');
             const vendorCards = document.querySelectorAll('.vendor-card');
-            const vendorGroups = document.querySelectorAll('.vendor-group');
             
             // Function to filter vendors
             function filterVendors() {
                 const searchTerm = searchInput.value.toLowerCase();
                 const selectedCategory = categoryFilter.value.toLowerCase();
                 
-                // Reset display
-                vendorGroups.forEach(group => {
-                    group.style.display = selectedCategory && 
-                        !group.id.toLowerCase().includes(selectedCategory) ? 'none' : 'block';
-                });
-                
-                // Count visible vendors per category
-                const visibleVendorsPerCategory = {};
-                
                 vendorCards.forEach(card => {
                     const vendorName = card.querySelector('.vendor-name').textContent.toLowerCase();
                     const vendorCategory = card.querySelector('.vendor-category span').textContent.toLowerCase();
-                    const parentGroup = card.closest('.vendor-group');
+                    const vendorLocation = card.getAttribute('data-location').toLowerCase();
                     
                     // Check if the card matches search and category filter
-                    const matchesSearch = !searchTerm || vendorName.includes(searchTerm);
+                    const matchesSearch = !searchTerm || vendorName.includes(searchTerm) || 
+                                          vendorCategory.includes(searchTerm) || vendorLocation.includes(searchTerm);
                     const matchesCategory = !selectedCategory || vendorCategory.includes(selectedCategory);
                     
                     const isVisible = matchesSearch && matchesCategory;
                     card.style.display = isVisible ? 'block' : 'none';
-                    
-                    // Track visible vendors for each category
-                    if (isVisible) {
-                        const categoryId = parentGroup.id;
-                        visibleVendorsPerCategory[categoryId] = (visibleVendorsPerCategory[categoryId] || 0) + 1;
-                    }
-                });
-                
-                // Hide empty categories
-                vendorGroups.forEach(group => {
-                    const categoryId = group.id;
-                    if (!visibleVendorsPerCategory[categoryId]) {
-                        group.style.display = 'none';
-                    }
                 });
             }
             

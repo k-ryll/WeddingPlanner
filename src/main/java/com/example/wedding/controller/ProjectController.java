@@ -52,7 +52,15 @@ public class ProjectController {
     private VendorService vendorService;
 
     @GetMapping("/project/{id}")
-    public String showProjectPage(@PathVariable Integer id, Model model) {
+    public String showProjectPage(@PathVariable Integer id, Model model, HttpSession session) {
+        // Check if user is logged in
+        User loggedUser = (User) session.getAttribute("loggedUser");
+        Boolean isAdmin = (Boolean) session.getAttribute("isAdmin");
+        
+        if (loggedUser == null && !Boolean.TRUE.equals(isAdmin)) {
+            return "redirect:/user/login";
+        }
+
         Project project = projectService.findById(id);
         if (project == null) {
             return "redirect:/home";
@@ -62,14 +70,34 @@ public class ProjectController {
         List<ItineraryItem> itinerary = itineraryService.findByProject(project);
         List<BudgetCategory> budgetCategories = budgetService.findByProject(project);
         
-        BigDecimal totalBudget = budgetService.getTotalBudget(project);
-        BigDecimal totalSpent = budgetService.getTotalSpent(project);
+        BigDecimal totalBudget = BigDecimal.ZERO;
+        BigDecimal totalSpent = BigDecimal.ZERO;
+        
+        // Calculate totals safely
+        if (budgetCategories != null) {
+            for (BudgetCategory category : budgetCategories) {
+                if (category.getBudget() != null) {
+                    totalBudget = totalBudget.add(category.getBudget());
+                }
+                if (category.getExpenses() != null) {
+                    for (Expense expense : category.getExpenses()) {
+                        if (expense.getAmount() != null) {
+                            totalSpent = totalSpent.add(expense.getAmount());
+                        }
+                    }
+                }
+            }
+        }
         
         // Guest summary
         List<Guest> guests = guestService.findByProject(project);
-        long totalGuests = guests.size();
-        long confirmedGuests = guests.stream().filter(g -> g.getRsvp() != null && g.getRsvp().equalsIgnoreCase("ACCEPTED")).count();
-        long pendingGuests = guests.stream().filter(g -> g.getRsvp() != null && g.getRsvp().equalsIgnoreCase("PENDING")).count();
+        long totalGuests = guests != null ? guests.size() : 0;
+        long confirmedGuests = guests != null ? guests.stream()
+            .filter(g -> g.getRsvp() != null && g.getRsvp().equalsIgnoreCase("ACCEPTED"))
+            .count() : 0;
+        long pendingGuests = guests != null ? guests.stream()
+            .filter(g -> g.getRsvp() != null && g.getRsvp().equalsIgnoreCase("PENDING"))
+            .count() : 0;
         
         model.addAttribute("project", project);
         model.addAttribute("projectId", id);

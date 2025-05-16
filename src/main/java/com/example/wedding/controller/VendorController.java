@@ -33,12 +33,20 @@ public class VendorController {
             return "redirect:/user/login";
         }
         
-        // Get all vendors
-        List<Vendor> vendors = vendorService.getAllVendors();
-        model.addAttribute("vendors", vendors);
-        
-        // Basic user can only view vendors, not add them
-        model.addAttribute("isAdmin", false);
+        try {
+            // Get all vendors
+            List<Vendor> vendors = vendorService.getAllVendors();
+            model.addAttribute("vendors", vendors);
+            
+            // Get all categories for the filter dropdown
+            List<String> categories = vendorService.getDistinctVendorCategories();
+            model.addAttribute("categories", categories);
+            
+            // Basic user can only view vendors, not add them
+            model.addAttribute("isAdmin", false);
+        } catch (Exception e) {
+            model.addAttribute("error", "Failed to load vendors: " + e.getMessage());
+        }
         
         return "user_vendors";
     }
