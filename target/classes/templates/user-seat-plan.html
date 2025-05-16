@@ -11,13 +11,20 @@
     <script th:src="@{/js/userMenu.js}"></script>
     <script th:inline="javascript">
         /*<![CDATA[*/
-        const projectId = /*[[${project?.id}]]*/ null;
-        const seatPlanId = /*[[${seatPlan?.id}]]*/ null;
+        try {
+            // Use window.projectId and window.seatPlanId to make them global
+            window.projectId = /*[[${project?.id}]]*/ null;
+            window.seatPlanId = /*[[${seatPlan?.id}]]*/ null;
+            console.log("Initializing - Project ID:", window.projectId);
+            console.log("Initializing - SeatPlan ID:", window.seatPlanId);
+        } catch (error) {
+            console.error("Error initializing variables:", error);
+        }
         /*]]>*/
     </script>
-    <script th:src="@{/js/seat-plan.js}"></script>
+    <script th:if="${project != null && seatPlan != null}" th:src="@{/js/user-seat-plan.js}"></script>
 </head>
-<body>
+<body th:data-project-id="${project?.id}" th:data-seat-plan-id="${seatPlan?.id}">
     <header>
         <img src="/images/logo.svg" class="logo" alt="logo">
         <div>
@@ -79,8 +86,8 @@
                                  th:classappend="${chair.guest != null} ? 'occupied' : ''"
                                  th:data-chair-id="${chair.id}"
                                  th:data-guest-name="${chair.guest?.name}"
-                                 th:text="${chair.guest != null} ? ${#strings.substring(chair.guest.name, 0, 1) + #strings.substring(chair.guest.name, #strings.indexOf(chair.guest.name, ' ') + 1, #strings.indexOf(chair.guest.name, ' ') + 2)} : ''"
-                                 onclick="openGuestAssignmentModal(this)">
+                                 th:attr="onclick='openGuestAssignmentModal(this, ' + ${chair.id} + ')'"
+                                 th:text="${chair.guest != null} ? ${#strings.substring(chair.guest.name, 0, 1) + #strings.substring(chair.guest.name, #strings.indexOf(chair.guest.name, ' ') + 1, #strings.indexOf(chair.guest.name, ' ') + 2)} : ''">
                             </div>
                         </div>
                     </div>
@@ -141,6 +148,7 @@
     <!-- Guest Assignment Modal -->
     <div id="guestAssignmentModal" class="modal" th:if="${project != null and seatPlan != null}">
         <div class="modal-content">
+            <span class="close" onclick="closeGuestModal()">&times;</span>
             <h2>Assign Guest</h2>
             <div class="modal-body">
                 <div id="currentGuestInfo" class="current-guest" style="display: none;">
@@ -166,266 +174,139 @@
     </div>
 
     <script>
-        let selectedChairId = null;
-        let selectedChairElement = null;
-
-        function openGuestAssignmentModal(chairElement) {
-            if (!projectId || !seatPlanId) {
-                alert("Project or Seat Plan not available.");
+        // Direct inline backup version of the function
+        function openGuestAssignmentModal(chairElement, chairId) {
+            console.log("INLINE: Opening guest assignment modal for chair", chairId);
+            try {
+                // Explicitly set these as global variables
+                window.selectedChairElement = chairElement;
+                window.selectedChairId = chairId || chairElement.getAttribute('data-chair-id');
+                console.log("INLINE: Set selectedChairId =", window.selectedChairId);
+                
+                // Set the current guest name if exists
+                const currentGuestName = chairElement.getAttribute('data-guest-name');
+                if (currentGuestName) {
+                    document.getElementById('currentGuestInfo').style.display = 'block';
+                    document.getElementById('currentGuestName').textContent = currentGuestName;
+                } else {
+                    document.getElementById('currentGuestInfo').style.display = 'none';
+                }
+                
+                const modal = document.getElementById('guestAssignmentModal');
+                if (modal) {
+                    console.log("INLINE: Modal found, showing it");
+                    modal.style.display = 'block';
+                } else {
+                    console.error("INLINE: Guest assignment modal not found");
+                    alert("Error: Guest assignment modal not found");
+                }
+            } catch (error) {
+                console.error("INLINE: Error in openGuestAssignmentModal:", error);
+                alert("Error: " + error.message);
+            }
+        }
+        
+        // Add our own version of assignGuest that doesn't rely on jQuery
+        function assignGuest() {
+            console.log("INLINE assignGuest - selectedChairId:", window.selectedChairId);
+            if (!window.selectedChairId) {
+                console.error("INLINE: No chair ID selected!");
+                alert("Error: No chair selected");
                 return;
             }
-            selectedChairElement = $(chairElement);
-            selectedChairId = selectedChairElement.data('chair-id');
             
-            const currentGuestName = selectedChairElement.data('guest-name');
-            const currentGuestInfo = $('#currentGuestInfo');
-            const currentGuestNameSpan = $('#currentGuestName');
-            
-            if (currentGuestName) {
-                currentGuestInfo.show();
-                currentGuestNameSpan.text(currentGuestName);
-            } else {
-                currentGuestInfo.hide();
-            }
-            
-            document.getElementById('guestAssignmentModal').style.display = 'block';
-        }
-
-        function closeGuestModal() {
-            document.getElementById('guestAssignmentModal').style.display = 'none';
-            selectedChairId = null;
-            selectedChairElement = null;
-            document.getElementById('guestSelect').value = '';
-            $('#currentGuestInfo').hide();
-        }
-
-        function removeGuest() {
-            if (!selectedChairId || !projectId || !seatPlanId) return;
-
-            $.ajax({
-                url: '/seatplan/remove-guest', // Adjusted for user context, no projectId in URL
-                method: 'POST',
-                data: {
-                    chairId: selectedChairId
-                },
-                success: function(response) {
-                    if (response && response.id) {
-                        selectedChairElement.removeClass('occupied');
-                        selectedChairElement.text('');
-                        selectedChairElement.data('guest-name', null);
-                        closeGuestModal();
-                    } else {
-                         alert("Failed to remove guest. Please try again.");
-                        // window.location.reload(); // Avoid reload if it's just a soft failure
-                    }
-                },
-                error: function(xhr, status, error) {
-                    console.error('Error removing guest:', error);
-                    alert('Error removing guest. Please try again or refresh the page.');
-                    // window.location.reload();
-                }
-            });
-        }
-
-        function assignGuest() {
-            if (!projectId || !seatPlanId) return;
             const guestId = document.getElementById('guestSelect').value;
             if (!guestId) {
-                alert('Please select a guest');
+                alert("Please select a guest");
                 return;
             }
-
-            $.ajax({
-                url: '/seatplan/assign-guest', // Adjusted for user context
-                method: 'POST',
-                data: {
-                    chairId: selectedChairId,
-                    guestId: guestId
-                },
-                success: function(response) {
-                    if (response && response.id) {
-                        const chairElement = $(`[data-chair-id="${response.id}"]`);
-                        if (response.guest) {
-                            chairElement.addClass('occupied');
-                            chairElement.text(getInitials(response.guest.name));
-                            chairElement.data('guest-name', response.guest.name);
-                        } else {
-                            chairElement.removeClass('occupied');
-                            chairElement.text('');
-                            chairElement.data('guest-name', null);
-                        }
-                        closeGuestModal();
-                    } else {
-                        alert("Failed to assign guest. Please try again.");
-                        // window.location.reload();
-                    }
-                },
-                error: function(xhr, status, error) {
-                    console.error('Error assigning guest:', error);
-                     alert('Error assigning guest. Please try again or refresh the page.');
-                    // window.location.reload();
-                }
-            });
-        }
-
-        function getInitials(name) {
-            if (!name) return '';
-            const parts = name.split(' ');
-            if (parts.length > 1) {
-                return (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase();
-            }
-            return name.charAt(0).toUpperCase();
-        }
-
-        // Add table functionality
-        $('#addTableBtn').click(function() {
-            if (!projectId || !seatPlanId) {
-                 alert("Cannot add table without an active project and seat plan.");
-                return;
-            }
-            $('#addTableModal').show();
-        });
-
-        function closeModal() {
-            $('#addTableModal').hide();
-        }
-
-        $('#addTableForm').submit(function(e) {
-            e.preventDefault();
-            if (!projectId || !seatPlanId) return;
-
-            const tableData = {
-                tableName: $('#tableName').val(),
-                numberOfChairs: parseInt($('#numberOfChairs').val())
-            };
-
-            $.ajax({
-                url: '/seatplan/add-table', // User context
-                method: 'POST',
-                contentType: 'application/json',
-                data: JSON.stringify(tableData),
-                success: function(response) {
-                    window.location.reload(); // Reload to see the new table
-                },
-                error: function(xhr, status, error) {
-                    console.error('Error adding table:', error);
-                    alert('Error adding table. Please try again.');
-                   // window.location.reload();
-                }
-            });
-        });
-
-        // Edit table functionality
-        // Ensure edit buttons are only interactive if project/seatplan exists (via th:if on parent or JS check)
-        $(document).on('click', '.edit-btn', function() { // Use event delegation for dynamically added elements
-            if (!projectId || !seatPlanId) {
-                alert("Cannot edit table without an active project and seat plan.");
-                return;
-            }
-            const tableId = $(this).data('id');
-            const tableElement = $(this).closest('.table'); // Corrected to use tableElement consistently
-            const tableName = tableElement.find('.table-name').text();
-            // Correctly count chairs based on existing chair elements or a data attribute if available
-            const chairCount = tableElement.find('.chair').length;
-
-
-            $('#editTableId').val(tableId);
-            $('#editTableName').val(tableName);
-            $('#editNumberOfChairs').val(chairCount);
-            $('#editTableModal').show();
-        });
-        
-
-        function closeEditModal() {
-            $('#editTableModal').hide();
-        }
-
-        $('#editTableForm').submit(function(e) {
-            e.preventDefault();
-            if (!projectId || !seatPlanId) return;
-            const tableId = $('#editTableId').val();
-            const tableData = {
-                tableName: $('#editTableName').val(),
-                numberOfChairs: parseInt($('#editNumberOfChairs').val())
-            };
-
-            $.ajax({
-                url: `/seatplan/update-table/${tableId}`, // User context
-                method: 'PUT',
-                contentType: 'application/json',
-                data: JSON.stringify(tableData),
-                success: function(response) {
+            
+            console.log("INLINE: Assigning guest", guestId, "to chair", window.selectedChairId);
+            
+            // Use XMLHttpRequest for maximum compatibility
+            const xhr = new XMLHttpRequest();
+            xhr.open('POST', '/seatplan/assign-guest');
+            xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+            xhr.onload = function() {
+                if (xhr.status === 200) {
+                    alert("Guest assigned successfully! Refreshing page.");
                     window.location.reload();
-                },
-                error: function(xhr, status, error) {
-                    console.error('Error updating table:', error);
-                    alert('Error updating table. Please try again.');
-                    // window.location.reload();
+                } else {
+                    console.error("INLINE: Error assigning guest", xhr.statusText);
+                    alert("Error assigning guest. Please try again.");
                 }
-            });
-        });
-
-        // Delete table functionality
-        $(document).on('click', '.delete-btn', function() { // Event delegation
-            if (!projectId || !seatPlanId) {
-                alert("Cannot delete table without an active project and seat plan.");
-                return;
-            }
-            if (confirm('Are you sure you want to delete this table?')) {
-                const tableId = $(this).data('id');
-                $.ajax({
-                    url: `/seatplan/delete-table/${tableId}`, // User context
-                    method: 'DELETE',
-                    success: function() {
-                        window.location.reload();
-                    },
-                    error: function(xhr, status, error) {
-                        console.error('Error deleting table:', error);
-                        alert('Error deleting table. Please try again.');
-                        // window.location.reload();
-                    }
-                });
-            }
-        });
-
-        // Save layout functionality
-        $('#saveBtn').click(function() {
-            if (!projectId || !seatPlanId) {
-                alert("Cannot save layout without an active project and seat plan.");
-                return;
-            }
-            const tables = [];
-            $('.table').each(function() {
-                const table = $(this);
-                tables.push({
-                    id: table.data('id'),
-                    positionX: parseInt(table.css('left')),
-                    positionY: parseInt(table.css('top'))
-                });
-            });
-
-            $.ajax({
-                url: '/seatplan/update-positions', // User context
-                method: 'POST',
-                contentType: 'application/json',
-                data: JSON.stringify(tables),
-                success: function(response) {
-                    alert('Layout saved successfully!');
-                },
-                error: function(xhr, status, error) {
-                    console.error('Error saving layout:', error);
-                    alert('Error saving layout. Please try again.');
-                }
-            });
-        });
+            };
+            xhr.onerror = function() {
+                console.error("INLINE: Network error assigning guest");
+                alert("Network error when assigning guest. Please try again.");
+            };
+            xhr.send('chairId=' + window.selectedChairId + '&guestId=' + guestId);
+        }
         
-        // Make tables draggable if project and seatPlan exist
-        $(function() {
-            if (projectId && seatPlanId) {
-                $("#seatPlanArea .table").draggable({
-                    containment: "parent",
-                    handle: ".table-header" // Optional: specify a handle for dragging
+        function removeGuest() {
+            console.log("INLINE removeGuest - selectedChairId:", window.selectedChairId);
+            if (!window.selectedChairId) {
+                console.error("INLINE: No chair ID selected!");
+                alert("Error: No chair selected");
+                return;
+            }
+            
+            console.log("INLINE: Removing guest from chair", window.selectedChairId);
+            
+            // Use XMLHttpRequest for maximum compatibility
+            const xhr = new XMLHttpRequest();
+            xhr.open('POST', '/seatplan/remove-guest');
+            xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+            xhr.onload = function() {
+                if (xhr.status === 200) {
+                    alert("Guest removed successfully! Refreshing page.");
+                    window.location.reload();
+                } else {
+                    console.error("INLINE: Error removing guest", xhr.statusText);
+                    alert("Error removing guest. Please try again.");
+                }
+            };
+            xhr.onerror = function() {
+                console.error("INLINE: Network error removing guest");
+                alert("Network error when removing guest. Please try again.");
+            };
+            xhr.send('chairId=' + window.selectedChairId);
+        }
+        
+        function closeGuestModal() {
+            console.log("INLINE: Closing guest modal");
+            const modal = document.getElementById('guestAssignmentModal');
+            if (modal) {
+                modal.style.display = 'none';
+            }
+            window.selectedChairId = null;
+            window.selectedChairElement = null;
+        }
+        
+        // Add event listeners after page load
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log("INLINE: DOMContentLoaded event");
+            document.querySelectorAll('.chair').forEach(function(chair) {
+                chair.addEventListener('click', function() {
+                    console.log("INLINE: Chair clicked with ID", this.dataset.chairId);
+                    openGuestAssignmentModal(this, this.dataset.chairId);
                 });
+            });
+            
+            // Override the existing buttons with our inline versions
+            const assignButton = document.querySelector('.modal-actions .btn-primary');
+            if (assignButton) {
+                assignButton.onclick = assignGuest;
+            }
+            
+            const removeButton = document.querySelector('#currentGuestInfo .btn-danger');
+            if (removeButton) {
+                removeButton.onclick = removeGuest;
+            }
+            
+            const cancelButton = document.querySelector('.modal-actions .btn-secondary');
+            if (cancelButton) {
+                cancelButton.onclick = closeGuestModal;
             }
         });
     </script>

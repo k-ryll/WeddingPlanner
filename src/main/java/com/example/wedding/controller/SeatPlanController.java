@@ -2,6 +2,7 @@ package com.example.wedding.controller;
 
 import com.example.wedding.model.*;
 import com.example.wedding.service.*;
+import com.example.wedding.dto.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -11,6 +12,8 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.HashMap;
+import java.util.Map;
 
 @Controller
 public class SeatPlanController {
@@ -100,7 +103,7 @@ public class SeatPlanController {
     // User endpoints
     @PostMapping("/seatplan/assign-guest")
     @ResponseBody
-    public ResponseEntity<Chair> assignGuestToChair(
+    public ResponseEntity<ChairDTO> assignGuestToChair(
             @SessionAttribute(name = "loggedUser", required = false) User user,
             @RequestParam Integer chairId,
             @RequestParam Integer guestId) {
@@ -124,10 +127,11 @@ public class SeatPlanController {
                 return ResponseEntity.notFound().build();
             }
             
-            // Ensure the guest is properly loaded in the response
-            chair.getGuest(); // This will trigger lazy loading if needed
+            // Convert to DTO to avoid circular references
+            GuestDTO guestDTO = new GuestDTO(guest.getGuestId(), guest.getName(), guest.getEmail());
+            ChairDTO chairDTO = new ChairDTO(chair.getId(), chair.getPosition(), guestDTO);
             
-            return ResponseEntity.ok(chair);
+            return ResponseEntity.ok(chairDTO);
         } catch (Exception e) {
             return ResponseEntity.status(500).build();
         }
@@ -135,7 +139,7 @@ public class SeatPlanController {
 
     @PostMapping("/seatplan/remove-guest")
     @ResponseBody
-    public ResponseEntity<Chair> removeGuestFromChair(
+    public ResponseEntity<ChairDTO> removeGuestFromChair(
             @SessionAttribute(name = "loggedUser", required = false) User user,
             @RequestParam Integer chairId) {
         try {
@@ -150,7 +154,11 @@ public class SeatPlanController {
 
             chairService.removeGuestFromChair(chairId);
             Chair chair = chairService.getChairById(chairId);
-            return ResponseEntity.ok(chair);
+            
+            // Convert to DTO to avoid circular references
+            ChairDTO chairDTO = new ChairDTO(chair.getId(), chair.getPosition(), null);
+            
+            return ResponseEntity.ok(chairDTO);
         } catch (Exception e) {
             return ResponseEntity.status(500).build();
         }
@@ -279,7 +287,7 @@ public class SeatPlanController {
     // Admin endpoints
     @PostMapping("/project/{projectId}/seatplan/assign-guest")
     @ResponseBody
-    public ResponseEntity<Chair> assignGuestToChairAdmin(
+    public ResponseEntity<ChairDTO> assignGuestToChairAdmin(
             @PathVariable Integer projectId,
             @RequestParam Integer chairId,
             @RequestParam Integer guestId) {
@@ -294,10 +302,11 @@ public class SeatPlanController {
                 return ResponseEntity.notFound().build();
             }
             
-            // Ensure the guest is properly loaded in the response
-            chair.getGuest(); // This will trigger lazy loading if needed
+            // Convert to DTO to avoid circular references
+            GuestDTO guestDTO = new GuestDTO(guest.getGuestId(), guest.getName(), guest.getEmail());
+            ChairDTO chairDTO = new ChairDTO(chair.getId(), chair.getPosition(), guestDTO);
             
-            return ResponseEntity.ok(chair);
+            return ResponseEntity.ok(chairDTO);
         } catch (Exception e) {
             return ResponseEntity.status(500).build();
         }
@@ -305,13 +314,17 @@ public class SeatPlanController {
 
     @PostMapping("/project/{projectId}/seatplan/remove-guest")
     @ResponseBody
-    public ResponseEntity<Chair> removeGuestFromChairAdmin(
+    public ResponseEntity<ChairDTO> removeGuestFromChairAdmin(
             @PathVariable Integer projectId,
             @RequestParam Integer chairId) {
         try {
             chairService.removeGuestFromChair(chairId);
             Chair chair = chairService.getChairById(chairId);
-            return ResponseEntity.ok(chair);
+            
+            // Convert to DTO to avoid circular references
+            ChairDTO chairDTO = new ChairDTO(chair.getId(), chair.getPosition(), null);
+            
+            return ResponseEntity.ok(chairDTO);
         } catch (Exception e) {
             return ResponseEntity.status(500).build();
         }

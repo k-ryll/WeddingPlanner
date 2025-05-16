@@ -162,7 +162,7 @@
                     <select id="guestSelect">
                         <option value="">Select a guest</option>
                         <option th:each="guest : ${guests}"
-                                th:value="${guest.guestId}" <!-- Assuming guests list from controller has guestId -->
+                                th:value="${guest.guestId}"
                                 th:text="${guest.name}">
                         </option>
                     </select>
@@ -269,7 +269,9 @@
                 },
                 error: function(xhr, status, error) {
                     console.error('Error assigning guest:', error);
-                     alert('Error assigning guest. ' + (xhr.responseText || ''));
+                    console.error('Status:', status);
+                    console.error('Response:', xhr.responseText);
+                    alert('Error assigning guest. ' + (xhr.responseText || ''));
                 }
             });
         }
