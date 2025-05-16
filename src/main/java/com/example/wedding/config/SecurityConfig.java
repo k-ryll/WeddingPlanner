@@ -57,5 +57,4 @@ public class SecurityConfig {
 	    return handler;
 	}
 
-
 }

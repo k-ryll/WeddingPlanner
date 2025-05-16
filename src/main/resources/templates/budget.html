@@ -20,6 +20,7 @@
                 <li><a th:href="${projectId != null ? '/project/' + projectId + '/planning' : '/planning'}">Planning</a></li>
                 <li class="active"><a th:href="${projectId != null ? '/project/' + projectId + '/budget' : '#nogo'}">Budget</a></li>
                 <li><a th:href="${projectId != null ? '/project/' + projectId + '/seatplan' : '#nogo'}">Seat Plan</a></li>
+                <li><a th:href="@{/vendors}">Vendors</a></li>
                 <li><a href="/admin/home">Admin Page</a></li>
             </ul>
             <div class="user-menu">

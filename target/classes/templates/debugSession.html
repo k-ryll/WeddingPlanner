@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Session Information</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 20px;
+        }
+        .debug-info {
+            background-color: #f5f5f5;
+            border: 1px solid #ddd;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        h1 {
+            color: #333;
+        }
+        h2 {
+            color: #555;
+            margin-top: 20px;
+        }
+        .attribute {
+            margin: 10px 0;
+            padding: 5px;
+            border-bottom: 1px solid #eee;
+        }
+        .true {
+            color: green;
+            font-weight: bold;
+        }
+        .false {
+            color: red;
+            font-weight: bold;
+        }
+        .null {
+            color: #999;
+            font-style: italic;
+        }
+        .nav {
+            margin-top: 30px;
+            padding-top: 15px;
+            border-top: 1px solid #ddd;
+        }
+    </style>
+</head>
+<body>
+    <h1>Session Debug Information</h1>
+    
+    <div class="debug-info">
+        <h2>Session ID</h2>
+        <div th:text="${sessionId}">session-id-here</div>
+        
+        <h2>Admin Status</h2>
+        <div th:if="${isAdmin != null && isAdmin == true}" class="true">Admin: TRUE</div>
+        <div th:if="${isAdmin != null && isAdmin == false}" class="false">Admin: FALSE</div>
+        <div th:if="${isAdmin == null}" class="null">Admin: NULL (not set)</div>
+        
+        <h2>Session Attributes</h2>
+        <div th:if="${#lists.isEmpty(sessionAttributes)}" class="null">No attributes found in session</div>
+        <div th:each="attr : ${sessionAttributes}" class="attribute">
+            <span th:text="${attr}">attribute-name</span>
+        </div>
+    </div>
+    
+    <div class="nav">
+        <p><a href="/admin/login">Go to Admin Login</a></p>
+        <p><a href="/admin/home">Go to Admin Dashboard</a> (only works if logged in)</p>
+        <p><a href="/admin/vendors">Go to Admin Vendors</a> (only works if logged in)</p>
+    </div>
+</body>
+</html> 

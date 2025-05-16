@@ -14,6 +14,7 @@ import com.example.wedding.model.Project;
 import com.example.wedding.model.User;
 import com.example.wedding.service.ProjectService;
 import com.example.wedding.service.UserService;
+import com.example.wedding.service.VendorService;
 
 import jakarta.servlet.http.HttpSession;
 
@@ -25,6 +26,9 @@ public class AdminController {
     @Autowired
     private ProjectService projectService;
 
+    @Autowired
+    private VendorService vendorService;
+
     @GetMapping("/admin/login")
     public String showAdminLogin() {
         return "adminLogin";
@@ -35,17 +39,28 @@ public class AdminController {
             @RequestParam("email") String email,
             @RequestParam("password") String password,
             RedirectAttributes redi, HttpSession session) {
+        System.out.println("Admin login attempt: " + email);
+        
         // Admin authentication without database user
         if(email.equals("admin") && password.equals("password")) {
+            System.out.println("Admin login successful, setting session attribute");
             session.setAttribute("isAdmin", true);
             return "redirect:/admin/home";
         }
+        
+        System.out.println("Admin login failed");
         redi.addFlashAttribute("error", "Invalid admin credentials.");
         return "redirect:/admin/login";
     }
     
     @GetMapping("/admin/home")
-    public String showAdminHome(Model model) {
+    public String showAdminHome(HttpSession session, Model model) {
+        // Check if admin is logged in
+        Boolean isAdmin = (Boolean) session.getAttribute("isAdmin");
+        if (isAdmin == null || !isAdmin) {
+            return "redirect:/admin/login";
+        }
+        
         model.addAttribute("project", new Project());
         model.addAttribute("brides", userService.getBrides());
         model.addAttribute("grooms", userService.getGrooms());
@@ -126,5 +141,38 @@ public class AdminController {
             redirectAttributes.addFlashAttribute("error", e.getMessage());
             return "redirect:/admin/home";
         }
+    }
+
+    @GetMapping("/admin/logout")
+    public String adminLogout(HttpSession session) {
+        session.removeAttribute("isAdmin");
+        return "redirect:/admin/login";
+    }
+
+    @GetMapping("/admin/session-test")
+    public String testAdminSession(HttpSession session, Model model) {
+        // Log and display session attributes
+        Boolean isAdmin = (Boolean) session.getAttribute("isAdmin");
+        System.out.println("Admin session test: isAdmin = " + isAdmin);
+        
+        model.addAttribute("isAdmin", isAdmin);
+        model.addAttribute("sessionId", session.getId());
+        model.addAttribute("allAttributes", session.getAttributeNames());
+        
+        // Add database connectivity check
+        try {
+            // Attempt to get vendor count to check database connectivity
+            long vendorCount = vendorService.getAllVendors().size();
+            model.addAttribute("dbStatus", "Connected");
+            model.addAttribute("vendorCount", vendorCount);
+            System.out.println("Database check successful. Found " + vendorCount + " vendors.");
+        } catch (Exception e) {
+            model.addAttribute("dbStatus", "Error: " + e.getMessage());
+            model.addAttribute("vendorCount", 0);
+            System.err.println("Database check failed: " + e.getMessage());
+            e.printStackTrace();
+        }
+        
+        return "admin_session_test";
     }
 }

@@ -1,8 +1,10 @@
 package com.example.wedding.repository;
 
+import com.example.wedding.model.Category;
 import com.example.wedding.model.Vendor;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -11,7 +13,8 @@ import java.util.List;
 public interface VendorRepository extends JpaRepository<Vendor, Integer> {
     
     // Find vendors by category
-    List<Vendor> findByCategory(String category);
+    @Query("SELECT v FROM Vendor v JOIN v.categories c WHERE c.name = :categoryName")
+    List<Vendor> findByCategory(@Param("categoryName") String categoryName);
     
     // Find vendors by location
     List<Vendor> findByLocation(String location);
@@ -26,7 +29,7 @@ public interface VendorRepository extends JpaRepository<Vendor, Integer> {
     // Search vendors by name (containing the search term)
     List<Vendor> findByNameContainingIgnoreCase(String searchTerm);
     
-    // Get all distinct categories
-    @Query("SELECT DISTINCT v.category FROM Vendor v ORDER BY v.category")
-    List<String> findAllCategories();
+    // Find vendors that have any of the given categories
+    @Query("SELECT DISTINCT v FROM Vendor v JOIN v.categories c WHERE c IN :categories")
+    List<Vendor> findByCategories(@Param("categories") List<Category> categories);
 } 

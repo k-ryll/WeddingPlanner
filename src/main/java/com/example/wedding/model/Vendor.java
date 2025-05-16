@@ -2,6 +2,9 @@ package com.example.wedding.model;
 
 import jakarta.persistence.*;
 import java.math.BigDecimal;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Entity
 @Table(name = "vendor")
@@ -13,7 +16,17 @@ public class Vendor {
     
     private String name;
     
+    // Keep this field for backward compatibility but mark it as transient so it's not persisted
+    @Transient
     private String category;
+    
+    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @JoinTable(
+        name = "vendor_category",
+        joinColumns = @JoinColumn(name = "vendor_id"),
+        inverseJoinColumns = @JoinColumn(name = "category_id")
+    )
+    private Set<Category> categories = new HashSet<>();
     
     private String location;
     
@@ -52,12 +65,45 @@ public class Vendor {
         this.name = name;
     }
     
+    // For backward compatibility with existing code
     public String getCategory() {
-        return category;
+        if (categories == null || categories.isEmpty()) {
+            return null;
+        }
+        // Return the first category name for backward compatibility
+        return categories.iterator().next().getName();
     }
     
+    // For backward compatibility with existing code
     public void setCategory(String category) {
         this.category = category;
+    }
+    
+    public Set<Category> getCategories() {
+        return categories;
+    }
+    
+    public void setCategories(Set<Category> categories) {
+        this.categories = categories;
+    }
+    
+    // Helper method to add a category
+    public void addCategory(Category category) {
+        categories.add(category);
+        category.getVendors().add(this);
+    }
+    
+    // Helper method to remove a category
+    public void removeCategory(Category category) {
+        categories.remove(category);
+        category.getVendors().remove(this);
+    }
+    
+    // Get all category names as a comma-separated string
+    public String getCategoryNames() {
+        return categories.stream()
+                .map(Category::getName)
+                .collect(Collectors.joining(", "));
     }
     
     public String getLocation() {

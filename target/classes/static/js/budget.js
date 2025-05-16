@@ -1,6 +1,6 @@
 function openBudgetModal() {
     const modal = document.getElementById('budgetModal');
-    modal.style.display = 'flex';
+    modal.classList.add('show');
     
     // Reset form and scrolling
     if (modal.querySelector('form')) {
@@ -18,14 +18,15 @@ function openBudgetModal() {
 }
 
 function closeBudgetModal() {
-    document.getElementById('budgetModal').style.display = 'none';
+    const modal = document.getElementById('budgetModal');
+    modal.classList.remove('show');
     // Restore scrolling on the body
     document.body.style.overflow = '';
 }
 
 function openBudgetCategoryModal() {
     const modal = document.getElementById('budgetCategoryModal');
-    modal.style.display = 'flex';
+    modal.classList.add('show');
     
     // Reset form and scrolling
     if (modal.querySelector('form')) {
@@ -43,7 +44,8 @@ function openBudgetCategoryModal() {
 }
 
 function closeBudgetCategoryModal() {
-    document.getElementById('budgetCategoryModal').style.display = 'none';
+    const modal = document.getElementById('budgetCategoryModal');
+    modal.classList.remove('show');
     // Restore scrolling on the body
     document.body.style.overflow = '';
 }
@@ -57,7 +59,7 @@ function openEditCategoryModal(categoryId, name, budget, description) {
     document.getElementById('editCategoryBudget').value = budget;
     document.getElementById('editCategoryDescription').value = description || '';
     
-    modal.style.display = 'flex';
+    modal.classList.add('show');
     
     // Reset the scroll position of the modal content
     const modalContent = modal.querySelector('.modal-content');
@@ -70,7 +72,8 @@ function openEditCategoryModal(categoryId, name, budget, description) {
 }
 
 function closeEditCategoryModal() {
-    document.getElementById('editCategoryModal').style.display = 'none';
+    const modal = document.getElementById('editCategoryModal');
+    modal.classList.remove('show');
     // Restore scrolling on the body
     document.body.style.overflow = '';
 }
@@ -80,7 +83,7 @@ window.onclick = function(event) {
     const modals = document.querySelectorAll('.modal');
     modals.forEach(modal => {
         if (event.target === modal) {
-            modal.style.display = 'none';
+            modal.classList.remove('show');
             // Restore scrolling on the body
             document.body.style.overflow = '';
         }

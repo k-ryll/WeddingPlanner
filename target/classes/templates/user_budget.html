@@ -20,6 +20,7 @@
                 <li><a th:href="@{/planning}">Planning</a></li>
                 <li class="active"><a th:href="@{/budget}">Budget</a></li>
                 <li><a th:href="@{/seatplan}">Seat Plan</a></li>
+                <li><a th:href="@{/vendors}">Vendors</a></li>
             </ul>
             <div class="user-menu">
                 <i class="fa-regular fa-circle-user user-icon"></i>
@@ -302,6 +303,10 @@
             // Get guest count from server-side variable
             const totalGuests = /*[[${totalGuests}]]*/ 0;
             
+            // Check if we need to pre-select a vendor
+            const preSelectVendorId = /*[[${preSelectVendorId}]]*/ null;
+            const openExpenseModal = /*[[${openExpenseModal}]]*/ false;
+            
             // Store all vendor options for filtering
             const vendorOptions = [];
             const vendorOptgroups = Array.from(vendorSelect.querySelectorAll('optgroup')).filter(group => group.id !== 'matchingVendors');
@@ -336,6 +341,20 @@
                     }
                 });
             });
+            
+            // Pre-select vendor if one was specified in the URL
+            if (preSelectVendorId) {
+                // Find the vendor option
+                vendorSelect.value = preSelectVendorId;
+                
+                // Trigger the change event to update price information
+                vendorSelect.dispatchEvent(new Event('change'));
+                
+                // Open the expense modal
+                if (openExpenseModal) {
+                    openBudgetModal();
+                }
+            }
             
             // Function to filter vendors based on selected category
             function filterVendorsByCategory(categoryName) {

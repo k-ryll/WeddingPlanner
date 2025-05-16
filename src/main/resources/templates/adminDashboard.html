@@ -7,7 +7,7 @@
     <link rel="stylesheet" th:href="@{/styles/admin.css}">
     <script src="https://kit.fontawesome.com/b80e3de11b.js" ></script>
     <script th:src="@{/js/userMenu.js}"></script>
-    <title>Document</title>
+    <title>Admin Dashboard</title>
 </head>
 <body>
     <header>
@@ -15,14 +15,15 @@
         <div>
             
                 <ul>
-                    <li class="active"> <a th:href="@{/home}">Projects</a> </li>
+                    <li class="active"> <a th:href="@{/admin/home}">Projects</a> </li>
                     <li><a th:href="@{/admin/users}">Users</a></li>
+                    <li><a th:href="@{/admin/vendors}">Vendors</a></li>
                 </ul>
             
                 <div class="user-menu">
                     <i class="fa-regular fa-circle-user user-icon"></i>
                     <div class="user-dropdown">
-                        <a th:href="@{/logout}" class="dropdown-item">
+                        <a th:href="@{/admin/logout}" class="dropdown-item">
                             <i class="fas fa-sign-out-alt"></i>
                             Logout
                         </a>

@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" th:href="@{/styles/styles.css}">
+    <link rel="stylesheet" th:href="@{/styles/planning.css}">
+    <link rel="stylesheet" th:href="@{/styles/modal.css}">
+    <link rel="stylesheet" th:href="@{/styles/vendors.css}">
+    <script src="https://kit.fontawesome.com/b80e3de11b.js"></script>
+    <script th:src="@{/js/userMenu.js}"></script>
+    <title>Wedding Vendors</title>
+</head>
+<body>
+    <header>
+        <img src="/images/logo.svg" class="logo" alt="logo">
+        <div>
+            <ul>
+                <li><a th:href="@{/home}">Home</a></li>
+                <li><a th:href="@{/guests}">Guests</a></li>
+                <li><a th:href="@{/planning}">Planning</a></li>
+                <li><a th:href="@{/budget}">Budget</a></li>
+                <li><a th:href="@{/seatplan}">Seat Plan</a></li>
+                <li class="active"><a th:href="@{/vendors}">Vendors</a></li>
+            </ul>
+            <div class="user-menu">
+                <i class="fa-regular fa-circle-user user-icon"></i>
+                <div class="user-dropdown">
+                    <a th:href="@{/logout}" class="dropdown-item">
+                        <i class="fas fa-sign-out-alt"></i>
+                        Logout
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <h1>Wedding Vendors</h1>
+        
+        <div class="filter-controls">
+            <input type="text" id="vendorSearch" placeholder="Search vendors..." class="search-input">
+            <select id="categoryFilter" class="filter-select">
+                <option value="">All Categories</option>
+                <option th:each="vendorType : ${vendorTypes}" th:value="${vendorType.name}" th:text="${vendorType.name}">Category</option>
+            </select>
+        </div>
+        
+        <div class="vendor-groups">
+            <div th:each="vendorType : ${vendorTypes}" th:id="'category-' + ${#strings.toLowerCase(vendorType.name)}" class="vendor-group">
+                <div class="vendor-group-header">
+                    <span th:text="${vendorType.name}">Category Name</span>
+                </div>
+                
+                <div class="vendor-cards">
+                    <div th:each="vendor : ${vendorType.vendors}" class="vendor-card">
+                        <div class="vendor-header">
+                            <h3 class="vendor-name" th:text="${vendor.name}">Vendor Name</h3>
+                            <div class="vendor-category">
+                                <i class="fas fa-tag"></i>
+                                <span th:text="${vendor.category}">Category</span>
+                            </div>
+                        </div>
+                        
+                        <div class="vendor-body">
+                            <div class="vendor-detail" th:if="${vendor.location}">
+                                <span class="detail-label">Location:</span>
+                                <span th:text="${vendor.location}">Location</span>
+                            </div>
+                            
+                            <div class="vendor-detail" th:if="${vendor.priceType == 'per_guest'}">
+                                <span class="detail-label">Price:</span>
+                                <span class="price-highlight" th:text="${'₱' + #numbers.formatDecimal(vendor.pricePerGuest, 1, 'COMMA', 2, 'POINT') + ' per guest'}">₱0.00 per guest</span>
+                            </div>
+                            
+                            <div class="vendor-detail" th:if="${vendor.priceType == 'fixed'}">
+                                <span class="detail-label">Price:</span>
+                                <span class="price-highlight" th:text="${'₱' + #numbers.formatDecimal(vendor.totalPrice, 1, 'COMMA', 2, 'POINT')}">₱0.00</span>
+                            </div>
+                            
+                            <div class="vendor-detail" th:if="${vendor.description}">
+                                <span class="detail-label">Description:</span>
+                                <p th:text="${vendor.description}">Description</p>
+                            </div>
+                            
+                            <div class="vendor-contact" th:if="${vendor.contact}">
+                                <a th:href="${vendor.contact}" target="_blank" class="contact-button">
+                                    <i class="fas fa-external-link-alt"></i> Contact
+                                </a>
+                            </div>
+                            
+                            <div class="vendor-actions" style="margin-top: 0.75rem; display: flex; gap: 0.5rem;">
+                                <a th:href="@{/budget(vendorId=${vendor.id})}" class="add-expense-button">
+                                    <i class="fas fa-plus-circle"></i> Add to Expense
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchInput = document.getElementById('vendorSearch');
+            const categoryFilter = document.getElementById('categoryFilter');
+            const vendorCards = document.querySelectorAll('.vendor-card');
+            const vendorGroups = document.querySelectorAll('.vendor-group');
+            
+            // Function to filter vendors
+            function filterVendors() {
+                const searchTerm = searchInput.value.toLowerCase();
+                const selectedCategory = categoryFilter.value.toLowerCase();
+                
+                // Reset display
+                vendorGroups.forEach(group => {
+                    group.style.display = selectedCategory && 
+                        !group.id.toLowerCase().includes(selectedCategory) ? 'none' : 'block';
+                });
+                
+                // Count visible vendors per category
+                const visibleVendorsPerCategory = {};
+                
+                vendorCards.forEach(card => {
+                    const vendorName = card.querySelector('.vendor-name').textContent.toLowerCase();
+                    const vendorCategory = card.querySelector('.vendor-category span').textContent.toLowerCase();
+                    const parentGroup = card.closest('.vendor-group');
+                    
+                    // Check if the card matches search and category filter
+                    const matchesSearch = !searchTerm || vendorName.includes(searchTerm);
+                    const matchesCategory = !selectedCategory || vendorCategory.includes(selectedCategory);
+                    
+                    const isVisible = matchesSearch && matchesCategory;
+                    card.style.display = isVisible ? 'block' : 'none';
+                    
+                    // Track visible vendors for each category
+                    if (isVisible) {
+                        const categoryId = parentGroup.id;
+                        visibleVendorsPerCategory[categoryId] = (visibleVendorsPerCategory[categoryId] || 0) + 1;
+                    }
+                });
+                
+                // Hide empty categories
+                vendorGroups.forEach(group => {
+                    const categoryId = group.id;
+                    if (!visibleVendorsPerCategory[categoryId]) {
+                        group.style.display = 'none';
+                    }
+                });
+            }
+            
+            // Attach event listeners
+            searchInput.addEventListener('input', filterVendors);
+            categoryFilter.addEventListener('change', filterVendors);
+        });
+    </script>
+</body>
+</html> 

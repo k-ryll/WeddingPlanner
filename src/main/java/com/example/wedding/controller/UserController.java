@@ -295,7 +295,7 @@ public String saveUser(@RequestParam("password") String password,
                     .filter(c -> c.getId().equals(categoryId))
                     .findFirst()
                     .orElseThrow(() -> new RuntimeException("Category not found"));
-                
+
                 // Create and save expense
                 Expense expense = new Expense();
                 expense.setName(name);
@@ -486,7 +486,8 @@ public String saveUser(@RequestParam("password") String password,
 
     @GetMapping("/budget")
     public String showBudgetPage(@SessionAttribute(name = "loggedUser", required = false) User user,
-                              Model model) {
+                                Model model,
+                                @RequestParam(required = false) Integer vendorId) {
         if (user == null) {
             return "redirect:/user/login";
         }
@@ -535,6 +536,12 @@ public String saveUser(@RequestParam("password") String password,
             model.addAttribute("vendorCategories", Collections.emptyList());
             model.addAttribute("totalGuests", 0);
             model.addAttribute("usedVendors", Collections.emptyList());
+        }
+        
+        // If vendorId is provided, pass it to the page to pre-select the vendor
+        if (vendorId != null) {
+            model.addAttribute("preSelectVendorId", vendorId);
+            model.addAttribute("openExpenseModal", true);
         }
         
         return "user_budget";
