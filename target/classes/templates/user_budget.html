@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" th:href="@{/styles/styles.css}">
+    <link rel="stylesheet" th:href="@{/styles/planning.css}">
+    <link rel="stylesheet" th:href="@{/styles/modal.css}">
+    <script src="https://kit.fontawesome.com/b80e3de11b.js"></script>
+    <script th:src="@{/js/userMenu.js}"></script>
+    <title>Wedding Budget</title>
+</head>
+<body>
+    <header>
+        <img src="/images/logo.svg" class="logo" alt="logo">
+        <div>
+            <ul>
+                <li><a th:href="@{/home}">Home</a></li>
+                <li><a th:href="@{/guests}">Guests</a></li>
+                <li><a th:href="@{/planning}">Planning</a></li>
+                <li class="active"><a th:href="@{/budget}">Budget</a></li>
+                <li><a th:href="@{/seatplan}">Seat Plan</a></li>
+            </ul>
+            <div class="user-menu">
+                <i class="fa-regular fa-circle-user user-icon"></i>
+                <div class="user-dropdown">
+                    <a th:href="@{/logout}" class="dropdown-item">
+                        <i class="fas fa-sign-out-alt"></i>
+                        Logout
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <input type="hidden" name="projectId" th:value="${projectId}">
+        <h1>Wedding Budget</h1>
+
+        <div class="planning-container">
+            <!-- Budget Section -->
+            <section class="budget-section">
+                <div class="section-header">
+                    <h2>Budget</h2>
+                    <div class="budget-actions">
+                        <button class="add-button" onclick="openBudgetModal()">Add Expense</button>
+                        <button class="add-button" onclick="openBudgetCategoryModal()">Add Category</button>
+                    </div>
+                </div>
+
+                <div class="budget-summary">
+                    <div class="budget-total">
+                        <h3>Total Budget</h3>
+                        <p class="amount" th:text="${'₱' + #numbers.formatDecimal(totalBudget, 1, 'COMMA', 2, 'POINT')}">₱0.00</p>
+                    </div>
+                    <div class="budget-spent">
+                        <h3>Total Spent</h3>
+                        <p class="amount" th:text="${'₱' + #numbers.formatDecimal(totalSpent, 1, 'COMMA', 2, 'POINT')}">₱0.00</p>
+                    </div>
+                    <div class="budget-remaining">
+                        <h3>Remaining</h3>
+                        <p class="amount" th:text="${'₱' + #numbers.formatDecimal(totalBudget - totalSpent, 1, 'COMMA', 2, 'POINT')}">₱0.00</p>
+                    </div>
+                </div>
+
+                <div class="budget-categories">
+                    <div th:each="category : ${budgetCategories}" class="budget-category">
+                        <div class="category-header">
+                            <h4 th:text="${category.name}">Category Name</h4>
+                            <span class="category-total" th:text="${'₱' + #numbers.formatDecimal(category.totalSpent, 1, 'COMMA', 2, 'POINT')}">₱0.00</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress" th:style="${'width: ' + (category.totalSpent / category.budget * 100) + '%'}"
+                                 th:class="${category.totalSpent > category.budget ? 'over-budget' : ''}"></div>
+                        </div>
+                        <div class="category-details">
+                            <span class="budget-amount" th:text="${'Budget: ₱' + #numbers.formatDecimal(category.budget, 1, 'COMMA', 2, 'POINT')}">Budget: ₱0.00</span>
+                            <span class="remaining-amount" th:text="${'Remaining: ₱' + #numbers.formatDecimal(category.budget - category.totalSpent, 1, 'COMMA', 2, 'POINT')}">Remaining: ₱0.00</span>
+                        </div>
+                        <div class="category-actions">
+                            <button class="edit-btn" 
+                                    th:data-category-id="${category.id}" 
+                                    th:data-name="${category.name}" 
+                                    th:data-budget="${category.budget}" 
+                                    th:data-description="${category.description}">Edit</button>
+                            <button class="delete-btn" 
+                                    th:data-category-id="${category.id}">Delete</button>
+                        </div>
+                        <div class="expense-list">
+                            <div th:each="expense : ${category.expenses}" class="expense-item">
+                                <div class="expense-info">
+                                    <span class="expense-name" th:text="${expense.name}">Expense Name</span>
+                                    <span class="expense-amount" th:text="${'₱' + #numbers.formatDecimal(expense.amount, 1, 'COMMA', 2, 'POINT')}">₱0.00</span>
+                                </div>
+                                <div class="expense-actions">
+                                    <button class="edit-btn" th:data-expense-id="${expense.id}">Edit</button>
+                                    <button class="delete-btn" th:data-expense-id="${expense.id}">Delete</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <!-- Budget Modal -->
+    <div id="budgetModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeBudgetModal()">&times;</span>
+            <h2>Add Expense</h2>
+            <form id="budgetForm" th:action="@{/budget/add}" method="post" class="modal-form">
+                <select name="categoryId" required>
+                    <option value="">Select Category</option>
+                    <option th:each="category : ${budgetCategories}" 
+                            th:value="${category.id}" 
+                            th:text="${category.name}">Category</option>
+                </select>
+                <input type="text" name="name" placeholder="Expense name" required>
+                <input type="number" name="amount" placeholder="Amount" step="0.01" required>
+                <input type="date" name="date" required>
+                <textarea name="description" placeholder="Description"></textarea>
+                <button type="submit">Add Expense</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Budget Category Modal -->
+    <div id="budgetCategoryModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeBudgetCategoryModal()">&times;</span>
+            <h2>Add Budget Category</h2>
+            <form id="budgetCategoryForm" th:action="@{/budget/category/add}" method="post" class="modal-form">
+                <input type="text" name="name" placeholder="Category name" required>
+                <input type="number" name="budget" placeholder="Budget amount" step="0.01" required>
+                <textarea name="description" placeholder="Description"></textarea>
+                <button type="submit">Add Category</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit Budget Category Modal -->
+    <div id="editCategoryModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeEditCategoryModal()">&times;</span>
+            <h2>Edit Budget Category</h2>
+            <form id="editCategoryForm" method="post" class="modal-form">
+                <input type="hidden" id="editCategoryId" name="categoryId">
+                <script th:inline="javascript">
+                    document.addEventListener('DOMContentLoaded', function() {
+                        const editForm = document.getElementById('editCategoryForm');
+                        const categoryIdField = document.getElementById('editCategoryId');
+                        
+                        // Set the form action dynamically when the form is submitted
+                        editForm.addEventListener('submit', function() {
+                            const categoryId = categoryIdField.value;
+                            this.action = '/budget/category/' + categoryId + '/edit';
+                        });
+                    });
+                </script>
+                <input type="text" id="editCategoryName" name="name" placeholder="Category name" required>
+                <input type="number" id="editCategoryBudget" name="budget" placeholder="Budget amount" step="0.01" required>
+                <textarea id="editCategoryDescription" name="description" placeholder="Description"></textarea>
+                <button type="submit">Update Category</button>
+            </form>
+        </div>
+    </div>
+
+    <script th:src="@{/js/budget.js}"></script>
+</body>
+</html> 

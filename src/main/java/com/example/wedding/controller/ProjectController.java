@@ -365,7 +365,7 @@ public class ProjectController {
         category.setDescription(description);
         category.setProject(project);
         budgetService.saveCategory(category);
-        return "redirect:/project/" + id + "/planning";
+        return "redirect:/project/" + id + "/budget";
     }
 
     @PostMapping("/project/{id}/budget/add")
@@ -388,7 +388,7 @@ public class ProjectController {
         expense.setDescription(description);
         expense.setCategory(category);
         budgetService.saveExpense(expense);
-        return "redirect:/project/" + id + "/planning";
+        return "redirect:/project/" + id + "/budget";
     }
 
     @DeleteMapping("/project/{id}/budget/category/{categoryId}/delete")
@@ -403,6 +403,18 @@ public class ProjectController {
     public String deleteExpense(@PathVariable Integer id, @PathVariable Integer expenseId) {
         budgetService.deleteExpense(expenseId);
         return "{\"success\": true}";
+    }
+    
+    @PostMapping("/project/{id}/budget/expense/{expenseId}/delete")
+    public String deleteExpensePost(@PathVariable Integer id, @PathVariable Integer expenseId) {
+        budgetService.deleteExpense(expenseId);
+        return "redirect:/project/" + id + "/budget";
+    }
+    
+    @PostMapping("/project/{id}/budget/category/{categoryId}/delete")
+    public String deleteCategoryPost(@PathVariable Integer id, @PathVariable Integer categoryId) {
+        budgetService.deleteCategory(categoryId);
+        return "redirect:/project/" + id + "/budget";
     }
 
     @PostMapping("/project/{id}/essential-details/update")
@@ -471,6 +483,47 @@ public class ProjectController {
             redirectAttributes.addFlashAttribute("error", "Failed to update essential details: " + e.getMessage());
         }
         return "redirect:/project/" + id;
+    }
+
+    @GetMapping("/project/{id}/budget")
+    public String showBudgetPage(@PathVariable Integer id, Model model) {
+        Project project = projectService.findById(id);
+        if (project == null) {
+            return "redirect:/home";
+        }
+
+        List<BudgetCategory> budgetCategories = budgetService.findByProject(project);
+        BigDecimal totalBudget = budgetService.getTotalBudget(project);
+        BigDecimal totalSpent = budgetService.getTotalSpent(project);
+
+        model.addAttribute("projectId", id);
+        model.addAttribute("budgetCategories", budgetCategories);
+        model.addAttribute("totalBudget", totalBudget);
+        model.addAttribute("totalSpent", totalSpent);
+
+        return "budget";
+    }
+
+    @PostMapping("/project/{id}/budget/category/edit")
+    public String editBudgetCategory(@PathVariable Integer id,
+                                  @RequestParam Integer categoryId,
+                                  @RequestParam String name,
+                                  @RequestParam BigDecimal budget,
+                                  @RequestParam(required = false) String description) {
+        // Find the category from the project's categories
+        BudgetCategory category = budgetService.findByProject(projectService.findById(id))
+                .stream()
+                .filter(c -> c.getId().equals(categoryId))
+                .findFirst()
+                .orElse(null);
+                
+        if (category != null) {
+            category.setName(name);
+            category.setBudget(budget);
+            category.setDescription(description);
+            budgetService.saveCategory(category);
+        }
+        return "redirect:/project/" + id + "/budget";
     }
 }
 

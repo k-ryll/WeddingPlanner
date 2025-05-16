@@ -298,12 +298,12 @@ public String saveUser(@RequestParam("password") String password,
                 expense.setCategory(category);
                 budgetService.saveExpense(expense);
                 
-                return "redirect:/planning";
+                return "redirect:/budget";
             } catch (Exception e) {
-                return "redirect:/planning?error=" + e.getMessage();
+                return "redirect:/budget?error=" + e.getMessage();
             }
         }
-        return "redirect:/planning";
+        return "redirect:/budget";
     }
     
     @PostMapping("/budget/category/add")
@@ -326,12 +326,12 @@ public String saveUser(@RequestParam("password") String password,
                 category.setProject(project);
                 budgetService.saveCategory(category);
                 
-                return "redirect:/planning";
+                return "redirect:/budget";
             } catch (Exception e) {
-                return "redirect:/planning?error=" + e.getMessage();
+                return "redirect:/budget?error=" + e.getMessage();
             }
         }
-        return "redirect:/planning";
+        return "redirect:/budget";
     }
     
     @PostMapping("/task/add")
@@ -466,5 +466,91 @@ public String saveUser(@RequestParam("password") String password,
             }
         }
         return ResponseEntity.notFound().build();
+    }
+
+    @GetMapping("/budget")
+    public String showBudgetPage(@SessionAttribute(name = "loggedUser", required = false) User user,
+                              Model model) {
+        if (user == null) {
+            return "redirect:/user/login";
+        }
+        
+        Project project = projectService.findProjectByUserEmail(user.getEmail());
+        
+        if (project != null) {
+            model.addAttribute("projectId", project.getId());
+            List<BudgetCategory> budgetCategories = budgetService.findByProject(project);
+            BigDecimal totalBudget = budgetService.getTotalBudget(project);
+            BigDecimal totalSpent = budgetService.getTotalSpent(project);
+            
+            model.addAttribute("budgetCategories", budgetCategories);
+            model.addAttribute("totalBudget", totalBudget);
+            model.addAttribute("totalSpent", totalSpent);
+        } else {
+            // Initialize with defaults if no project
+            model.addAttribute("projectId", null);
+            model.addAttribute("budgetCategories", Collections.emptyList());
+            model.addAttribute("totalBudget", BigDecimal.ZERO);
+            model.addAttribute("totalSpent", BigDecimal.ZERO);
+        }
+        
+        return "user_budget";
+    }
+
+    @PostMapping("/budget/expense/{expenseId}/delete")
+    public String deleteExpense(@SessionAttribute(name = "loggedUser", required = false) User user,
+                               @PathVariable Integer expenseId) {
+        if (user == null) {
+            return "redirect:/user/login";
+        }
+        
+        budgetService.deleteExpense(expenseId);
+        return "redirect:/budget";
+    }
+
+    @PostMapping("/budget/category/{categoryId}/delete")
+    public String deleteBudgetCategory(@SessionAttribute(name = "loggedUser", required = false) User user,
+                                      @PathVariable Integer categoryId) {
+        if (user == null) {
+            return "redirect:/user/login";
+        }
+        
+        budgetService.deleteCategory(categoryId);
+        return "redirect:/budget";
+    }
+    
+    @PostMapping("/budget/category/{categoryId}/edit")
+    public String editBudgetCategory(@SessionAttribute(name = "loggedUser", required = false) User user,
+                                    @PathVariable Integer categoryId,
+                                    @RequestParam String name,
+                                    @RequestParam BigDecimal budget,
+                                    @RequestParam(required = false) String description) {
+        if (user == null) {
+            return "redirect:/user/login";
+        }
+        
+        Project project = projectService.findProjectByUserEmail(user.getEmail());
+        if (project != null) {
+            try {
+                // Find the category
+                BudgetCategory category = budgetService.findByProject(project)
+                    .stream()
+                    .filter(c -> c.getId().equals(categoryId))
+                    .findFirst()
+                    .orElse(null);
+                
+                if (category != null) {
+                    category.setName(name);
+                    category.setBudget(budget);
+                    category.setDescription(description);
+                    budgetService.saveCategory(category);
+                }
+                
+                return "redirect:/budget";
+            } catch (Exception e) {
+                return "redirect:/budget?error=" + e.getMessage();
+            }
+        }
+        return "redirect:/budget";
     }
 }

@@ -24,7 +24,7 @@ public class SecurityConfig {
 	                "/verify", "/user/login**",
 	                "/home", "/guests", "/guests/**", "/user/validate", "/project/**", 
 	                "/admin/login", "/admin/**","/project/**","/guest/**", "/rsvp-success", "/styles/**", "/js/**", "/images/**",
-	                "/planning", "/budget/add", "/budget/category/add", "/task/add", "/itinerary/add", 
+	                "/planning", "/budget", "/budget/**", "/budget/add", "/budget/category/add", "/task/add", "/itinerary/add", 
 	                "/task/*/send-email", "/itinerary/send-email", "/seatplan", "/vendors"
 	            ).permitAll()
 	            

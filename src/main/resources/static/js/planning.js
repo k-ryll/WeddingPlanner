@@ -23,64 +23,118 @@ window.onclick = function(event) {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
-    // Task completion toggle
-    document.querySelectorAll('.task-checkbox').forEach(checkbox => {
+    // Task checkbox functionality
+    const checkboxes = document.querySelectorAll('.task-checkbox');
+    checkboxes.forEach(checkbox => {
         checkbox.addEventListener('change', function() {
-            const taskId = this.dataset.taskId;
-            const completed = this.checked;
+            const taskId = this.getAttribute('data-task-id');
+            const isCompleted = this.checked;
+
+            // Get the project ID from the hidden input field
+            const projectIdInput = document.querySelector('input[name="projectId"]');
+            const projectId = projectIdInput ? projectIdInput.value : null;
             
-            fetch(`/project/${taskId}/task/toggle`, {
+            // Determine the URL based on whether we're in admin or user mode
+            let url;
+            if (window.location.pathname.includes('/project/')) {
+                url = `/project/${projectId}/task/${taskId}/update-status`;
+            } else {
+                url = `/task/${taskId}/update-status`;
+            }
+
+            fetch(url, {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json',
+                    'Content-Type': 'application/x-www-form-urlencoded',
                 },
-                body: JSON.stringify({ completed: completed })
+                body: `completed=${isCompleted}`
             })
-            .then(response => response.json())
-            .then(data => {
-                if (!data.success) {
-                    this.checked = !completed;
-                    alert('Failed to update task status');
+            .then(response => {
+                if (response.ok) {
+                    // Update the UI to reflect the task status
+                    const taskTitle = this.nextElementSibling;
+                    if (isCompleted) {
+                        taskTitle.classList.add('completed');
+                    } else {
+                        taskTitle.classList.remove('completed');
+                    }
+                } else {
+                    console.error('Failed to update task status');
                 }
+            })
+            .catch(error => {
+                console.error('Error:', error);
             });
         });
     });
 
-    // Task deletion
+    // Delete task functionality
     document.querySelectorAll('.task-item .delete-btn').forEach(button => {
         button.addEventListener('click', function() {
             if (confirm('Are you sure you want to delete this task?')) {
-                const taskId = this.dataset.taskId;
-                fetch(`/project/${taskId}/task/delete`, {
-                    method: 'DELETE'
+                const taskId = this.getAttribute('data-task-id');
+                
+                // Get the project ID from the hidden input field
+                const projectIdInput = document.querySelector('input[name="projectId"]');
+                const projectId = projectIdInput ? projectIdInput.value : null;
+                
+                // Determine the URL based on whether we're in admin or user mode
+                let url;
+                if (window.location.pathname.includes('/project/')) {
+                    url = `/project/${projectId}/task/${taskId}/delete`;
+                } else {
+                    url = `/task/${taskId}/delete`;
+                }
+
+                fetch(url, {
+                    method: 'POST'
                 })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
+                .then(response => {
+                    if (response.ok) {
+                        // Remove the task from the UI
                         this.closest('.task-item').remove();
                     } else {
-                        alert('Failed to delete task');
+                        console.error('Failed to delete task');
                     }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
                 });
             }
         });
     });
 
-    // Itinerary item deletion
+    // Delete itinerary item functionality
     document.querySelectorAll('.itinerary-item .delete-btn').forEach(button => {
         button.addEventListener('click', function() {
             if (confirm('Are you sure you want to delete this event?')) {
-                const itemId = this.dataset.itemId;
-                fetch(`/project/${itemId}/itinerary/delete`, {
-                    method: 'DELETE'
+                const itemId = this.getAttribute('data-item-id');
+                
+                // Get the project ID from the hidden input field
+                const projectIdInput = document.querySelector('input[name="projectId"]');
+                const projectId = projectIdInput ? projectIdInput.value : null;
+                
+                // Determine the URL based on whether we're in admin or user mode
+                let url;
+                if (window.location.pathname.includes('/project/')) {
+                    url = `/project/${projectId}/itinerary/${itemId}/delete`;
+                } else {
+                    url = `/itinerary/${itemId}/delete`;
+                }
+
+                fetch(url, {
+                    method: 'POST'
                 })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
+                .then(response => {
+                    if (response.ok) {
+                        // Remove the itinerary item from the UI
                         this.closest('.itinerary-item').remove();
                     } else {
-                        alert('Failed to delete event');
+                        console.error('Failed to delete itinerary item');
                     }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
                 });
             }
         });

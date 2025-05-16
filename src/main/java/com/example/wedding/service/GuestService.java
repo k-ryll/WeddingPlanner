@@ -51,27 +51,30 @@ public class GuestService {
 				throw new IllegalArgumentException("A " + guest.getEntourage() + " already exists for this project.");
 			}
 
-			// Get the project and update it with the new best man or maid of honor
+			// Get the project
 			Project project = guest.getProjectId();
+			
+			// Optional: Try to find user but don't require it
 			User user = userService.findByEmail(guest.getEmail());
-			if (user == null) {
-				throw new IllegalArgumentException("User not found for email: " + guest.getEmail());
+			
+			// Only update project if we found a user
+			if (user != null) {
+				if ("Best Man".equals(guest.getEntourage())) {
+					project.setBestMan(user);
+				} else if ("Maid of Honor".equals(guest.getEntourage())) {
+					project.setMaidOfHonor(user);
+				}
+				projectService.updateProject(
+					project.getId(),
+					project.getProjectName(),
+					project.getGroom().getEmail(),
+					project.getBride().getEmail(),
+					project.getOrganizer() != null ? project.getOrganizer().getEmail() : null,
+					project.getWeddingDate().toString(),
+					project.getStatus()
+				);
 			}
-
-			if ("Best Man".equals(guest.getEntourage())) {
-				project.setBestMan(user);
-			} else if ("Maid of Honor".equals(guest.getEntourage())) {
-				project.setMaidOfHonor(user);
-			}
-			projectService.updateProject(
-				project.getId(),
-				project.getProjectName(),
-				project.getGroom().getEmail(),
-				project.getBride().getEmail(),
-				project.getOrganizer() != null ? project.getOrganizer().getEmail() : null,
-				project.getWeddingDate().toString(),
-				project.getStatus()
-			);
+			// If no user found, just continue without updating project roles
 		}
 		
 		repo.save(guest);
@@ -115,27 +118,30 @@ public class GuestService {
                 throw new IllegalArgumentException("A " + entourage + " already exists for this project.");
             }
 
-            // Get the project and update it with the new best man or maid of honor
+            // Get the project
             Project project = guest.getProjectId();
+            
+            // Optional: Try to find user but don't require it
             User user = userService.findByEmail(email);
-            if (user == null) {
-                throw new IllegalArgumentException("User not found for email: " + email);
+            
+            // Only update project if we found a user
+            if (user != null) {
+                if ("Best Man".equals(entourage)) {
+                    project.setBestMan(user);
+                } else if ("Maid of Honor".equals(entourage)) {
+                    project.setMaidOfHonor(user);
+                }
+                projectService.updateProject(
+                    project.getId(),
+                    project.getProjectName(),
+                    project.getGroom().getEmail(),
+                    project.getBride().getEmail(),
+                    project.getOrganizer() != null ? project.getOrganizer().getEmail() : null,
+                    project.getWeddingDate().toString(),
+                    project.getStatus()
+                );
             }
-
-            if ("Best Man".equals(entourage)) {
-                project.setBestMan(user);
-            } else if ("Maid of Honor".equals(entourage)) {
-                project.setMaidOfHonor(user);
-            }
-            projectService.updateProject(
-                project.getId(),
-                project.getProjectName(),
-                project.getGroom().getEmail(),
-                project.getBride().getEmail(),
-                project.getOrganizer() != null ? project.getOrganizer().getEmail() : null,
-                project.getWeddingDate().toString(),
-                project.getStatus()
-            );
+            // If no user found, just continue without updating project roles
         }
 
         guest.setTitle(title);
