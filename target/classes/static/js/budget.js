@@ -1,17 +1,51 @@
 function openBudgetModal() {
-    document.getElementById('budgetModal').style.display = 'block';
+    const modal = document.getElementById('budgetModal');
+    modal.style.display = 'flex';
+    
+    // Reset form and scrolling
+    if (modal.querySelector('form')) {
+        modal.querySelector('form').reset();
+    }
+    
+    // Reset the scroll position of the modal content
+    const modalContent = modal.querySelector('.modal-content');
+    if (modalContent) {
+        modalContent.scrollTop = 0;
+    }
+    
+    // Block scrolling on the body when modal is open
+    document.body.style.overflow = 'hidden';
 }
 
 function closeBudgetModal() {
     document.getElementById('budgetModal').style.display = 'none';
+    // Restore scrolling on the body
+    document.body.style.overflow = '';
 }
 
 function openBudgetCategoryModal() {
-    document.getElementById('budgetCategoryModal').style.display = 'block';
+    const modal = document.getElementById('budgetCategoryModal');
+    modal.style.display = 'flex';
+    
+    // Reset form and scrolling
+    if (modal.querySelector('form')) {
+        modal.querySelector('form').reset();
+    }
+    
+    // Reset the scroll position of the modal content
+    const modalContent = modal.querySelector('.modal-content');
+    if (modalContent) {
+        modalContent.scrollTop = 0;
+    }
+    
+    // Block scrolling on the body when modal is open
+    document.body.style.overflow = 'hidden';
 }
 
 function closeBudgetCategoryModal() {
     document.getElementById('budgetCategoryModal').style.display = 'none';
+    // Restore scrolling on the body
+    document.body.style.overflow = '';
 }
 
 function openEditCategoryModal(categoryId, name, budget, description) {
@@ -23,18 +57,34 @@ function openEditCategoryModal(categoryId, name, budget, description) {
     document.getElementById('editCategoryBudget').value = budget;
     document.getElementById('editCategoryDescription').value = description || '';
     
-    modal.style.display = 'block';
+    modal.style.display = 'flex';
+    
+    // Reset the scroll position of the modal content
+    const modalContent = modal.querySelector('.modal-content');
+    if (modalContent) {
+        modalContent.scrollTop = 0;
+    }
+    
+    // Block scrolling on the body when modal is open
+    document.body.style.overflow = 'hidden';
 }
 
 function closeEditCategoryModal() {
     document.getElementById('editCategoryModal').style.display = 'none';
+    // Restore scrolling on the body
+    document.body.style.overflow = '';
 }
 
 // Close modals when clicking outside
 window.onclick = function(event) {
-    if (event.target.className === 'modal') {
-        event.target.style.display = 'none';
-    }
+    const modals = document.querySelectorAll('.modal');
+    modals.forEach(modal => {
+        if (event.target === modal) {
+            modal.style.display = 'none';
+            // Restore scrolling on the body
+            document.body.style.overflow = '';
+        }
+    });
 }
 
 // Edit expense button functionality

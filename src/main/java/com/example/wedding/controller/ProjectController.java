@@ -4,6 +4,7 @@ import java.util.List;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +20,7 @@ import com.example.wedding.model.ItineraryItem;
 import com.example.wedding.model.BudgetCategory;
 import com.example.wedding.model.Expense;
 import com.example.wedding.model.User;
+import com.example.wedding.model.Vendor;
 import com.example.wedding.service.GuestService;
 import com.example.wedding.service.ProjectService;
 import com.example.wedding.service.TaskService;
@@ -26,6 +28,7 @@ import com.example.wedding.service.ItineraryService;
 import com.example.wedding.service.EmailService;
 import com.example.wedding.service.BudgetService;
 import com.example.wedding.service.UserService;
+import com.example.wedding.service.VendorService;
 
 import jakarta.servlet.http.HttpSession;
 
@@ -45,6 +48,8 @@ public class ProjectController {
     private BudgetService budgetService;
     @Autowired
     private UserService userService;
+    @Autowired
+    private VendorService vendorService;
 
     @GetMapping("/project/{id}")
     public String showProjectPage(@PathVariable Integer id, Model model) {
@@ -374,7 +379,8 @@ public class ProjectController {
                            @RequestParam String name,
                            @RequestParam BigDecimal amount,
                            @RequestParam String date,
-                           @RequestParam(required = false) String description) {
+                           @RequestParam(required = false) String description,
+                           @RequestParam(required = false) Integer vendorId) {
         BudgetCategory category = budgetService.findByProject(projectService.findById(id))
                 .stream()
                 .filter(c -> c.getId().equals(categoryId))
@@ -387,6 +393,15 @@ public class ProjectController {
         expense.setDate(LocalDate.parse(date));
         expense.setDescription(description);
         expense.setCategory(category);
+        
+        // If a vendor was selected, add it to the expense
+        if (vendorId != null) {
+            Vendor vendor = vendorService.getVendorById(vendorId);
+            if (vendor != null) {
+                expense.setVendor(vendor);
+            }
+        }
+        
         budgetService.saveExpense(expense);
         return "redirect:/project/" + id + "/budget";
     }
@@ -496,10 +511,33 @@ public class ProjectController {
         BigDecimal totalBudget = budgetService.getTotalBudget(project);
         BigDecimal totalSpent = budgetService.getTotalSpent(project);
 
+        // Get all vendor types for the dropdown
+        List<VendorService.VendorType> vendorTypes = vendorService.getVendorsByType();
+        
+        // Get distinct vendor categories for category suggestions
+        List<String> vendorCategories = vendorService.getDistinctVendorCategories();
+        
+        // Get total guest count for price calculations
+        int totalGuests = guestService.findByProject(project).size();
+        
+        // Get all vendors used in this project's expenses
+        List<Vendor> usedVendors = new ArrayList<>();
+        for (BudgetCategory category : budgetCategories) {
+            for (Expense expense : category.getExpenses()) {
+                if (expense.getVendor() != null && !usedVendors.contains(expense.getVendor())) {
+                    usedVendors.add(expense.getVendor());
+                }
+            }
+        }
+
         model.addAttribute("projectId", id);
         model.addAttribute("budgetCategories", budgetCategories);
         model.addAttribute("totalBudget", totalBudget);
         model.addAttribute("totalSpent", totalSpent);
+        model.addAttribute("vendorTypes", vendorTypes);
+        model.addAttribute("vendorCategories", vendorCategories);
+        model.addAttribute("totalGuests", totalGuests);
+        model.addAttribute("usedVendors", usedVendors);
 
         return "budget";
     }

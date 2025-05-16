@@ -119,14 +119,35 @@
             <span class="close" onclick="closeBudgetModal()">&times;</span>
             <h2>Add Expense</h2>
             <form id="budgetForm" th:action="@{/project/{id}/budget/add(id=${projectId})}" method="post" class="modal-form">
-                <select name="categoryId" required>
+                <select name="categoryId" id="expenseCategory" required>
                     <option value="">Select Category</option>
                     <option th:each="category : ${budgetCategories}" 
                             th:value="${category.id}" 
                             th:text="${category.name}">Category</option>
                 </select>
+                
+                <div class="vendor-selection">
+                    <label for="vendorSelect">Select Vendor:</label>
+                    <select name="vendorId" id="vendorSelect">
+                        <option value="">Select Vendor</option>
+                        <optgroup th:each="vendorType : ${vendorTypes}" th:label="${vendorType.name}">
+                            <option th:each="vendor : ${vendorType.vendors}" 
+                                    th:value="${vendor.id}" 
+                                    th:text="${vendor.name}"
+                                    th:data-avg-price="${vendor.averagePrice}"
+                                    th:data-guest-based="${vendor.pricePerGuest != null}">Vendor Name</option>
+                        </optgroup>
+                    </select>
+                </div>
+                
+                <div class="vendor-price-info" id="vendorPriceInfo" style="display: none;">
+                    <p>Average Price: <span id="avgPriceDisplay">₱0.00</span></p>
+                    <p id="guestBasedPrice" style="display: none;">Price based on <span id="guestCount">0</span> guests: <span id="calculatedPrice">₱0.00</span></p>
+                    <label><input type="checkbox" id="useCustomAmount"> Enter custom amount</label>
+                </div>
+                
                 <input type="text" name="name" placeholder="Expense name" required>
-                <input type="number" name="amount" placeholder="Amount" step="0.01" required>
+                <input type="number" name="amount" id="expenseAmount" placeholder="Amount" step="0.01" required>
                 <input type="date" name="date" required>
                 <textarea name="description" placeholder="Description"></textarea>
                 <button type="submit">Add Expense</button>
@@ -140,7 +161,10 @@
             <span class="close" onclick="closeBudgetCategoryModal()">&times;</span>
             <h2>Add Budget Category</h2>
             <form id="budgetCategoryForm" th:action="@{/project/{id}/budget/category/add(id=${projectId})}" method="post" class="modal-form">
-                <input type="text" name="name" placeholder="Category name" required>
+                <input type="text" name="name" id="categoryName" list="vendorCategoryList" placeholder="Category name" required>
+                <datalist id="vendorCategoryList">
+                    <option th:each="category : ${vendorCategories}" th:value="${category}"></option>
+                </datalist>
                 <input type="number" name="budget" placeholder="Budget amount" step="0.01" required>
                 <textarea name="description" placeholder="Description"></textarea>
                 <button type="submit">Add Category</button>
@@ -155,7 +179,10 @@
             <h2>Edit Budget Category</h2>
             <form id="editCategoryForm" th:action="@{/project/{id}/budget/category/edit(id=${projectId})}" method="post" class="modal-form">
                 <input type="hidden" id="editCategoryId" name="categoryId">
-                <input type="text" id="editCategoryName" name="name" placeholder="Category name" required>
+                <input type="text" id="editCategoryName" name="name" list="editVendorCategoryList" placeholder="Category name" required>
+                <datalist id="editVendorCategoryList">
+                    <option th:each="category : ${vendorCategories}" th:value="${category}"></option>
+                </datalist>
                 <input type="number" id="editCategoryBudget" name="budget" placeholder="Budget amount" step="0.01" required>
                 <textarea id="editCategoryDescription" name="description" placeholder="Description"></textarea>
                 <button type="submit">Update Category</button>
@@ -164,5 +191,59 @@
     </div>
 
     <script th:src="@{/js/budget.js}"></script>
+    <script th:inline="javascript">
+        document.addEventListener('DOMContentLoaded', function() {
+            const vendorSelect = document.getElementById('vendorSelect');
+            const vendorPriceInfo = document.getElementById('vendorPriceInfo');
+            const avgPriceDisplay = document.getElementById('avgPriceDisplay');
+            const guestBasedPrice = document.getElementById('guestBasedPrice');
+            const calculatedPrice = document.getElementById('calculatedPrice');
+            const guestCount = document.getElementById('guestCount');
+            const expenseAmount = document.getElementById('expenseAmount');
+            const useCustomAmount = document.getElementById('useCustomAmount');
+            
+            // Get guest count from server-side variable
+            const totalGuests = /*[[${totalGuests}]]*/ 0;
+            
+            if (vendorSelect) {
+                vendorSelect.addEventListener('change', function() {
+                    if (this.value) {
+                        const selectedOption = this.options[this.selectedIndex];
+                        const avgPrice = selectedOption.getAttribute('data-avg-price');
+                        const isGuestBased = selectedOption.getAttribute('data-guest-based') === 'true';
+                        
+                        vendorPriceInfo.style.display = 'block';
+                        avgPriceDisplay.textContent = '₱' + parseFloat(avgPrice).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                        
+                        // Auto-fill the amount field
+                        expenseAmount.value = avgPrice;
+                        
+                        // If price is guest-based, show calculated price
+                        if (isGuestBased) {
+                            guestCount.textContent = totalGuests;
+                            const calculatedAmount = parseFloat(avgPrice) * totalGuests;
+                            calculatedPrice.textContent = '₱' + calculatedAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                            guestBasedPrice.style.display = 'block';
+                            expenseAmount.value = calculatedAmount;
+                        } else {
+                            guestBasedPrice.style.display = 'none';
+                        }
+                    } else {
+                        vendorPriceInfo.style.display = 'none';
+                    }
+                });
+            
+                useCustomAmount.addEventListener('change', function() {
+                    if (this.checked) {
+                        expenseAmount.removeAttribute('readonly');
+                        expenseAmount.focus();
+                    } else {
+                        // Reapply the vendor's price
+                        vendorSelect.dispatchEvent(new Event('change'));
+                    }
+                });
+            }
+        });
+    </script>
 </body>
 </html> 

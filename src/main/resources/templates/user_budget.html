@@ -101,6 +101,49 @@
                     </div>
                 </div>
             </section>
+            
+            <!-- Vendors Section -->
+            <section class="vendors-section">
+                <div class="section-header">
+                    <h2>Your Vendors</h2>
+                </div>
+                
+                <div class="vendor-list">
+                    <div th:if="${usedVendors.empty}" class="empty-state">
+                        <p>No vendors added yet. Add expenses with vendors to see them here.</p>
+                    </div>
+                    
+                    <div th:each="vendor : ${usedVendors}" class="vendor-card">
+                        <h3 th:text="${vendor.name}">Vendor Name</h3>
+                        <div class="vendor-details">
+                            <div class="detail-row">
+                                <span class="label">Category:</span>
+                                <span class="value" th:text="${vendor.category}">Category</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="label">Location:</span>
+                                <span class="value" th:text="${vendor.location}">Location</span>
+                            </div>
+                            <div class="detail-row" th:if="${vendor.priceType == 'per_guest'}">
+                                <span class="label">Price per Guest:</span>
+                                <span class="value" th:text="${'₱' + #numbers.formatDecimal(vendor.pricePerGuest, 1, 'COMMA', 2, 'POINT')}">₱0.00</span>
+                            </div>
+                            <div class="detail-row" th:if="${vendor.priceType == 'fixed'}">
+                                <span class="label">Fixed Price:</span>
+                                <span class="value" th:text="${'₱' + #numbers.formatDecimal(vendor.totalPrice, 1, 'COMMA', 2, 'POINT')}">₱0.00</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="label">Contact:</span>
+                                <a th:href="${vendor.contact}" th:text="${vendor.contact}" target="_blank" class="contact-link">Contact Info</a>
+                            </div>
+                            <div class="detail-row" th:if="${vendor.description != null && !vendor.description.isEmpty()}">
+                                <span class="label">Description:</span>
+                                <p class="description" th:text="${vendor.description}">Description</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
         </div>
     </div>
 
@@ -110,14 +153,80 @@
             <span class="close" onclick="closeBudgetModal()">&times;</span>
             <h2>Add Expense</h2>
             <form id="budgetForm" th:action="@{/budget/add}" method="post" class="modal-form">
-                <select name="categoryId" required>
+                <select name="categoryId" id="expenseCategory" required>
                     <option value="">Select Category</option>
                     <option th:each="category : ${budgetCategories}" 
                             th:value="${category.id}" 
                             th:text="${category.name}">Category</option>
                 </select>
+                
+                <div class="vendor-selection">
+                    <label for="vendorSelect">Select Vendor:</label>
+                    <select name="vendorId" id="vendorSelect">
+                        <option value="">Select Vendor</option>
+                        <optgroup id="matchingVendors" label="Matching Vendors" style="display: none;">
+                            <!-- Matching vendors will be cloned here when filtering -->
+                        </optgroup>
+                        <optgroup th:each="vendorType : ${vendorTypes}" th:label="${vendorType.name}">
+                            <option th:each="vendor : ${vendorType.vendors}" 
+                                    th:value="${vendor.id}" 
+                                    th:text="${vendor.name}"
+                                    th:data-category="${vendor.category}"
+                                    th:data-avg-price="${vendor.averagePrice}"
+                                    th:data-guest-based="${vendor.pricePerGuest != null}">Vendor Name</option>
+                        </optgroup>
+                    </select>
+                    <div id="vendorFilterInfo" class="vendor-filter-info">
+                        Showing vendors for <span id="filterCategoryName" class="vendor-filter-match"></span>
+                        (<span id="filteredVendorCount" class="vendor-filter-count">0</span> matches at top)
+                    </div>
+                </div>
+                
+                <div class="vendor-price-info" id="vendorPriceInfo" style="display: none;">
+                    <div class="price-card">
+                        <div class="price-header">
+                            <i class="fa-solid fa-tags"></i>
+                            <h4>Vendor Price Information</h4>
+                        </div>
+                        
+                        <div class="price-details">
+                            <!-- Fixed price info -->
+                            <div class="price-row">
+                                <span class="price-label">Vendor's Price:</span>
+                                <span class="price-value" id="avgPriceDisplay">₱0.00</span>
+                            </div>
+                            
+                            <!-- Guest-based pricing info -->
+                            <div id="guestBasedPriceContainer" style="display: none;">
+                                <div class="price-calculation">
+                                    <div class="calculation-row">
+                                        <span class="calc-label">Price per guest:</span>
+                                        <span class="calc-value" id="perGuestPrice">₱0.00</span>
+                                    </div>
+                                    <div class="calculation-row">
+                                        <span class="calc-label">Guest count:</span>
+                                        <span class="calc-value" id="guestCount">0</span>
+                                    </div>
+                                    <div class="calculation-divider"></div>
+                                    <div class="calculation-row calculation-total">
+                                        <span class="calc-label">Total calculated:</span>
+                                        <span class="calc-value" id="calculatedPrice">₱0.00</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="price-footer">
+                            <label class="custom-checkbox">
+                                <input type="checkbox" id="useCustomAmount">
+                                <span class="checkbox-text">I want to enter a custom amount</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                
                 <input type="text" name="name" placeholder="Expense name" required>
-                <input type="number" name="amount" placeholder="Amount" step="0.01" required>
+                <input type="number" name="amount" id="expenseAmount" placeholder="Amount" step="0.01" required>
                 <input type="date" name="date" required>
                 <textarea name="description" placeholder="Description"></textarea>
                 <button type="submit">Add Expense</button>
@@ -131,7 +240,10 @@
             <span class="close" onclick="closeBudgetCategoryModal()">&times;</span>
             <h2>Add Budget Category</h2>
             <form id="budgetCategoryForm" th:action="@{/budget/category/add}" method="post" class="modal-form">
-                <input type="text" name="name" placeholder="Category name" required>
+                <input type="text" name="name" id="categoryName" list="vendorCategoryList" placeholder="Category name" required>
+                <datalist id="vendorCategoryList">
+                    <option th:each="category : ${vendorCategories}" th:value="${category}"></option>
+                </datalist>
                 <input type="number" name="budget" placeholder="Budget amount" step="0.01" required>
                 <textarea name="description" placeholder="Description"></textarea>
                 <button type="submit">Add Category</button>
@@ -158,7 +270,10 @@
                         });
                     });
                 </script>
-                <input type="text" id="editCategoryName" name="name" placeholder="Category name" required>
+                <input type="text" id="editCategoryName" name="name" list="editVendorCategoryList" placeholder="Category name" required>
+                <datalist id="editVendorCategoryList">
+                    <option th:each="category : ${vendorCategories}" th:value="${category}"></option>
+                </datalist>
                 <input type="number" id="editCategoryBudget" name="budget" placeholder="Budget amount" step="0.01" required>
                 <textarea id="editCategoryDescription" name="description" placeholder="Description"></textarea>
                 <button type="submit">Update Category</button>
@@ -167,5 +282,174 @@
     </div>
 
     <script th:src="@{/js/budget.js}"></script>
+    <script th:inline="javascript">
+        document.addEventListener('DOMContentLoaded', function() {
+            const expenseCategorySelect = document.getElementById('expenseCategory');
+            const vendorSelect = document.getElementById('vendorSelect');
+            const matchingVendorsGroup = document.getElementById('matchingVendors');
+            const vendorPriceInfo = document.getElementById('vendorPriceInfo');
+            const vendorFilterInfo = document.getElementById('vendorFilterInfo');
+            const filterCategoryName = document.getElementById('filterCategoryName');
+            const filteredVendorCount = document.getElementById('filteredVendorCount');
+            const avgPriceDisplay = document.getElementById('avgPriceDisplay');
+            const guestBasedPriceContainer = document.getElementById('guestBasedPriceContainer');
+            const perGuestPrice = document.getElementById('perGuestPrice');
+            const guestCount = document.getElementById('guestCount');
+            const calculatedPrice = document.getElementById('calculatedPrice');
+            const expenseAmount = document.getElementById('expenseAmount');
+            const useCustomAmount = document.getElementById('useCustomAmount');
+            
+            // Get guest count from server-side variable
+            const totalGuests = /*[[${totalGuests}]]*/ 0;
+            
+            // Store all vendor options for filtering
+            const vendorOptions = [];
+            const vendorOptgroups = Array.from(vendorSelect.querySelectorAll('optgroup')).filter(group => group.id !== 'matchingVendors');
+            
+            // Original vendor options backup (for resetting)
+            const originalVendorOptions = [];
+            
+            // Initialize vendor options array
+            vendorOptgroups.forEach(optgroup => {
+                const options = optgroup.querySelectorAll('option');
+                options.forEach(option => {
+                    if (option.value) { // Skip the "Select Vendor" option
+                        vendorOptions.push({
+                            element: option,
+                            optgroup: optgroup,
+                            value: option.value,
+                            text: option.text,
+                            category: option.getAttribute('data-category'),
+                            avgPrice: option.getAttribute('data-avg-price'),
+                            isGuestBased: option.getAttribute('data-guest-based')
+                        });
+                        
+                        // Create a backup of original options
+                        originalVendorOptions.push({
+                            value: option.value,
+                            text: option.text,
+                            category: option.getAttribute('data-category'),
+                            avgPrice: option.getAttribute('data-avg-price'),
+                            isGuestBased: option.getAttribute('data-guest-based'),
+                            optgroupLabel: optgroup.label
+                        });
+                    }
+                });
+            });
+            
+            // Function to filter vendors based on selected category
+            function filterVendorsByCategory(categoryName) {
+                // Reset vendor dropdown and clear the matching vendors group
+                vendorSelect.value = '';
+                vendorPriceInfo.style.display = 'none';
+                
+                // Clear previous matching vendors
+                while (matchingVendorsGroup.firstChild) {
+                    matchingVendorsGroup.removeChild(matchingVendorsGroup.firstChild);
+                }
+                
+                // Hide the matching vendors group initially
+                matchingVendorsGroup.style.display = 'none';
+                
+                if (!categoryName) {
+                    // If no category selected, restore original state
+                    vendorFilterInfo.style.display = 'none';
+                    return;
+                }
+                
+                // Convert to lowercase for case-insensitive matching
+                const selectedCategory = categoryName.toLowerCase();
+                
+                // Track matched vendors to add at the top
+                const matchingVendors = [];
+                
+                // Identify matching vendors
+                vendorOptions.forEach(vendor => {
+                    // Check if vendor category matches the budget category (case insensitive)
+                    const vendorCategory = vendor.category.toLowerCase();
+                    
+                    // Check for matches using different strategies
+                    const exactMatch = vendorCategory === selectedCategory;
+                    const vendorIncludes = vendorCategory.includes(selectedCategory);
+                    const categoryIncludes = selectedCategory.includes(vendorCategory);
+                    
+                    if (exactMatch || vendorIncludes || categoryIncludes) {
+                        matchingVendors.push(vendor);
+                    }
+                });
+                
+                // If we have matches, display them at the top
+                if (matchingVendors.length > 0) {
+                    // Create clones of matching vendor options at the top
+                    matchingVendors.forEach(vendor => {
+                        const clonedOption = document.createElement('option');
+                        clonedOption.value = vendor.value;
+                        clonedOption.text = vendor.text;
+                        clonedOption.setAttribute('data-avg-price', vendor.avgPrice);
+                        clonedOption.setAttribute('data-guest-based', vendor.isGuestBased);
+                        clonedOption.setAttribute('data-category', vendor.category);
+                        clonedOption.setAttribute('data-original-group', vendor.optgroup.label);
+                        matchingVendorsGroup.appendChild(clonedOption);
+                    });
+                    
+                    // Show the matching vendors group
+                    matchingVendorsGroup.style.display = '';
+                    
+                    // Update filter info display
+                    filterCategoryName.textContent = categoryName;
+                    filteredVendorCount.textContent = matchingVendors.length;
+                    vendorFilterInfo.style.display = 'block';
+                } else {
+                    // If no matches, don't show filter info
+                    vendorFilterInfo.style.display = 'none';
+                }
+            }
+            
+            // Filter vendors when category changes
+            expenseCategorySelect.addEventListener('change', function() {
+                const selectedOption = this.options[this.selectedIndex];
+                const categoryName = selectedOption.text;
+                filterVendorsByCategory(categoryName !== 'Select Category' ? categoryName : '');
+            });
+            
+            vendorSelect.addEventListener('change', function() {
+                if (this.value) {
+                    const selectedOption = this.options[this.selectedIndex];
+                    const avgPrice = selectedOption.getAttribute('data-avg-price');
+                    const isGuestBased = selectedOption.getAttribute('data-guest-based') === 'true';
+                    
+                    vendorPriceInfo.style.display = 'block';
+                    avgPriceDisplay.textContent = '₱' + parseFloat(avgPrice).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                    
+                    // Auto-fill the amount field
+                    expenseAmount.value = avgPrice;
+                    
+                    // If price is guest-based, show calculated price
+                    if (isGuestBased) {
+                        guestCount.textContent = totalGuests;
+                        perGuestPrice.textContent = '₱' + parseFloat(avgPrice).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                        const calculatedAmount = parseFloat(avgPrice) * totalGuests;
+                        calculatedPrice.textContent = '₱' + calculatedAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                        guestBasedPriceContainer.style.display = 'block';
+                        expenseAmount.value = calculatedAmount;
+                    } else {
+                        guestBasedPriceContainer.style.display = 'none';
+                    }
+                } else {
+                    vendorPriceInfo.style.display = 'none';
+                }
+            });
+            
+            useCustomAmount.addEventListener('change', function() {
+                if (this.checked) {
+                    expenseAmount.removeAttribute('readonly');
+                    expenseAmount.focus();
+                } else {
+                    // Reapply the vendor's price
+                    vendorSelect.dispatchEvent(new Event('change'));
+                }
+            });
+        });
+    </script>
 </body>
 </html> 

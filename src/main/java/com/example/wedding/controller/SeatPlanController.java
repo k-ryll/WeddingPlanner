@@ -29,6 +29,29 @@ public class SeatPlanController {
     @Autowired
     private GuestService guestService;
 
+    // TableDTO to avoid circular references
+    private static class TableDTO {
+        private Integer id;
+        private String tableName;
+        private Integer numberOfChairs;
+        private Integer positionX;
+        private Integer positionY;
+        
+        public TableDTO(WeddingTable table) {
+            this.id = table.getId();
+            this.tableName = table.getTableName();
+            this.numberOfChairs = table.getNumberOfChairs();
+            this.positionX = table.getPositionX();
+            this.positionY = table.getPositionY();
+        }
+        
+        public Integer getId() { return id; }
+        public String getTableName() { return tableName; }
+        public Integer getNumberOfChairs() { return numberOfChairs; }
+        public Integer getPositionX() { return positionX; }
+        public Integer getPositionY() { return positionY; }
+    }
+
     // User seat plan route
     @GetMapping("/seatplan")
     public String getUserSeatPlan(@SessionAttribute(name = "loggedUser", required = false) User user, Model model) {
@@ -166,7 +189,7 @@ public class SeatPlanController {
 
     @PostMapping("/seatplan/add-table")
     @ResponseBody
-    public ResponseEntity<WeddingTable> addTable(
+    public ResponseEntity<TableDTO> addTable(
             @SessionAttribute(name = "loggedUser", required = false) User user,
             @RequestBody WeddingTable table) {
         if (user == null) {
@@ -193,7 +216,8 @@ public class SeatPlanController {
         // Save and return the updated seat plan
         seatPlanService.saveSeatPlan(seatPlan);
         
-        return ResponseEntity.ok(table);
+        // Return DTO instead of full entity to avoid circular references
+        return ResponseEntity.ok(new TableDTO(table));
     }
 
     @PostMapping("/seatplan/update-positions")
@@ -332,7 +356,7 @@ public class SeatPlanController {
 
     @PostMapping("/project/{projectId}/seatplan/add-table")
     @ResponseBody
-    public ResponseEntity<WeddingTable> addTableAdmin(
+    public ResponseEntity<TableDTO> addTableAdmin(
             @PathVariable Integer projectId,
             @RequestBody WeddingTable table) {
         SeatPlan seatPlan = seatPlanService.getSeatPlanByProjectId(projectId);
@@ -350,7 +374,8 @@ public class SeatPlanController {
         // Save and return the updated seat plan
         seatPlanService.saveSeatPlan(seatPlan);
         
-        return ResponseEntity.ok(table);
+        // Return DTO instead of full entity to avoid circular references
+        return ResponseEntity.ok(new TableDTO(table));
     }
 
     @PostMapping("/project/{projectId}/seatplan/update-positions")

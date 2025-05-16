@@ -23,11 +23,15 @@
 
 @media (min-width: 1024px) {
     .planning-container {
-        grid-template-columns: repeat(2, 1fr);
+        grid-template-columns: 2fr 1fr;
     }
 
     .budget-section {
-        grid-column: 1 / -1;
+        grid-column: 1 / 2;
+    }
+    
+    .vendors-section {
+        grid-column: 2 / 3;
     }
 }
 
@@ -511,8 +515,98 @@
     gap: 0.5rem;
 }
 
+/* Vendor Section Styles */
+.vendors-section {
+    background: #fff;
+    border-radius: 8px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    margin-top: 1rem;
+}
+
+.vendor-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    margin-top: 1rem;
+}
+
+.vendor-card {
+    background: #faf7f8;
+    border-radius: 8px;
+    padding: 1.25rem;
+    border: 1px solid #f0e6e9;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.vendor-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(129, 66, 86, 0.1);
+}
+
+.vendor-card h3 {
+    color: #814256;
+    font-size: 1.2rem;
+    margin: 0 0 1rem 0;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid #f0e6e9;
+}
+
+.vendor-details {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.detail-row {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.label {
+    font-weight: 500;
+    color: #814256;
+    font-size: 0.9rem;
+}
+
+.value {
+    color: #666;
+}
+
+.contact-link {
+    color: #1976d2;
+    text-decoration: none;
+}
+
+.contact-link:hover {
+    text-decoration: underline;
+}
+
+.description {
+    font-size: 0.9rem;
+    line-height: 1.4;
+    margin: 0.25rem 0 0 0;
+    color: #666;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 2rem;
+    color: #999;
+    font-style: italic;
+}
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
+    .planning-container {
+        grid-template-columns: 1fr;
+    }
+    
+    .budget-section, .vendors-section {
+        grid-column: 1 / -1;
+    }
+    
     .budget-summary {
         grid-template-columns: 1fr;
         gap: 1rem;
@@ -533,4 +627,190 @@
         width: 100%;
         justify-content: flex-end;
     }
+}
+
+/* Vendor filter styles */
+.vendor-selection {
+    margin-bottom: 1rem;
+}
+
+.vendor-filter-info {
+    margin-top: 0.5rem;
+    padding: 0.5rem;
+    font-size: 0.9rem;
+    color: #814256;
+    background-color: #f0e6e9;
+    border-radius: 4px;
+    display: none;
+}
+
+.vendor-filter-match {
+    font-weight: bold;
+}
+
+.vendor-filter-count {
+    font-weight: bold;
+}
+
+/* Match group styling */
+#matchingVendors {
+    background-color: #f0e6e9;
+    color: #814256;
+    font-weight: bold;
+    border-bottom: 2px solid #814256;
+    padding-bottom: 5px;
+    margin-bottom: 5px;
+}
+
+#matchingVendors option {
+    background-color: white;
+    font-weight: normal;
+    padding: 5px;
+}
+
+#vendorSelect option {
+    padding: 3px;
+}
+
+/* Mobile enhancements for select */
+@media (max-width: 768px) {
+    #vendorSelect {
+        font-size: 16px; /* Prevent zoom on iOS */
+        padding: 8px;
+    }
+    
+    #vendorSelect option {
+        padding: 8px 4px;
+    }
+}
+
+/* Add styles for the filtered vendors */
+select option.filter-match {
+    background-color: #f0e6e9;
+    color: #814256;
+    font-weight: bold;
+}
+
+/* Style for optgroups with matching vendors */
+select optgroup.has-matches {
+    font-weight: bold;
+    color: #814256;
+}
+
+/* Price information styling */
+.vendor-price-info {
+    margin: 1rem 0;
+}
+
+.price-card {
+    background-color: #fcf7f9;
+    border: 1px solid #f0e6e9;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(129, 66, 86, 0.05);
+}
+
+.price-header {
+    background-color: #814256;
+    color: white;
+    padding: 0.75rem 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.price-header i {
+    font-size: 1.1rem;
+}
+
+.price-header h4 {
+    font-size: 1.1rem;
+    margin: 0;
+    font-weight: 500;
+}
+
+.price-details {
+    padding: 1rem;
+}
+
+.price-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0;
+    border-bottom: 1px dashed #f0e6e9;
+}
+
+.price-label {
+    color: #666;
+    font-weight: 500;
+}
+
+.price-value {
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: #814256;
+}
+
+.price-calculation {
+    margin-top: 1rem;
+    padding: 1rem;
+    background-color: #ffffff;
+    border: 1px solid #f0e6e9;
+    border-radius: 6px;
+}
+
+.calculation-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+}
+
+.calc-label {
+    color: #666;
+}
+
+.calc-value {
+    font-weight: 500;
+    color: #333;
+}
+
+.calculation-divider {
+    height: 1px;
+    background-color: #f0e6e9;
+    margin: 0.75rem 0;
+}
+
+.calculation-total {
+    font-weight: bold;
+}
+
+.calculation-total .calc-value {
+    color: #814256;
+    font-size: 1.1rem;
+}
+
+.price-footer {
+    padding: 0.75rem 1rem;
+    background-color: #f8f2f5;
+    border-top: 1px solid #f0e6e9;
+}
+
+.custom-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+}
+
+.checkbox-text {
+    color: #814256;
+    font-size: 0.9rem;
+}
+
+/* Make sure input checkbox is visible and aligned */
+.custom-checkbox input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    accent-color: #814256;
 } 

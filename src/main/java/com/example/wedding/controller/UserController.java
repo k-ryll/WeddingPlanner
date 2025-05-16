@@ -6,6 +6,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.ArrayList;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -31,6 +32,7 @@ import com.example.wedding.model.Task;
 import com.example.wedding.model.ItineraryItem;
 import com.example.wedding.model.BudgetCategory;
 import com.example.wedding.model.Expense;
+import com.example.wedding.model.Vendor;
 import com.example.wedding.service.DuplicateEmailException;
 import com.example.wedding.service.EmailService;
 import com.example.wedding.service.UserService;
@@ -40,6 +42,7 @@ import com.example.wedding.service.TaskService;
 import com.example.wedding.service.ItineraryService;
 import com.example.wedding.service.BudgetService;
 import com.example.wedding.service.GuestService;
+import com.example.wedding.service.VendorService;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -74,6 +77,9 @@ public class UserController {
 
     @Autowired
     private GuestService guestService;
+
+    @Autowired
+    private VendorService vendorService;
 
     @GetMapping("/index")
     public String showIndexPage() {
@@ -274,7 +280,8 @@ public String saveUser(@RequestParam("password") String password,
                                    @RequestParam("name") String name,
                                    @RequestParam("amount") BigDecimal amount,
                                    @RequestParam("date") String date,
-                                   @RequestParam(value = "description", required = false) String description) {
+                                   @RequestParam(value = "description", required = false) String description,
+                                   @RequestParam(value = "vendorId", required = false) Integer vendorId) {
         if (user == null) {
             return "redirect:/user/login";
         }
@@ -282,13 +289,13 @@ public String saveUser(@RequestParam("password") String password,
         Project project = projectService.findProjectByUserEmail(user.getEmail());
         if (project != null) {
             try {
-                // Find the budget category
+                // Find the category
                 BudgetCategory category = budgetService.findByProject(project)
                     .stream()
                     .filter(c -> c.getId().equals(categoryId))
                     .findFirst()
                     .orElseThrow(() -> new RuntimeException("Category not found"));
-
+                
                 // Create and save expense
                 Expense expense = new Expense();
                 expense.setName(name);
@@ -296,6 +303,15 @@ public String saveUser(@RequestParam("password") String password,
                 expense.setDate(LocalDate.parse(date));
                 expense.setDescription(description);
                 expense.setCategory(category);
+                
+                // If a vendor was selected, add it to the expense
+                if (vendorId != null) {
+                    Vendor vendor = vendorService.getVendorById(vendorId);
+                    if (vendor != null) {
+                        expense.setVendor(vendor);
+                    }
+                }
+                
                 budgetService.saveExpense(expense);
                 
                 return "redirect:/budget";
@@ -483,15 +499,42 @@ public String saveUser(@RequestParam("password") String password,
             BigDecimal totalBudget = budgetService.getTotalBudget(project);
             BigDecimal totalSpent = budgetService.getTotalSpent(project);
             
+            // Get all vendor types for the dropdown
+            List<VendorService.VendorType> vendorTypes = vendorService.getVendorsByType();
+            
+            // Get distinct vendor categories for category suggestions
+            List<String> vendorCategories = vendorService.getDistinctVendorCategories();
+            
+            // Get total guest count for price calculations
+            int totalGuests = guestService.findByProject(project).size();
+            
+            // Get all vendors used in this project's expenses
+            List<Vendor> usedVendors = new ArrayList<>();
+            for (BudgetCategory category : budgetCategories) {
+                for (Expense expense : category.getExpenses()) {
+                    if (expense.getVendor() != null && !usedVendors.contains(expense.getVendor())) {
+                        usedVendors.add(expense.getVendor());
+                    }
+                }
+            }
+            
             model.addAttribute("budgetCategories", budgetCategories);
             model.addAttribute("totalBudget", totalBudget);
             model.addAttribute("totalSpent", totalSpent);
+            model.addAttribute("vendorTypes", vendorTypes);
+            model.addAttribute("vendorCategories", vendorCategories);
+            model.addAttribute("totalGuests", totalGuests);
+            model.addAttribute("usedVendors", usedVendors);
         } else {
             // Initialize with defaults if no project
             model.addAttribute("projectId", null);
             model.addAttribute("budgetCategories", Collections.emptyList());
             model.addAttribute("totalBudget", BigDecimal.ZERO);
             model.addAttribute("totalSpent", BigDecimal.ZERO);
+            model.addAttribute("vendorTypes", Collections.emptyList());
+            model.addAttribute("vendorCategories", Collections.emptyList());
+            model.addAttribute("totalGuests", 0);
+            model.addAttribute("usedVendors", Collections.emptyList());
         }
         
         return "user_budget";

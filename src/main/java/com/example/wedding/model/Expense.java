@@ -26,6 +26,10 @@ public class Expense {
     @JoinColumn(name = "category_id", nullable = false)
     private BudgetCategory category;
 
+    @ManyToOne
+    @JoinColumn(name = "vendor_id", nullable = true)
+    private Vendor vendor;
+
     // Getters and Setters
     public Integer getId() {
         return id;
@@ -73,5 +77,13 @@ public class Expense {
 
     public void setCategory(BudgetCategory category) {
         this.category = category;
+    }
+
+    public Vendor getVendor() {
+        return vendor;
+    }
+
+    public void setVendor(Vendor vendor) {
+        this.vendor = vendor;
     }
 } 
