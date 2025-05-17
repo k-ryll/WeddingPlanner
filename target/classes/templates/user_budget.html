@@ -283,191 +283,64 @@
     </div>
 
     <script th:src="@{/js/budget.js}"></script>
-    <script th:inline="javascript">
+    <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const expenseCategorySelect = document.getElementById('expenseCategory');
-            const vendorSelect = document.getElementById('vendorSelect');
-            const matchingVendorsGroup = document.getElementById('matchingVendors');
-            const vendorPriceInfo = document.getElementById('vendorPriceInfo');
-            const vendorFilterInfo = document.getElementById('vendorFilterInfo');
-            const filterCategoryName = document.getElementById('filterCategoryName');
-            const filteredVendorCount = document.getElementById('filteredVendorCount');
-            const avgPriceDisplay = document.getElementById('avgPriceDisplay');
-            const guestBasedPriceContainer = document.getElementById('guestBasedPriceContainer');
-            const perGuestPrice = document.getElementById('perGuestPrice');
-            const guestCount = document.getElementById('guestCount');
-            const calculatedPrice = document.getElementById('calculatedPrice');
-            const expenseAmount = document.getElementById('expenseAmount');
-            const useCustomAmount = document.getElementById('useCustomAmount');
-            
-            // Get guest count from server-side variable
-            const totalGuests = /*[[${totalGuests}]]*/ 0;
-            
-            // Check if we need to pre-select a vendor
-            const preSelectVendorId = /*[[${preSelectVendorId}]]*/ null;
-            const openExpenseModal = /*[[${openExpenseModal}]]*/ false;
-            
-            // Store all vendor options for filtering
-            const vendorOptions = [];
-            const vendorOptgroups = Array.from(vendorSelect.querySelectorAll('optgroup')).filter(group => group.id !== 'matchingVendors');
-            
-            // Original vendor options backup (for resetting)
-            const originalVendorOptions = [];
-            
-            // Initialize vendor options array
-            vendorOptgroups.forEach(optgroup => {
-                const options = optgroup.querySelectorAll('option');
-                options.forEach(option => {
-                    if (option.value) { // Skip the "Select Vendor" option
-                        vendorOptions.push({
-                            element: option,
-                            optgroup: optgroup,
-                            value: option.value,
-                            text: option.text,
-                            category: option.getAttribute('data-category'),
-                            avgPrice: option.getAttribute('data-avg-price'),
-                            isGuestBased: option.getAttribute('data-guest-based')
-                        });
-                        
-                        // Create a backup of original options
-                        originalVendorOptions.push({
-                            value: option.value,
-                            text: option.text,
-                            category: option.getAttribute('data-category'),
-                            avgPrice: option.getAttribute('data-avg-price'),
-                            isGuestBased: option.getAttribute('data-guest-based'),
-                            optgroupLabel: optgroup.label
-                        });
-                    }
-                });
-            });
-            
-            // Pre-select vendor if one was specified in the URL
-            if (preSelectVendorId) {
-                // Find the vendor option
-                vendorSelect.value = preSelectVendorId;
-                
-                // Trigger the change event to update price information
-                vendorSelect.dispatchEvent(new Event('change'));
-                
-                // Open the expense modal
-                if (openExpenseModal) {
-                    openBudgetModal();
-                }
+            // Function to get URL parameters
+            function getUrlParameter(name) {
+                name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+                var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+                var results = regex.exec(location.search);
+                return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
             }
-            
-            // Function to filter vendors based on selected category
-            function filterVendorsByCategory(categoryName) {
-                // Reset vendor dropdown and clear the matching vendors group
-                vendorSelect.value = '';
-                vendorPriceInfo.style.display = 'none';
-                
-                // Clear previous matching vendors
-                while (matchingVendorsGroup.firstChild) {
-                    matchingVendorsGroup.removeChild(matchingVendorsGroup.firstChild);
-                }
-                
-                // Hide the matching vendors group initially
-                matchingVendorsGroup.style.display = 'none';
-                
-                if (!categoryName) {
-                    // If no category selected, restore original state
-                    vendorFilterInfo.style.display = 'none';
-                    return;
-                }
-                
-                // Convert to lowercase for case-insensitive matching
-                const selectedCategory = categoryName.toLowerCase();
-                
-                // Track matched vendors to add at the top
-                const matchingVendors = [];
-                
-                // Identify matching vendors
-                vendorOptions.forEach(vendor => {
-                    // Check if vendor category matches the budget category (case insensitive)
-                    const vendorCategory = vendor.category.toLowerCase();
-                    
-                    // Check for matches using different strategies
-                    const exactMatch = vendorCategory === selectedCategory;
-                    const vendorIncludes = vendorCategory.includes(selectedCategory);
-                    const categoryIncludes = selectedCategory.includes(vendorCategory);
-                    
-                    if (exactMatch || vendorIncludes || categoryIncludes) {
-                        matchingVendors.push(vendor);
-                    }
-                });
-                
-                // If we have matches, display them at the top
-                if (matchingVendors.length > 0) {
-                    // Create clones of matching vendor options at the top
-                    matchingVendors.forEach(vendor => {
-                        const clonedOption = document.createElement('option');
-                        clonedOption.value = vendor.value;
-                        clonedOption.text = vendor.text;
-                        clonedOption.setAttribute('data-avg-price', vendor.avgPrice);
-                        clonedOption.setAttribute('data-guest-based', vendor.isGuestBased);
-                        clonedOption.setAttribute('data-category', vendor.category);
-                        clonedOption.setAttribute('data-original-group', vendor.optgroup.label);
-                        matchingVendorsGroup.appendChild(clonedOption);
-                    });
-                    
-                    // Show the matching vendors group
-                    matchingVendorsGroup.style.display = '';
-                    
-                    // Update filter info display
-                    filterCategoryName.textContent = categoryName;
-                    filteredVendorCount.textContent = matchingVendors.length;
-                    vendorFilterInfo.style.display = 'block';
-                } else {
-                    // If no matches, don't show filter info
-                    vendorFilterInfo.style.display = 'none';
-                }
-            }
-            
-            // Filter vendors when category changes
-            expenseCategorySelect.addEventListener('change', function() {
-                const selectedOption = this.options[this.selectedIndex];
-                const categoryName = selectedOption.text;
-                filterVendorsByCategory(categoryName !== 'Select Category' ? categoryName : '');
-            });
-            
-            vendorSelect.addEventListener('change', function() {
-                if (this.value) {
-                    const selectedOption = this.options[this.selectedIndex];
-                    const avgPrice = selectedOption.getAttribute('data-avg-price');
-                    const isGuestBased = selectedOption.getAttribute('data-guest-based') === 'true';
-                    
-                    vendorPriceInfo.style.display = 'block';
-                    avgPriceDisplay.textContent = '₱' + parseFloat(avgPrice).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-                    
-                    // Auto-fill the amount field
-                    expenseAmount.value = avgPrice;
-                    
-                    // If price is guest-based, show calculated price
-                    if (isGuestBased) {
-                        guestCount.textContent = totalGuests;
-                        perGuestPrice.textContent = '₱' + parseFloat(avgPrice).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-                        const calculatedAmount = parseFloat(avgPrice) * totalGuests;
-                        calculatedPrice.textContent = '₱' + calculatedAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-                        guestBasedPriceContainer.style.display = 'block';
-                        expenseAmount.value = calculatedAmount;
-                    } else {
-                        guestBasedPriceContainer.style.display = 'none';
-                    }
-                } else {
-                    vendorPriceInfo.style.display = 'none';
-                }
-            });
-            
-            useCustomAmount.addEventListener('change', function() {
-                if (this.checked) {
-                    expenseAmount.removeAttribute('readonly');
-                    expenseAmount.focus();
-                } else {
-                    // Reapply the vendor's price
+
+            // Check if we have vendor parameters
+            const vendorId = getUrlParameter('vendorId');
+            const vendorName = getUrlParameter('vendorName');
+            const category = getUrlParameter('category');
+            const amount = getUrlParameter('amount');
+
+            if (vendorId && vendorName) {
+                // Open the budget modal
+                openBudgetModal();
+
+                // Set the vendor in the select
+                const vendorSelect = document.getElementById('vendorSelect');
+                if (vendorSelect) {
+                    vendorSelect.value = vendorId;
+                    // Trigger change event to update any dependent fields
                     vendorSelect.dispatchEvent(new Event('change'));
                 }
-            });
+
+                // Set the expense name
+                const expenseNameInput = document.querySelector('input[name="name"]');
+                if (expenseNameInput) {
+                    expenseNameInput.value = vendorName;
+                }
+
+                // Set the amount if provided
+                if (amount) {
+                    const amountInput = document.getElementById('expenseAmount');
+                    if (amountInput) {
+                        amountInput.value = amount;
+                    }
+                }
+
+                // Try to set the category
+                if (category) {
+                    const categorySelect = document.getElementById('expenseCategory');
+                    if (categorySelect) {
+                        // Find the option that matches the category
+                        const options = Array.from(categorySelect.options);
+                        const matchingOption = options.find(option => 
+                            option.text.toLowerCase() === category.toLowerCase()
+                        );
+                        if (matchingOption) {
+                            categorySelect.value = matchingOption.value;
+                            categorySelect.dispatchEvent(new Event('change'));
+                        }
+                    }
+                }
+            }
         });
     </script>
 </body>

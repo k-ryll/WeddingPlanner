@@ -160,11 +160,11 @@
                                 <span class="category-name" th:text="${stat.count + '. ' + category.name}"></span>
                                 <div class="category-details">
                                     <span class="budget-amount" th:text="${'Budget: ₱' + #numbers.formatDecimal(category.budget != null ? category.budget : 0, 1, 'COMMA', 2, 'POINT')}"></span>
-                                    <span class="expense-amount" th:text="${'Spent: ₱' + #numbers.formatDecimal(totalSpent, 1, 'COMMA', 2, 'POINT')}"></span>
+                                    <span class="expense-amount" th:text="${'Spent: ₱' + #numbers.formatDecimal(category.totalSpent != null ? category.totalSpent : 0, 1, 'COMMA', 2, 'POINT')}"></span>
                                 </div>
                             </div>
                             <div class="category-progress">
-                                <div class="progress-bar" th:style="${'width: ' + (totalBudget > 0 ? (totalSpent / totalBudget * 100) : 0) + '%'}"></div>
+                                <div class="progress-bar" th:style="${'width: ' + (category.budget > 0 ? (category.totalSpent / category.budget * 100) : 0) + '%'}"></div>
                             </div>
                         </li>
                     </ul>

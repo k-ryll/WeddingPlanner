@@ -120,13 +120,13 @@
                     </div>
                     
                     <div class="vendor-contact" th:if="${vendor.contact}">
-                        <a th:href="${vendor.contact}" target="_blank" class="contact-button">
+                        <a th:href="${vendor.contact.startsWith('http') ? vendor.contact : 'http://' + vendor.contact}" target="_blank" class="contact-button">
                             <i class="fas fa-external-link-alt"></i> Contact
                         </a>
                     </div>
                     
                     <div class="vendor-actions" style="margin-top: 0.75rem; display: flex; gap: 0.5rem;">
-                        <a th:href="@{/budget(vendorId=${vendor.id})}" class="add-expense-button">
+                        <a th:href="@{/budget(vendorId=${vendor.id}, vendorName=${vendor.name}, category=${vendor.getCategoryNames()}, amount=${vendor.priceType == 'fixed' ? vendor.totalPrice : vendor.pricePerGuest})}" class="add-expense-button">
                             <i class="fas fa-plus-circle"></i> Add to Expense
                         </a>
                     </div>
