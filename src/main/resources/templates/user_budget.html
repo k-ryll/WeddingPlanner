@@ -283,64 +283,251 @@
     </div>
 
     <script th:src="@{/js/budget.js}"></script>
-    <script>
+    <script th:inline="javascript">
         document.addEventListener('DOMContentLoaded', function() {
-            // Function to get URL parameters
-            function getUrlParameter(name) {
-                name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
-                var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
-                var results = regex.exec(location.search);
-                return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
-            }
+             const expenseCategorySelect = document.getElementById('expenseCategory');
+             const vendorSelect = document.getElementById('vendorSelect');
+             const matchingVendorsGroup = document.getElementById('matchingVendors');
+             const vendorPriceInfo = document.getElementById('vendorPriceInfo');
+             const vendorFilterInfo = document.getElementById('vendorFilterInfo');
+             const filterCategoryName = document.getElementById('filterCategoryName');
+             const filteredVendorCount = document.getElementById('filteredVendorCount');
+             const avgPriceDisplay = document.getElementById('avgPriceDisplay');
+             const guestBasedPriceContainer = document.getElementById('guestBasedPriceContainer');
+             const perGuestPrice = document.getElementById('perGuestPrice');
+             const guestCount = document.getElementById('guestCount');
+             const calculatedPrice = document.getElementById('calculatedPrice');
+             const expenseAmount = document.getElementById('expenseAmount');
+             const useCustomAmount = document.getElementById('useCustomAmount');
+             const budgetForm = document.getElementById('budgetForm'); // Added for more specific selector
+             
+             // Get guest count from server-side variable
+             const totalGuests = /*[[${totalGuests}]]*/ 0;
+             
+             // Check if we need to pre-select a vendor (from model attributes)
+             const preSelectVendorId = /*[[${preSelectVendorId}]]*/ null;
+             const openExpenseModalOnLoad = /*[[${openExpenseModal}]]*/ false; // Renamed to avoid conflict
+             
+             const vendorOptions = [];
+             const vendorOptgroups = Array.from(vendorSelect.querySelectorAll('optgroup')).filter(group => group.id !== 'matchingVendors');
+             
+             vendorOptgroups.forEach(optgroup => {
+                 const options = optgroup.querySelectorAll('option');
+                 options.forEach(option => {
+                     if (option.value) {
+                         vendorOptions.push({
+                             element: option,
+                             optgroup: optgroup,
+                             value: option.value,
+                             text: option.text,
+                             category: option.getAttribute('data-category'),
+                             avgPrice: option.getAttribute('data-avg-price'),
+                             isGuestBased: option.getAttribute('data-guest-based') === 'true' // Ensure boolean
+                         });
+                     }
+                 });
+             });
+             
+             if (preSelectVendorId) {
+                 vendorSelect.value = preSelectVendorId;
+                 vendorSelect.dispatchEvent(new Event('change'));
+                 if (openExpenseModalOnLoad) {
+                     openBudgetModal(); // Assumes openBudgetModal() is defined elsewhere (e.g., budget.js)
+                 }
+             }
+             
+             function filterVendorsByCategory(categoryName) {
+                 vendorSelect.value = '';
+                 vendorPriceInfo.style.display = 'none';
+                 while (matchingVendorsGroup.firstChild) {
+                     matchingVendorsGroup.removeChild(matchingVendorsGroup.firstChild);
+                 }
+                 matchingVendorsGroup.style.display = 'none';
+                 
+                 if (!categoryName) {
+                     vendorFilterInfo.style.display = 'none';
+                     return;
+                 }
+                 
+                 const selectedCategoryLower = categoryName.toLowerCase();
+                 const matchingVendors = [];
+                 
+                 vendorOptions.forEach(vendor => {
+                     const vendorCategoryLower = vendor.category ? vendor.category.toLowerCase() : "";
+                     if (vendorCategoryLower.includes(selectedCategoryLower) || selectedCategoryLower.includes(vendorCategoryLower)) {
+                         matchingVendors.push(vendor);
+                     }
+                 });
+                 
+                 if (matchingVendors.length > 0) {
+                     matchingVendors.forEach(vendor => {
+                         const clonedOption = document.createElement('option');
+                         clonedOption.value = vendor.value;
+                         clonedOption.text = vendor.text;
+                         clonedOption.setAttribute('data-avg-price', vendor.avgPrice);
+                         clonedOption.setAttribute('data-guest-based', String(vendor.isGuestBased));
+                         clonedOption.setAttribute('data-category', vendor.category);
+                         matchingVendorsGroup.appendChild(clonedOption);
+                     });
+                     matchingVendorsGroup.style.display = '';
+                     filterCategoryName.textContent = categoryName;
+                     filteredVendorCount.textContent = matchingVendors.length;
+                     vendorFilterInfo.style.display = 'block';
+                 } else {
+                     vendorFilterInfo.style.display = 'none';
+                 }
+             }
+             
+             expenseCategorySelect.addEventListener('change', function() {
+                 const selectedOption = this.options[this.selectedIndex];
+                 const categoryName = selectedOption.text;
+                 filterVendorsByCategory(categoryName !== 'Select Category' ? categoryName : '');
+             });
+             
+             vendorSelect.addEventListener('change', function() {
+                 if (this.value) {
+                     const selectedOption = this.options[this.selectedIndex];
+                     // Ensure attributes are correctly fetched, even from cloned options in matchingVendorsGroup
+                     let avgPrice = selectedOption.getAttribute('data-avg-price');
+                     let isGuestBased = selectedOption.getAttribute('data-guest-based') === 'true';
 
-            // Check if we have vendor parameters
-            const vendorId = getUrlParameter('vendorId');
-            const vendorName = getUrlParameter('vendorName');
-            const category = getUrlParameter('category');
-            const amount = getUrlParameter('amount');
-
-            if (vendorId && vendorName) {
-                // Open the budget modal
-                openBudgetModal();
-
-                // Set the vendor in the select
-                const vendorSelect = document.getElementById('vendorSelect');
-                if (vendorSelect) {
-                    vendorSelect.value = vendorId;
-                    // Trigger change event to update any dependent fields
-                    vendorSelect.dispatchEvent(new Event('change'));
-                }
-
-                // Set the expense name
-                const expenseNameInput = document.querySelector('input[name="name"]');
-                if (expenseNameInput) {
-                    expenseNameInput.value = vendorName;
-                }
-
-                // Set the amount if provided
-                if (amount) {
-                    const amountInput = document.getElementById('expenseAmount');
-                    if (amountInput) {
-                        amountInput.value = amount;
-                    }
-                }
-
-                // Try to set the category
-                if (category) {
-                    const categorySelect = document.getElementById('expenseCategory');
-                    if (categorySelect) {
-                        // Find the option that matches the category
-                        const options = Array.from(categorySelect.options);
-                        const matchingOption = options.find(option => 
-                            option.text.toLowerCase() === category.toLowerCase()
-                        );
-                        if (matchingOption) {
-                            categorySelect.value = matchingOption.value;
-                            categorySelect.dispatchEvent(new Event('change'));
+                     if (selectedOption.parentNode === matchingVendorsGroup) {
+                        // For cloned options, data attributes might need to be re-fetched or ensured they are set
+                        const originalVendor = vendorOptions.find(v => v.value === selectedOption.value);
+                        if (originalVendor) {
+                            avgPrice = originalVendor.avgPrice;
+                            isGuestBased = originalVendor.isGuestBased;
                         }
+                     }
+                     
+                     if (avgPrice === null) return; // Vendor might not have price info
+
+                     vendorPriceInfo.style.display = 'block';
+                     const avgPriceNum = parseFloat(avgPrice);
+                     avgPriceDisplay.textContent = '₱' + avgPriceNum.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                     
+                     if (!useCustomAmount.checked) {
+                         expenseAmount.value = avgPriceNum.toFixed(2);
+                         expenseAmount.setAttribute('readonly', 'readonly');
+                     }
+                     
+                     if (isGuestBased) {
+                         guestCount.textContent = totalGuests;
+                         perGuestPrice.textContent = '₱' + avgPriceNum.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                         const calculatedAmount = avgPriceNum * totalGuests;
+                         calculatedPrice.textContent = '₱' + calculatedAmount.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                         guestBasedPriceContainer.style.display = 'block';
+                         if (!useCustomAmount.checked) {
+                            expenseAmount.value = calculatedAmount.toFixed(2);
+                         }
+                     } else {
+                         guestBasedPriceContainer.style.display = 'none';
+                     }
+                 } else {
+                     vendorPriceInfo.style.display = 'none';
+                     if (!useCustomAmount.checked) {
+                        expenseAmount.value = ''; // Clear amount if no vendor selected
+                     }
+                 }
+             });
+             
+             useCustomAmount.addEventListener('change', function() {
+                 if (this.checked) {
+                     expenseAmount.removeAttribute('readonly');
+                     expenseAmount.focus();
+                 } else {
+                     expenseAmount.setAttribute('readonly', 'readonly');
+                     // Reapply the vendor's price if a vendor is selected
+                     if (vendorSelect.value) {
+                         vendorSelect.dispatchEvent(new Event('change'));
+                     } else {
+                         expenseAmount.value = ''; // Clear if no vendor
+                     }
+                 }
+             });
+
+            // --- Start of new URL parameter handling logic ---
+            function getUrlParameter(name) {
+                name = name.replace(/[\\[]/, '\\\\[').replace(/[\\]]/, '\\\\]');
+                var regex = new RegExp('[\\\\?&]' + name + '=([^&#]*)');
+                var results = regex.exec(location.search);
+                return results === null ? '' : decodeURIComponent(results[1].replace(/\\+/g, ' '));
+            }
+
+            const urlVendorIdParam = getUrlParameter('vendorId');
+            const urlVendorNameParam = getUrlParameter('vendorName');
+            const urlCategoryParam = getUrlParameter('category');
+            const urlAmountParam = getUrlParameter('amount');
+
+            if (urlVendorIdParam && urlVendorNameParam) {
+                openBudgetModal(); // Assumed to be globally available
+
+                if (vendorSelect) {
+                    // Check if the vendorId exists in the main list or matching list
+                    let optionToSelect = vendorSelect.querySelector('option[value="' + urlVendorIdParam + '"]');
+                    if (!optionToSelect && matchingVendorsGroup.querySelector('option[value="' + urlVendorIdParam + '"]')) {
+                         // If not in main list, but potentially in (not-yet-populated) matching list,
+                         // we might need to trigger category filter first if category is also passed.
+                         // For now, just try to set it.
+                         optionToSelect = matchingVendorsGroup.querySelector('option[value="' + urlVendorIdParam + '"]');
+                    }
+
+                    if (optionToSelect) {
+                        vendorSelect.value = urlVendorIdParam;
+                    } else {
+                        // If vendor is not in the list (e.g. filtered out), create a temporary option
+                        // This is less ideal, better if category is pre-selected first to populate matching vendors
+                        const tempOption = document.createElement('option');
+                        tempOption.value = urlVendorIdParam;
+                        tempOption.text = urlVendorNameParam + " (from URL)"; // Indicate it's temp
+                        tempOption.setAttribute('data-avg-price', urlAmountParam || '0'); // Use URL amount as avg
+                        tempOption.setAttribute('data-guest-based', 'false'); // Assume not guest based unless more info
+                        tempOption.setAttribute('data-category', urlCategoryParam || '');
+                        
+                        // Add to a visible group or directly to select
+                        // For simplicity, adding to matchingVendorsGroup if it's visible, else to select directly
+                        if (matchingVendorsGroup.style.display !== 'none') {
+                            matchingVendorsGroup.appendChild(tempOption);
+                        } else {
+                             vendorSelect.appendChild(tempOption); // Fallback, might not be in correct optgroup
+                        }
+                        vendorSelect.value = urlVendorIdParam;
+                    }
+                }
+                
+                // Try to set the category first, this might populate vendorSelect correctly
+                if (urlCategoryParam && expenseCategorySelect) {
+                    const options = Array.from(expenseCategorySelect.options);
+                    const matchingCategoryOption = options.find(option => 
+                        option.text.toLowerCase() === urlCategoryParam.toLowerCase()
+                    );
+                    if (matchingCategoryOption) {
+                        expenseCategorySelect.value = matchingCategoryOption.value;
+                        expenseCategorySelect.dispatchEvent(new Event('change')); // This will trigger filterVendorsByCategory
+                    }
+                }
+                
+                // Now that category might have filtered vendors, try setting vendorId again
+                 if (vendorSelect) {
+                    vendorSelect.value = urlVendorIdParam; // This might now pick the correct option if category filter helped
+                    vendorSelect.dispatchEvent(new Event('change')); // Trigger price calculation
+                }
+
+
+                const expenseNameInput = budgetForm.querySelector('input[name="name"]');
+                if (expenseNameInput) {
+                    expenseNameInput.value = urlVendorNameParam;
+                }
+
+                if (urlAmountParam) {
+                    if (expenseAmount) {
+                        expenseAmount.value = parseFloat(urlAmountParam).toFixed(2);
+                        useCustomAmount.checked = true; // If amount comes from URL, it's "custom"
+                        expenseAmount.removeAttribute('readonly');
                     }
                 }
             }
+            // --- End of new URL parameter handling logic ---
         });
     </script>
 </body>
