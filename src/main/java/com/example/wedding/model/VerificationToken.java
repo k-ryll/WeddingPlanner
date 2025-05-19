@@ -13,7 +13,7 @@ public class VerificationToken {
     private String token;
     
     @OneToOne
-    @JoinColumn(name = "user_id", nullable = false)
+    @JoinColumn(name = "user_id", nullable = false, foreignKey = @ForeignKey(name = "FK_VERIFICATION_TOKEN_USER"))
     private User user;
 
     

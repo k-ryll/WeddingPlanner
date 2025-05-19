@@ -9,6 +9,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
+import jakarta.persistence.ForeignKey;
 
 @Entity
 public class ResetPasswordToken {
@@ -20,7 +21,7 @@ public class ResetPasswordToken {
 	    private String token;
 	    
 	    @OneToOne
-	    @JoinColumn(name = "user_id", nullable = false)
+	    @JoinColumn(name = "user_id", nullable = false, foreignKey = @ForeignKey(name = "FK_RESET_PASSWORD_TOKEN_USER"))
 	    private User user;
 
 	    
