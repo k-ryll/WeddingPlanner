@@ -35,6 +35,9 @@
     </header>
 
     <div class="container">
+        <div th:if="${project != null && project.status == 'Completed'}" class="completed-message" style="background-color: #f8d7da; color: #721c24; padding: 15px; margin-bottom: 20px; border-radius: 4px; text-align: center;">
+            <p>This wedding has been completed. Please contact us if you need to make any changes.</p>
+        </div>
         <input type="hidden" name="projectId" th:value="${projectId}">
         <h1>Wedding Planning</h1>
         
@@ -43,7 +46,10 @@
             <section class="tasks-section">
                 <div class="section-header">
                     <h2>Tasks</h2>
-                    <button class="add-button" onclick="openTaskModal()">Add Task</button>
+                    <button class="add-button" th:if="${project.status != 'Completed'}" onclick="openTaskModal()">Add Task</button>
+                    <div th:if="${project.status == 'Completed'}" class="completed-message">
+                        <p>This wedding has been completed. Please contact us if you need to make any changes.</p>
+                    </div>
                 </div>
                 
                 <div class="task-list">
@@ -84,7 +90,10 @@
                 <div class="section-header">
                     <h2>Wedding Day Itinerary</h2>
                     <div class="itinerary-actions-top">
-                        <button class="add-button" onclick="openItineraryModal()">Add Event</button>
+                        <button class="add-button" th:if="${project.status != 'Completed'}" onclick="openItineraryModal()">Add Event</button>
+                        <div th:if="${project.status == 'Completed'}" class="completed-message">
+                            <p>This wedding has been completed. Please contact us if you need to make any changes.</p>
+                        </div>
                         <div class="email-dropdown">
                             <button class="email-btn">Email Itinerary</button>
                             <div class="email-dropdown-content">
@@ -162,5 +171,29 @@
 
     <script th:src="@{/js/planning.js}"></script>
     <script th:src="@{/js/planning-events.js}"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Only disable elements if project is completed
+            const completedMessage = document.querySelector('.completed-message');
+            if (completedMessage) {
+                const header = document.querySelector('header');
+                const allElements = document.querySelectorAll('input, button, select, textarea, a:not([href^="/"]), [onclick]');
+                
+                allElements.forEach(element => {
+                    // Skip elements in the header
+                    if (!header.contains(element)) {
+                        if (element.tagName === 'INPUT' || element.tagName === 'SELECT' || element.tagName === 'TEXTAREA') {
+                            element.disabled = true;
+                        } else if (element.tagName === 'BUTTON' || element.tagName === 'A') {
+                            element.style.pointerEvents = 'none';
+                            element.style.opacity = '0.6';
+                        }
+                        // Remove onclick handlers
+                        element.removeAttribute('onclick');
+                    }
+                });
+            }
+        });
+    </script>
 </body>
 </html> 

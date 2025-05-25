@@ -14,6 +14,7 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
     <script th:src="@{/js/userMenu.js}" defer></script>
     <script th:src="@{/js/tasks.js}" defer></script>
+    <script th:src="@{/js/home.js}" defer></script>
 </head>
 <body>
 
@@ -43,6 +44,9 @@
 
      
     <div class="container">
+        <div th:if="${project != null && project.status == 'Completed'}" class="completed-message" style="background-color: #f8d7da; color: #721c24; padding: 15px; margin-bottom: 20px; border-radius: 4px; text-align: center;">
+            <p>This wedding has been completed. Please contact us if you need to make any changes.</p>
+        </div>
         <h1>Organize your Wedding in One Place</h1>
         <div class="dashboard">
             <section class="left">
@@ -260,6 +264,26 @@
                 alert('Error updating task status');
             });
         }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // Disable all inputs, buttons, and interactive elements except header navigation
+            const header = document.querySelector('header');
+            const allElements = document.querySelectorAll('input, button, select, textarea, a:not([href^="/"]), [onclick]');
+            
+            allElements.forEach(element => {
+                // Skip elements in the header
+                if (!header.contains(element)) {
+                    if (element.tagName === 'INPUT' || element.tagName === 'SELECT' || element.tagName === 'TEXTAREA') {
+                        element.disabled = true;
+                    } else if (element.tagName === 'BUTTON' || element.tagName === 'A') {
+                        element.style.pointerEvents = 'none';
+                        element.style.opacity = '0.6';
+                    }
+                    // Remove onclick handlers
+                    element.removeAttribute('onclick');
+                }
+            });
+        });
     </script>
 
 </body>

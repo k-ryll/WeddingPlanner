@@ -162,6 +162,7 @@ public class UserController {
         Project project = projectService.findProjectByUserEmail(user.getEmail());
         
         if (project != null) {
+            model.addAttribute("project", project);
             model.addAttribute("projectId", project.getId());
             List<Task> tasks = taskService.findByProject(project);
             List<ItineraryItem> itinerary = itineraryService.findByProject(project);
@@ -176,13 +177,14 @@ public class UserController {
             model.addAttribute("totalSpent", totalSpent);
         } else {
             // Initialize with defaults if no project
-            model.addAttribute("projectId", null); // Or a suitable default/flag
+            model.addAttribute("project", null);
+            model.addAttribute("projectId", null);
             model.addAttribute("tasks", Collections.emptyList());
             model.addAttribute("itinerary", Collections.emptyList());
             model.addAttribute("budgetCategories", Collections.emptyList());
             model.addAttribute("totalBudget", BigDecimal.ZERO);
             model.addAttribute("totalSpent", BigDecimal.ZERO);
-            model.addAttribute("error", "No project found. Some features might be disabled until a project is created."); // Optional: inform the user
+            model.addAttribute("error", "No project found. Some features might be disabled until a project is created.");
         }
         
         return "user_planning";
@@ -274,6 +276,10 @@ public String saveUser(@RequestParam("password") String password,
     }
 }
 
+    private boolean isProjectCompleted(Project project) {
+        return project != null && "Completed".equals(project.getStatus());
+    }
+
     @PostMapping("/budget/add")
     public String addBudgetExpense(@SessionAttribute(name = "loggedUser", required = false) User user,
                                    @RequestParam("categoryId") Integer categoryId,
@@ -281,13 +287,18 @@ public String saveUser(@RequestParam("password") String password,
                                    @RequestParam("amount") BigDecimal amount,
                                    @RequestParam("date") String date,
                                    @RequestParam(value = "description", required = false) String description,
-                                   @RequestParam(value = "vendorId", required = false) Integer vendorId) {
+                                   @RequestParam(value = "vendorId", required = false) Integer vendorId,
+                                   RedirectAttributes redirectAttributes) {
         if (user == null) {
             return "redirect:/user/login";
         }
         
         Project project = projectService.findProjectByUserEmail(user.getEmail());
         if (project != null) {
+            if (isProjectCompleted(project)) {
+                redirectAttributes.addFlashAttribute("error", "This wedding has been completed. Please contact us if you need to make any changes.");
+                return "redirect:/budget";
+            }
             try {
                 // Find the category
                 BudgetCategory category = budgetService.findByProject(project)
@@ -316,7 +327,8 @@ public String saveUser(@RequestParam("password") String password,
                 
                 return "redirect:/budget";
             } catch (Exception e) {
-                return "redirect:/budget?error=" + e.getMessage();
+                redirectAttributes.addFlashAttribute("error", e.getMessage());
+                return "redirect:/budget";
             }
         }
         return "redirect:/budget";
@@ -326,13 +338,18 @@ public String saveUser(@RequestParam("password") String password,
     public String addBudgetCategory(@SessionAttribute(name = "loggedUser", required = false) User user,
                                    @RequestParam("name") String name,
                                    @RequestParam("budget") BigDecimal budget,
-                                   @RequestParam(value = "description", required = false) String description) {
+                                   @RequestParam(value = "description", required = false) String description,
+                                   RedirectAttributes redirectAttributes) {
         if (user == null) {
             return "redirect:/user/login";
         }
         
         Project project = projectService.findProjectByUserEmail(user.getEmail());
         if (project != null) {
+            if (isProjectCompleted(project)) {
+                redirectAttributes.addFlashAttribute("error", "This wedding has been completed. Please contact us if you need to make any changes.");
+                return "redirect:/budget";
+            }
             try {
                 // Create and save category
                 BudgetCategory category = new BudgetCategory();
@@ -344,7 +361,8 @@ public String saveUser(@RequestParam("password") String password,
                 
                 return "redirect:/budget";
             } catch (Exception e) {
-                return "redirect:/budget?error=" + e.getMessage();
+                redirectAttributes.addFlashAttribute("error", e.getMessage());
+                return "redirect:/budget";
             }
         }
         return "redirect:/budget";
@@ -355,13 +373,18 @@ public String saveUser(@RequestParam("password") String password,
                          @RequestParam("title") String title,
                          @RequestParam(value = "description", required = false) String description,
                          @RequestParam("dueDate") String dueDate,
-                         @RequestParam("priority") String priority) {
+                         @RequestParam("priority") String priority,
+                         RedirectAttributes redirectAttributes) {
         if (user == null) {
             return "redirect:/user/login";
         }
         
         Project project = projectService.findProjectByUserEmail(user.getEmail());
         if (project != null) {
+            if (isProjectCompleted(project)) {
+                redirectAttributes.addFlashAttribute("error", "This wedding has been completed. Please contact us if you need to make any changes.");
+                return "redirect:/planning";
+            }
             try {
                 // Create and save task
                 Task task = new Task();
@@ -374,7 +397,8 @@ public String saveUser(@RequestParam("password") String password,
                 
                 return "redirect:/planning";
             } catch (Exception e) {
-                return "redirect:/planning?error=" + e.getMessage();
+                redirectAttributes.addFlashAttribute("error", e.getMessage());
+                return "redirect:/planning";
             }
         }
         return "redirect:/planning";
@@ -386,13 +410,18 @@ public String saveUser(@RequestParam("password") String password,
                                  @RequestParam(value = "description", required = false) String description,
                                  @RequestParam("startTime") String startTime,
                                  @RequestParam("endTime") String endTime,
-                                 @RequestParam(value = "location", required = false) String location) {
+                                 @RequestParam(value = "location", required = false) String location,
+                                 RedirectAttributes redirectAttributes) {
         if (user == null) {
             return "redirect:/user/login";
         }
         
         Project project = projectService.findProjectByUserEmail(user.getEmail());
         if (project != null) {
+            if (isProjectCompleted(project)) {
+                redirectAttributes.addFlashAttribute("error", "This wedding has been completed. Please contact us if you need to make any changes.");
+                return "redirect:/planning";
+            }
             try {
                 // Create and save itinerary item
                 ItineraryItem item = new ItineraryItem();
@@ -406,7 +435,8 @@ public String saveUser(@RequestParam("password") String password,
                 
                 return "redirect:/planning";
             } catch (Exception e) {
-                return "redirect:/planning?error=" + e.getMessage();
+                redirectAttributes.addFlashAttribute("error", e.getMessage());
+                return "redirect:/planning";
             }
         }
         return "redirect:/planning";
@@ -495,6 +525,7 @@ public String saveUser(@RequestParam("password") String password,
         Project project = projectService.findProjectByUserEmail(user.getEmail());
         
         if (project != null) {
+            model.addAttribute("project", project);
             model.addAttribute("projectId", project.getId());
             List<BudgetCategory> budgetCategories = budgetService.findByProject(project);
             BigDecimal totalBudget = budgetService.getTotalBudget(project);
@@ -528,6 +559,7 @@ public String saveUser(@RequestParam("password") String password,
             model.addAttribute("usedVendors", usedVendors);
         } else {
             // Initialize with defaults if no project
+            model.addAttribute("project", null);
             model.addAttribute("projectId", null);
             model.addAttribute("budgetCategories", Collections.emptyList());
             model.addAttribute("totalBudget", BigDecimal.ZERO);
@@ -549,9 +581,16 @@ public String saveUser(@RequestParam("password") String password,
 
     @PostMapping("/budget/expense/{expenseId}/delete")
     public String deleteExpense(@SessionAttribute(name = "loggedUser", required = false) User user,
-                               @PathVariable Integer expenseId) {
+                               @PathVariable Integer expenseId,
+                               RedirectAttributes redirectAttributes) {
         if (user == null) {
             return "redirect:/user/login";
+        }
+        
+        Project project = projectService.findProjectByUserEmail(user.getEmail());
+        if (project != null && isProjectCompleted(project)) {
+            redirectAttributes.addFlashAttribute("error", "This wedding has been completed. Please contact us if you need to make any changes.");
+            return "redirect:/budget";
         }
         
         budgetService.deleteExpense(expenseId);
@@ -560,9 +599,16 @@ public String saveUser(@RequestParam("password") String password,
 
     @PostMapping("/budget/category/{categoryId}/delete")
     public String deleteBudgetCategory(@SessionAttribute(name = "loggedUser", required = false) User user,
-                                      @PathVariable Integer categoryId) {
+                                      @PathVariable Integer categoryId,
+                                      RedirectAttributes redirectAttributes) {
         if (user == null) {
             return "redirect:/user/login";
+        }
+        
+        Project project = projectService.findProjectByUserEmail(user.getEmail());
+        if (project != null && isProjectCompleted(project)) {
+            redirectAttributes.addFlashAttribute("error", "This wedding has been completed. Please contact us if you need to make any changes.");
+            return "redirect:/budget";
         }
         
         budgetService.deleteCategory(categoryId);
@@ -574,13 +620,18 @@ public String saveUser(@RequestParam("password") String password,
                                     @PathVariable Integer categoryId,
                                     @RequestParam String name,
                                     @RequestParam BigDecimal budget,
-                                    @RequestParam(required = false) String description) {
+                                    @RequestParam(required = false) String description,
+                                    RedirectAttributes redirectAttributes) {
         if (user == null) {
             return "redirect:/user/login";
         }
         
         Project project = projectService.findProjectByUserEmail(user.getEmail());
         if (project != null) {
+            if (isProjectCompleted(project)) {
+                redirectAttributes.addFlashAttribute("error", "This wedding has been completed. Please contact us if you need to make any changes.");
+                return "redirect:/budget";
+            }
             try {
                 // Find the category
                 BudgetCategory category = budgetService.findByProject(project)
@@ -598,7 +649,8 @@ public String saveUser(@RequestParam("password") String password,
                 
                 return "redirect:/budget";
             } catch (Exception e) {
-                return "redirect:/budget?error=" + e.getMessage();
+                redirectAttributes.addFlashAttribute("error", e.getMessage());
+                return "redirect:/budget";
             }
         }
         return "redirect:/budget";

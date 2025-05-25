@@ -18,6 +18,8 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import com.example.wedding.model.User;
 import com.example.wedding.model.Vendor;
 import com.example.wedding.service.VendorService;
+import com.example.wedding.model.Project;
+import com.example.wedding.service.ProjectService;
 
 import jakarta.servlet.http.HttpSession;
 
@@ -27,6 +29,9 @@ public class VendorController {
     @Autowired
     private VendorService vendorService;
 
+    @Autowired
+    private ProjectService projectService;
+
     @GetMapping("/vendors")
     public String showVendorsPage(@SessionAttribute(name = "loggedUser", required = false) User user, Model model) {
         if (user == null) {
@@ -34,6 +39,10 @@ public class VendorController {
         }
         
         try {
+            // Get the project for the logged-in user
+            Project project = projectService.findProjectByUserEmail(user.getEmail());
+            model.addAttribute("project", project);
+            
             // Get all vendors
             List<Vendor> vendors = vendorService.getAllVendors();
             model.addAttribute("vendors", vendors);

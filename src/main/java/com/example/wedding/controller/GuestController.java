@@ -46,7 +46,10 @@ public class GuestController {
 	        return "redirect:/user/login"; // Redirect to login if not logged in
 	    }
 
+	    Project project = projectService.findProjectByUserEmail(loggedUser.getEmail());
 	    List<Guest> guests = service.findByUser(loggedUser); // Fetch guests for the logged-in user
+	    
+	    model.addAttribute("project", project); // Add project to model
 	    model.addAttribute("guests", guests); // Add guest list to model
 
 	    if (!model.containsAttribute("guest")) {

@@ -35,6 +35,9 @@
     </div>
 </header>
 <div class="container">
+    <div th:if="${project != null && project.status == 'Completed'}" class="completed-message" style="background-color: #f8d7da; color: #721c24; padding: 15px; margin-bottom: 20px; border-radius: 4px; text-align: center;">
+        <p>This wedding has been completed. Please contact us if you need to make any changes.</p>
+    </div>
     <div class="page-header">
         <h1>Guest Management</h1>
     </div>
@@ -157,6 +160,30 @@
 </div>
 
  <script th:src="@{/js/guestPage.js}"></script>
+ <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Only disable elements if project is completed
+        const completedMessage = document.querySelector('.completed-message');
+        if (completedMessage) {
+            const header = document.querySelector('header');
+            const allElements = document.querySelectorAll('input, button, select, textarea, a:not([href^="/"]), [onclick]');
+            
+            allElements.forEach(element => {
+                // Skip elements in the header
+                if (!header.contains(element)) {
+                    if (element.tagName === 'INPUT' || element.tagName === 'SELECT' || element.tagName === 'TEXTAREA') {
+                        element.disabled = true;
+                    } else if (element.tagName === 'BUTTON' || element.tagName === 'A') {
+                        element.style.pointerEvents = 'none';
+                        element.style.opacity = '0.6';
+                    }
+                    // Remove onclick handlers
+                    element.removeAttribute('onclick');
+                }
+            });
+        }
+    });
+</script>
   
 </body>
 </html>

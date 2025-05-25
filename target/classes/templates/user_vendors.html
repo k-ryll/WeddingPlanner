@@ -9,6 +9,7 @@
     <link rel="stylesheet" th:href="@{/styles/vendors.css}">
     <script src="https://kit.fontawesome.com/b80e3de11b.js"></script>
     <script th:src="@{/js/userMenu.js}"></script>
+    <script th:src="@{/js/vendors.js}"></script>
     <title>Wedding Vendors</title>
     <style>
         .vendor-grid {
@@ -78,6 +79,9 @@
     </header>
 
     <div class="container">
+        <div th:if="${project != null && project.status == 'Completed'}" class="completed-message" style="background-color: #f8d7da; color: #721c24; padding: 15px; margin-bottom: 20px; border-radius: 4px; text-align: center;">
+            <p>This wedding has been completed. Please contact us if you need to make any changes.</p>
+        </div>
         <h1>Wedding Vendors</h1>
         
         <div class="filter-controls">
@@ -134,37 +138,5 @@
             </div>
         </div>
     </div>
-    
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const searchInput = document.getElementById('vendorSearch');
-            const categoryFilter = document.getElementById('categoryFilter');
-            const vendorCards = document.querySelectorAll('.vendor-card');
-            
-            // Function to filter vendors
-            function filterVendors() {
-                const searchTerm = searchInput.value.toLowerCase();
-                const selectedCategory = categoryFilter.value.toLowerCase();
-                
-                vendorCards.forEach(card => {
-                    const vendorName = card.querySelector('.vendor-name').textContent.toLowerCase();
-                    const vendorCategory = card.querySelector('.vendor-category span').textContent.toLowerCase();
-                    const vendorLocation = card.getAttribute('data-location').toLowerCase();
-                    
-                    // Check if the card matches search and category filter
-                    const matchesSearch = !searchTerm || vendorName.includes(searchTerm) || 
-                                          vendorCategory.includes(searchTerm) || vendorLocation.includes(searchTerm);
-                    const matchesCategory = !selectedCategory || vendorCategory.includes(selectedCategory);
-                    
-                    const isVisible = matchesSearch && matchesCategory;
-                    card.style.display = isVisible ? 'block' : 'none';
-                });
-            }
-            
-            // Attach event listeners
-            searchInput.addEventListener('input', filterVendors);
-            categoryFilter.addEventListener('change', filterVendors);
-        });
-    </script>
 </body>
 </html> 
