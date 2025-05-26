@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" th:href="@{/styles/styles.css}">
+    <link rel="stylesheet" th:href="@{/styles/login.css}">
+    <script src="https://kit.fontawesome.com/b80e3de11b.js" ></script>
+    <title>Index</title>
+</head>
+<body>
+    <div class="container index">
+        <div>
+            <img th:src="@{/images/logo.svg}" class="logo" alt="logo">
+            <p>Your one-stop solution for planning your dream wedding</p>
+        </div>
+        <div class="button-container">
+            <a th:href="@{/user/login}" class="button">Login</a>
+            <a th:href="@{/user/signup}" class="button">Signup</a>
+        </div>
+    </div>
+</body>
+</html>

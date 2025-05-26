@@ -1,0 +1,235 @@
+/* Vendor Groups Layout */
+.vendor-groups {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    margin-top: 1.5rem;
+}
+
+.vendor-group {
+    background-color: #fff;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(129, 66, 86, 0.1);
+    overflow: hidden;
+}
+
+.vendor-group-header {
+    background-color: #814256;
+    color: white;
+    padding: 1rem 1.5rem;
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+
+/* Vendor Cards */
+.vendor-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+    padding: 1.5rem;
+}
+
+.vendor-card {
+    border: 1px solid #f0e6e9;
+    border-radius: 8px;
+    overflow: hidden;
+    transition: transform 0.2s, box-shadow 0.2s;
+    background-color: #fcf7f9;
+}
+
+.vendor-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 5px 15px rgba(129, 66, 86, 0.2);
+}
+
+.vendor-header {
+    padding: 1rem;
+    border-bottom: 1px solid #f0e6e9;
+    background-color: #f8f2f5;
+}
+
+.vendor-name {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #814256;
+    margin: 0 0 0.5rem 0;
+}
+
+.vendor-category {
+    font-size: 0.85rem;
+    color: #666;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.vendor-category i {
+    color: #814256;
+}
+
+.vendor-body {
+    padding: 1rem;
+}
+
+.vendor-detail {
+    margin-bottom: 0.75rem;
+    font-size: 0.9rem;
+}
+
+.detail-label {
+    font-weight: 500;
+    color: #814256;
+    display: block;
+    margin-bottom: 0.25rem;
+}
+
+.price-highlight {
+    font-weight: 600;
+    color: #814256;
+}
+
+.vendor-contact {
+    margin-top: 1rem;
+    text-align: center;
+}
+
+.contact-button {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    background-color: #814256;
+    color: white;
+    text-decoration: none;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    transition: background-color 0.2s;
+    width: 100%;
+    text-align: center;
+}
+
+.contact-button:hover {
+    background-color: #6b3748;
+}
+
+/* Add to Expense button */
+.add-expense-button {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    background-color: #5e8a3f;
+    color: white;
+    text-decoration: none;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    transition: background-color 0.2s;
+    text-align: center;
+    width: 100%;
+}
+
+.add-expense-button:hover {
+    background-color: #4a7032;
+}
+
+/* Button container for multiple buttons */
+.vendor-actions {
+    margin-top: 0.75rem;
+    display: flex;
+    gap: 0.5rem;
+}
+
+/* Search and Filter Controls */
+.filter-controls {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.search-input,
+.filter-select {
+    padding: 0.75rem;
+    border: 1px solid #f0e6e9;
+    border-radius: 6px;
+    font-size: 0.95rem;
+}
+
+.search-input {
+    flex: 1;
+}
+
+.search-input:focus,
+.filter-select:focus {
+    outline: none;
+    border-color: #814256;
+}
+
+/* Admin specific styles */
+.vendor-admin-actions {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    display: flex;
+    gap: 0.25rem;
+}
+
+.admin-btn {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    border: none;
+    cursor: pointer;
+    font-size: 0.8rem;
+    transition: background-color 0.2s, transform 0.1s;
+}
+
+.admin-btn:hover {
+    transform: scale(1.1);
+}
+
+.edit-btn {
+    background-color: #1976d2;
+}
+
+.edit-btn:hover {
+    background-color: #1565c0;
+}
+
+.delete-btn {
+    background-color: #d32f2f;
+}
+
+.delete-btn:hover {
+    background-color: #c62828;
+}
+
+/* Messages */
+.message {
+    padding: 1rem;
+    margin: 1rem 0;
+    border-radius: 6px;
+    font-weight: 500;
+}
+
+.success-message {
+    background-color: #e8f5e9;
+    color: #2e7d32;
+    border: 1px solid #c8e6c9;
+}
+
+.error-message {
+    background-color: #ffebee;
+    color: #c62828;
+    border: 1px solid #ffcdd2;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .vendor-cards {
+        grid-template-columns: 1fr;
+    }
+    
+    .filter-controls {
+        flex-direction: column;
+    }
+} 

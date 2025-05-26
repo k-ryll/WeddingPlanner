@@ -6,12 +6,16 @@
 <link rel="stylesheet" th:href="@{/styles/login.css}">
 </head>
 <body>
+<header>
+  <img th:src="@{/images/logo.svg}" class="logo" alt="logo">
+  Wedding Planner
+</header>
 <div class="container-reset">
-<form action="/user/reset-password" method="post">
+<form th:action="@{/user/reset-password}" method="post">
 <label for="email">Email</label>
-    <input type="text"  name="email" id="email" required>
+    <input type="text" name="email" id="email" required>
     <p th:if="${message}" th:text="${message}" style="color: green;"></p>
-            	<p th:if="${error}" th:text="${error}" style="color: red;"></p>
+    <p th:if="${error}" th:text="${error}" style="color: red;"></p>
     
     <button>Reset Password</button>
 </form>

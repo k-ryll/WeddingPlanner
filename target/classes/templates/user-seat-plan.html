@@ -26,7 +26,7 @@
 </head>
 <body th:data-project-id="${project?.id}" th:data-seat-plan-id="${seatPlan?.id}">
     <header>
-        <img src="/images/logo.svg" class="logo" alt="logo">
+        <img th:src="@{/images/logo.svg}" class="logo" alt="logo">
         <div>
             <ul>
                 <li><a th:href="@{/home}">Home</a></li>

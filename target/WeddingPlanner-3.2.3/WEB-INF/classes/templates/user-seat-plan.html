@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Seat Plan</title>
+    <link rel="stylesheet" th:href="@{/styles/styles.css}">
+    <link rel="stylesheet" th:href="@{/styles/home.css}">
+    <link rel="stylesheet" th:href="@{/styles/seat-plan.css}">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.13.0/jquery-ui.min.js"></script>
+    <script src="https://kit.fontawesome.com/b80e3de11b.js"></script>
+    <script th:src="@{/js/userMenu.js}"></script>
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        try {
+            // Use window.projectId and window.seatPlanId to make them global
+            window.projectId = /*[[${project?.id}]]*/ null;
+            window.seatPlanId = /*[[${seatPlan?.id}]]*/ null;
+            console.log("Initializing - Project ID:", window.projectId);
+            console.log("Initializing - SeatPlan ID:", window.seatPlanId);
+        } catch (error) {
+            console.error("Error initializing variables:", error);
+        }
+        /*]]>*/
+    </script>
+    <script th:if="${project != null && seatPlan != null}" th:src="@{/js/user-seat-plan.js}"></script>
+</head>
+<body th:data-project-id="${project?.id}" th:data-seat-plan-id="${seatPlan?.id}">
+    <header>
+        <img th:src="@{/images/logo.svg}" class="logo" alt="logo">
+        <div>
+            <ul>
+                <li><a th:href="@{/home}">Home</a></li>
+                <li><a th:href="${project != null ? '/guests' : '#nogo'}">Guests</a></li>
+                <li><a th:href="${project != null ? '/planning' : '#nogo'}">Planning</a></li>
+                <li><a th:href="${project != null ? '/budget' : '#nogo'}">Budget</a></li>
+                <li class="active"><a th:href="${project != null ? '/seatplan' : '#nogo'}">Seat Plan</a></li>
+                <li><a th:href="@{/vendors}">Vendors</a></li>
+            </ul>
+            <div class="user-menu">
+                <i class="fa-regular fa-circle-user user-icon"></i>
+                <div class="user-dropdown">
+                    <a th:href="@{/logout}" class="dropdown-item">
+                        <i class="fas fa-sign-out-alt"></i>
+                        Logout
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+    <div class="container">
+        <div th:if="${project != null && project.status == 'Completed'}" class="completed-message" style="background-color: #f8d7da; color: #721c24; padding: 15px; margin-bottom: 20px; border-radius: 4px; text-align: center;">
+            <p>This wedding has been completed. Please contact us if you need to make any changes.</p>
+        </div>
+        <div th:if="${error}" class="error-message">
+            <p th:text="${error}"></p>
+            <p>Please <a th:href="@{/home}">create or select a project</a> to use this feature.</p>
+        </div>
+        <div th:if="${warning}" class="warning-message">
+            <p th:text="${warning}"></p>
+        </div>
+
+        <div th:if="${project != null}">
+            <h1>Seat Plan for <span th:text="${project.projectName}">Project Name</span></h1>
+            
+            <div th:if="${seatPlan != null}">
+                <div class="controls">
+                    <button id="addTableBtn" class="btn btn-primary">Add Table</button>
+                    <button id="saveBtn" class="btn btn-success">Save Layout</button>
+                </div>
+
+                <div id="seatPlanArea" class="seat-plan-area">
+                    <div th:each="table : ${seatPlan.tables}" 
+                         class="table" 
+                         th:data-id="${table.id}"
+                         th:style="'left: ' + ${table.positionX} + 'px; top: ' + ${table.positionY} + 'px;'">
+                        <div class="table-header">
+                            <div class="table-name" th:text="${table.tableName}"></div>
+                            <div class="table-actions">
+                                <button class="table-action-btn edit-btn" th:data-id="${table.id}">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                <button class="table-action-btn delete-btn" th:data-id="${table.id}">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="chair-count" th:text="${table.numberOfChairs} + ' chairs'"></div>
+                        <div class="chairs-container">
+                            <div th:each="chair : ${table.chairs}"
+                                 class="chair"
+                                 th:classappend="${chair.guest != null} ? 'occupied' : ''"
+                                 th:data-chair-id="${chair.id}"
+                                 th:data-guest-name="${chair.guest?.name}"
+                                 th:attr="onclick='openGuestAssignmentModal(this, ' + ${chair.id} + ')'"
+                                 th:text="${chair.guest != null} ? ${#strings.substring(chair.guest.name, 0, 1) + #strings.substring(chair.guest.name, #strings.indexOf(chair.guest.name, ' ') + 1, #strings.indexOf(chair.guest.name, ' ') + 2)} : ''">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div th:unless="${seatPlan != null} and ${project != null} and ${error == null}">
+                 <p>The seat plan for this project has not been initialized yet. You might need to create it or it will be created automatically.</p>
+                 <!-- Optionally, add a button here to explicitly create/initialize a seat plan if that's a desired user action -->
+            </div>
+        </div>
+        <div th:unless="${project != null} and ${error == null}">
+            <!-- Message already handled by the general error block if project is null -->
+        </div>
+    </div>
+
+    <!-- Modals will only be functional if seatPlan and project are not null, controlled by JS or th:if on trigger buttons -->
+    <div id="addTableModal" class="modal" th:if="${project != null and seatPlan != null}">
+        <div class="modal-content">
+            <h2>Add New Table</h2>
+            <form id="addTableForm">
+                <div class="form-group">
+                    <label for="tableName">Table Name:</label>
+                    <input type="text" id="tableName" name="tableName" required placeholder="Enter table name">
+                </div>
+                <div class="form-group">
+                    <label for="numberOfChairs">Number of Chairs:</label>
+                    <input type="number" id="numberOfChairs" name="numberOfChairs" min="1" max="12" required>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Add Table</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="editTableModal" class="modal" th:if="${project != null and seatPlan != null}">
+        <div class="modal-content">
+            <h2>Edit Table</h2>
+            <form id="editTableForm">
+                <input type="hidden" id="editTableId">
+                <div class="form-group">
+                    <label for="editTableName">Table Name:</label>
+                    <input type="text" id="editTableName" name="tableName" required placeholder="Enter table name">
+                </div>
+                <div class="form-group">
+                    <label for="editNumberOfChairs">Number of Chairs:</label>
+                    <input type="number" id="editNumberOfChairs" name="numberOfChairs" min="1" max="12" required>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Save Changes</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeEditModal()">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Guest Assignment Modal -->
+    <div id="guestAssignmentModal" class="modal" th:if="${project != null and seatPlan != null}">
+        <div class="modal-content">
+            <span class="close" onclick="closeGuestModal()">&times;</span>
+            <h2>Assign Guest</h2>
+            <div class="modal-body">
+                <div id="currentGuestInfo" class="current-guest" style="display: none;">
+                    <p>Current Guest: <span id="currentGuestName"></span></p>
+                    <button class="btn btn-danger" onclick="removeGuest()">Remove Guest</button>
+                </div>
+                <div class="guest-selection">
+                    <label for="guestSelect">Select a guest:</label>
+                    <select id="guestSelect">
+                        <option value="">Select a guest</option>
+                        <option th:each="guest : ${guests}"
+                                th:value="${guest.guestId}"
+                                th:text="${guest.name}">
+                        </option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-primary" onclick="assignGuest()">Assign</button>
+                <button class="btn btn-secondary" onclick="closeGuestModal()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Direct inline backup version of the function
+        function openGuestAssignmentModal(chairElement, chairId) {
+            console.log("INLINE: Opening guest assignment modal for chair", chairId);
+            try {
+                // Explicitly set these as global variables
+                window.selectedChairElement = chairElement;
+                window.selectedChairId = chairId || chairElement.getAttribute('data-chair-id');
+                console.log("INLINE: Set selectedChairId =", window.selectedChairId);
+                
+                // Set the current guest name if exists
+                const currentGuestName = chairElement.getAttribute('data-guest-name');
+                if (currentGuestName) {
+                    document.getElementById('currentGuestInfo').style.display = 'block';
+                    document.getElementById('currentGuestName').textContent = currentGuestName;
+                } else {
+                    document.getElementById('currentGuestInfo').style.display = 'none';
+                }
+                
+                const modal = document.getElementById('guestAssignmentModal');
+                if (modal) {
+                    console.log("INLINE: Modal found, showing it");
+                    modal.style.display = 'block';
+                } else {
+                    console.error("INLINE: Guest assignment modal not found");
+                    alert("Error: Guest assignment modal not found");
+                }
+            } catch (error) {
+                console.error("INLINE: Error in openGuestAssignmentModal:", error);
+                alert("Error: " + error.message);
+            }
+        }
+        
+        // Add our own version of assignGuest that doesn't rely on jQuery
+        function assignGuest() {
+            console.log("INLINE assignGuest - selectedChairId:", window.selectedChairId);
+            if (!window.selectedChairId) {
+                console.error("INLINE: No chair ID selected!");
+                alert("Error: No chair selected");
+                return;
+            }
+            
+            const guestId = document.getElementById('guestSelect').value;
+            if (!guestId) {
+                alert("Please select a guest");
+                return;
+            }
+            
+            console.log("INLINE: Assigning guest", guestId, "to chair", window.selectedChairId);
+            
+            // Use XMLHttpRequest for maximum compatibility
+            const xhr = new XMLHttpRequest();
+            xhr.open('POST', '/seatplan/assign-guest');
+            xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+            xhr.onload = function() {
+                if (xhr.status === 200) {
+                    alert("Guest assigned successfully! Refreshing page.");
+                    window.location.reload();
+                } else {
+                    console.error("INLINE: Error assigning guest", xhr.statusText);
+                    alert("Error assigning guest. Please try again.");
+                }
+            };
+            xhr.onerror = function() {
+                console.error("INLINE: Network error assigning guest");
+                alert("Network error when assigning guest. Please try again.");
+            };
+            xhr.send('chairId=' + window.selectedChairId + '&guestId=' + guestId);
+        }
+        
+        function removeGuest() {
+            console.log("INLINE removeGuest - selectedChairId:", window.selectedChairId);
+            if (!window.selectedChairId) {
+                console.error("INLINE: No chair ID selected!");
+                alert("Error: No chair selected");
+                return;
+            }
+            
+            console.log("INLINE: Removing guest from chair", window.selectedChairId);
+            
+            // Use XMLHttpRequest for maximum compatibility
+            const xhr = new XMLHttpRequest();
+            xhr.open('POST', '/seatplan/remove-guest');
+            xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+            xhr.onload = function() {
+                if (xhr.status === 200) {
+                    alert("Guest removed successfully! Refreshing page.");
+                    window.location.reload();
+                } else {
+                    console.error("INLINE: Error removing guest", xhr.statusText);
+                    alert("Error removing guest. Please try again.");
+                }
+            };
+            xhr.onerror = function() {
+                console.error("INLINE: Network error removing guest");
+                alert("Network error when removing guest. Please try again.");
+            };
+            xhr.send('chairId=' + window.selectedChairId);
+        }
+        
+        function closeGuestModal() {
+            console.log("INLINE: Closing guest modal");
+            const modal = document.getElementById('guestAssignmentModal');
+            if (modal) {
+                modal.style.display = 'none';
+            }
+            window.selectedChairId = null;
+            window.selectedChairElement = null;
+        }
+        
+        // Add event listeners after page load
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log("INLINE: DOMContentLoaded event");
+            document.querySelectorAll('.chair').forEach(function(chair) {
+                chair.addEventListener('click', function() {
+                    console.log("INLINE: Chair clicked with ID", this.dataset.chairId);
+                    openGuestAssignmentModal(this, this.dataset.chairId);
+                });
+            });
+            
+            // Override the existing buttons with our inline versions
+            const assignButton = document.querySelector('.modal-actions .btn-primary');
+            if (assignButton) {
+                assignButton.onclick = assignGuest;
+            }
+            
+            const removeButton = document.querySelector('#currentGuestInfo .btn-danger');
+            if (removeButton) {
+                removeButton.onclick = removeGuest;
+            }
+            
+            const cancelButton = document.querySelector('.modal-actions .btn-secondary');
+            if (cancelButton) {
+                cancelButton.onclick = closeGuestModal;
+            }
+
+            // Only disable elements if project is completed
+            const completedMessage = document.querySelector('.completed-message');
+            if (completedMessage) {
+                const header = document.querySelector('header');
+                const allElements = document.querySelectorAll('input, button, select, textarea, a:not([href^="/"]), [onclick]');
+                
+                allElements.forEach(element => {
+                    // Skip elements in the header
+                    if (!header.contains(element)) {
+                        if (element.tagName === 'INPUT' || element.tagName === 'SELECT' || element.tagName === 'TEXTAREA') {
+                            element.disabled = true;
+                        } else if (element.tagName === 'BUTTON' || element.tagName === 'A') {
+                            element.style.pointerEvents = 'none';
+                            element.style.opacity = '0.6';
+                        }
+                        // Remove onclick handlers
+                        element.removeAttribute('onclick');
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html> 

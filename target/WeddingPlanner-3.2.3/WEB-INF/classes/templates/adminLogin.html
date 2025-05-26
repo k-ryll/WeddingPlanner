@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet" th:href="@{/styles/login.css}">
+<title>Login</title>
+
+</head>
+<body>
+
+<header class="admin-header">
+  Wedding Planner
+</header>
+
+<div class="container">
+  <form th:action="@{/admin/validate}" method="post">
+    <h1>Login to your Admin Account</h1>
+
+        <p th:if="${message}" th:text="${message}" style="color: green;"></p>
+        <p th:if="${error}" th:text="${error}" style="color: red;"></p>
+    <label for="email">Email</label>
+    <input type="text"  name="email" id="email" required>
+
+    <label for="password">Password</label>
+    <input type="password"  name="password" id="password" required>
+
+    <button type="submit">Login</button>
+    
+  </form>
+</div>
+
+</body>
+</html>

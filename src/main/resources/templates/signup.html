@@ -6,7 +6,9 @@
     <title>Wedding Registration</title>
 </head>
 <body>
-    <header>Wedding Planner</header>
+    <header>
+        Wedding Planner
+    </header>
     <div class="container">
         <form id="registrationForm" th:action="@{/user/save}" method="post" th:object="${user}">
             <h1>Create an Account</h1>
@@ -43,12 +45,12 @@
             </div>
             <div class="terms">
                 <input type="checkbox" name="terms" id="terms" required>
-                <label for="terms">I agree to the <a id="termsLink" href="#">terms and conditions</a>
+                <label for="terms">I agree to the <a id="termsLink" th:href="@{/terms}">terms and conditions</a>
                 </label>
             </div>
             
             <div class="buttons">
-                <a class="loginButton" href="/user/login">Already have an Account</a>
+                <a class="loginButton" th:href="@{/user/login}">Already have an Account</a>
                 <button type="submit">Register</button>
             </div>
         </form>
@@ -119,6 +121,6 @@
     </div>
     
     <div id="modalOverlay" style="display: none;"></div>
-    <script src="/js/signup.js"></script>
+    <script th:src="@{/js/signup.js}"></script>
 </body>
 </html>

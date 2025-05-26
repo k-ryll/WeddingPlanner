@@ -1,0 +1,119 @@
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.6);
+    align-items: center;
+    justify-content: center;
+}
+
+.modal.show {
+    display: flex;
+}
+
+.modal-content {
+    background-color: #fefefe;
+    margin: 5% auto;
+    padding: 25px;
+    border: 1px solid #f0e6e9;
+    width: 90%;
+    max-width: 600px;
+    border-radius: 12px;
+    max-height: 85vh;
+    overflow-y: auto;
+    box-shadow: 0 5px 15px rgba(129, 66, 86, 0.2);
+    position: relative;
+}
+
+.close {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    color: #814256;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    z-index: 10;
+}
+
+.close:hover {
+    color: #6b3748;
+}
+
+.modal-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    padding-top: 10px;
+}
+
+.modal-form input,
+.modal-form textarea,
+.modal-form select {
+    padding: 12px;
+    border: 1px solid #f0e6e9;
+    border-radius: 6px;
+    font-size: 1rem;
+    transition: border-color 0.2s;
+}
+
+.modal-form input:focus,
+.modal-form textarea:focus,
+.modal-form select:focus {
+    outline: none;
+    border-color: #814256;
+    box-shadow: 0 0 0 2px rgba(129, 66, 86, 0.1);
+}
+
+.modal-form button {
+    padding: 12px;
+    background-color: #814256;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 500;
+    font-size: 1rem;
+    transition: background-color 0.2s;
+    margin-top: 10px;
+}
+
+.modal-form button:hover {
+    background-color: #6b3748;
+}
+
+/* Ensure modal works well on smaller screens */
+@media (max-width: 768px) {
+    .modal-content {
+        width: 95%;
+        padding: 20px;
+        margin: 3% auto;
+        max-height: 90vh;
+    }
+    
+    .modal-form input,
+    .modal-form textarea,
+    .modal-form select {
+        font-size: 16px; /* Prevent zoom on iOS */
+    }
+}
+
+.add-button {
+    padding: 10px 20px;
+    background-color: #814256;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    margin-bottom: 20px;
+    font-weight: 500;
+    transition: background-color 0.2s;
+}
+
+.add-button:hover {
+    background-color: #6b3748;
+} 

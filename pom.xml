@@ -5,11 +5,12 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>3.4.3</version>
+		<version>3.2.3</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.wedding</groupId>
 	<artifactId>WeddingPlanner</artifactId>
+	<packaging>war</packaging>
 	<name>WeddingPlanner</name>
 	<description>Wedding planner</description>
 	<url/>
@@ -102,6 +103,19 @@
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.tomcat.maven</groupId>
+				<artifactId>tomcat7-maven-plugin</artifactId>
+				<version>2.2</version>
+				<configuration>
+					<server>maven-tomcat-deployment</server>
+					<url>http://localhost:8080/manager/text</url>
+					<path>/WeddingPlanner</path>
+					<username>admin</username>
+					<password>admin-password</password>
+					<update>true</update>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>

@@ -10,12 +10,10 @@
 
 <header class="admin-header">
   Wedding Planner
-  
-  
 </header>
 
 <div class="container">
-  <form action="/admin/validate" method="post">
+  <form th:action="@{/admin/validate}" method="post">
     <h1>Login to your Admin Account</h1>
 
         <p th:if="${message}" th:text="${message}" style="color: green;"></p>

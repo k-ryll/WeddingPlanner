@@ -12,7 +12,7 @@
 </head>
 <body>
     <header>
-        <img src="/images/logo.svg" class="logo" alt="logo">
+        <img th:src="@{/images/logo.svg}" class="logo" alt="logo">
         <div>
             <ul>
                 <li><a th:href="${projectId != null ? '/project/' + projectId : '/home'}">Home</a></li>
@@ -20,7 +20,7 @@
                 <li class="active"><a th:href="${projectId != null ? '/project/' + projectId + '/planning' : '/planning'}">Planning</a></li>
                 <li><a th:href="${projectId != null ? '/project/' + projectId + '/budget' : '#nogo'}">Budget</a></li>
                 <li><a th:href="${projectId != null ? '/project/' + projectId + '/seatplan' : '#nogo'}">Seat Plan</a></li>
-                <li><a href="/admin/home">Admin Page</a></li>
+                <li><a th:href="@{/admin/home}">Admin Page</a></li>
             </ul>
             <div class="user-menu">
                 <i class="fa-regular fa-circle-user user-icon"></i>

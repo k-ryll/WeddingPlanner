@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<title>Guest Page</title>
+<link rel="stylesheet" th:href="@{/styles/guestsPage.css}">
+<link rel="stylesheet" th:href="@{/styles/styles.css}">
+
+<script src="https://kit.fontawesome.com/b80e3de11b.js" ></script>
+<script th:src="@{/js/userMenu.js}"></script>
+</head>
+<body>
+ 
+  <header>
+    <img th:src="@{/images/logo.svg}" class="logo" alt="logo">
+    <div>
+        <ul>
+            <li> <a th:href="@{/home}">Home</a> </li>
+            <li class="active"><a th:href="@{/guests}">Guests</a></li>
+            
+            <li><a th:href="@{/planning}">Planning</a></li>
+            <li><a th:href="@{/budget}">Budget</a></li>
+            <li><a th:href="@{/seatplan}">Seat Plan</a></li>
+            <li><a th:href="@{/vendors}">Vendors</a></li>
+        </ul>
+        <div class="user-menu">
+            <i class="fa-regular fa-circle-user user-icon"></i>
+            <div class="user-dropdown">
+                <a th:href="@{/logout}" class="dropdown-item">
+                    <i class="fas fa-sign-out-alt"></i>
+                    Logout
+                </a>
+            </div>
+        </div>
+    </div>
+</header>
+<div class="container">
+    <div th:if="${project != null && project.status == 'Completed'}" class="completed-message" style="background-color: #f8d7da; color: #721c24; padding: 15px; margin-bottom: 20px; border-radius: 4px; text-align: center;">
+        <p>This wedding has been completed. Please contact us if you need to make any changes.</p>
+    </div>
+    <div class="page-header">
+        <h1>Guest Management</h1>
+    </div>
+    <div class="search-box">
+        <div>
+            <input type="text" class="search-input" placeholder="Search guests by name, email, or role...">
+            <i class="fas fa-search"></i>
+        </div>
+        <div class="action-buttons">
+            <button id="openModal" class="btn btn-primary">
+                <i class="fa-solid fa-plus"></i>
+                Add Guest
+            </button>
+            <form th:action="@{/guests/send-all-invitations}" method="post" style="display: inline;">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-paper-plane"></i>
+                    Send Invitations
+                </button>
+            </form>
+        </div>
+    </div>
+    <div class="table-container" style="overflow-x:auto;">
+        <div class="table-header">
+            <h2>Guest List</h2>
+        </div>
+        <p th:if="${message}" th:text="${message}" style="color: green;"></p>
+        <p th:if="${error}" th:text="${error}" style="color: red;"></p>
+        <table class="guest-table">
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Entourage</th>
+                    <th>RSVP</th>
+                    <th>Remarks</th>
+                    <th>Added By</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="guest : ${guests}">
+                    <td th:text="${guest.title}"></td>
+                    <td th:text="${guest.name}"></td>
+                    <td th:text="${guest.email}"></td>
+                    <td th:text="${guest.entourage}"></td>
+                    <td>
+                        <span class="status-badge" th:classappend="${guest.rsvp?.toLowerCase()}" th:text="${guest.rsvp}"></span>
+                    </td>
+                    <td th:text="${guest.remarks}"></td>
+                    <td th:text="${guest.addedBy.firstName + ' ' + guest.addedBy.lastName}"></td>
+                    <td class="actions">
+                        <button class="email-btn" th:attr="data-guest-email=${guest.email}" title="Send Email">
+                            <i class="fas fa-envelope"></i>
+                        </button>
+                        <button class="edit-btn" th:attr="data-guest-id=${guest.guestId}" title="Edit Guest">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="delete-btn" th:attr="data-guest-id=${guest.guestId}" title="Delete Guest">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <!-- Modal -->
+    <div id="guestModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h4 class="modal-title">Add New Guest</h4>
+            <form class="guestForm" th:action="@{/guest/create}" method="post" th:object="${guest}">
+                <div>
+                    <label for="title">Title</label>
+                    <select name="title" id="title" th:field="*{title}" required>
+                        <option value="">Select Title</option>
+                        <option value="Mr.">Mr.</option>
+                        <option value="Mrs.">Mrs.</option>
+                        <option value="Miss">Miss</option>
+                        <option value="Dr.">Dr.</option>
+                        <option value="Hon.">Hon.</option>
+                        <option value="Rev.">Rev.</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="name">Full Name</label>
+                    <input type="text" th:field="*{name}" required placeholder="Enter full name">
+                </div>
+                <div>
+                    <label for="email">Email Address</label>
+                    <input type="email" name="email" id="email" th:field="*{email}" required placeholder="Enter email address">
+                </div>
+                <div>
+                    <label for="entourage">Role in Wedding</label>
+                    <select name="entourage" id="entourage" th:field="*{entourage}" required>
+                        <option value="" disabled selected>Select Role</option>
+                        <option value="Guest">Guest</option>
+                        <option value="Bride's Maid">Bride's Maid</option>
+                        <option value="Maid of Honor">Maid of Honor</option>
+                        <option value="Matron of Honor">Matron of Honor</option>
+                        <option value="Groomsman">Groomsman</option>
+                        <option value="Best Man">Best Man</option>
+                        <option value="Flower Girl">Flower Girl</option>
+                        <option value="Ring Bearer">Ring Bearer</option>
+                        <option value="Junior Bridesmaid">Junior Bridesmaid</option>
+                        <option value="Junior Groomsman">Junior Groomsman</option>
+                        <option value="Father of the Bride">Father of the Bride</option>
+                        <option value="Mother of the Bride">Mother of the Bride</option>
+                        <option value="Father of the Groom">Father of the Groom</option>
+                        <option value="Mother of the Groom">Mother of the Groom</option>
+                    </select>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Add Guest</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+ <script th:src="@{/js/guestPage.js}"></script>
+ <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Only disable elements if project is completed
+        const completedMessage = document.querySelector('.completed-message');
+        if (completedMessage) {
+            const header = document.querySelector('header');
+            const allElements = document.querySelectorAll('input, button, select, textarea, a:not([href^="/"]), [onclick]');
+            
+            allElements.forEach(element => {
+                // Skip elements in the header
+                if (!header.contains(element)) {
+                    if (element.tagName === 'INPUT' || element.tagName === 'SELECT' || element.tagName === 'TEXTAREA') {
+                        element.disabled = true;
+                    } else if (element.tagName === 'BUTTON' || element.tagName === 'A') {
+                        element.style.pointerEvents = 'none';
+                        element.style.opacity = '0.6';
+                    }
+                    // Remove onclick handlers
+                    element.removeAttribute('onclick');
+                }
+            });
+        }
+    });
+</script>
+  
+</body>
+</html>

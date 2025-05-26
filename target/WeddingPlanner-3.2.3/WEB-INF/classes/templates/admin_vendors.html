@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" th:href="@{/styles/styles.css}">
+    <link rel="stylesheet" th:href="@{/styles/planning.css}">
+    <link rel="stylesheet" th:href="@{/styles/modal.css}">
+    <link rel="stylesheet" th:href="@{/styles/vendors.css}">
+    <link rel="stylesheet" th:href="@{/styles/admin_vendors.css}">
+    <script src="https://kit.fontawesome.com/b80e3de11b.js"></script>
+    <script th:src="@{/js/userMenu.js}"></script>
+    <script th:src="@{/js/admin_vendors.js}"></script>
+    <title>Admin - Wedding Vendors</title>
+</head>
+<body>
+    <header>
+        <img th:src="@{/images/logo.svg}" class="logo" alt="logo">
+        <div>
+            <ul>
+                <li><a th:href="@{/admin/home}">Projects</a></li>
+                <li><a th:href="@{/admin/users}">Users</a></li>
+                <li class="active"><a th:href="@{/admin/vendors}">Vendors</a></li>
+            </ul>
+            <div class="user-menu">
+                <i class="fa-regular fa-circle-user user-icon"></i>
+                <div class="user-dropdown">
+                    <a th:href="@{/admin/logout}" class="dropdown-item">
+                        <i class="fas fa-sign-out-alt"></i>
+                        Logout
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <h1>Manage Wedding Vendors</h1>
+        
+        <!-- Success/error messages -->
+        <div th:if="${message}" class="message success-message">
+            <i class="fas fa-check-circle"></i> <span th:text="${message}"></span>
+        </div>
+        
+        <div th:if="${error}" class="message error-message">
+            <i class="fas fa-exclamation-circle"></i> <span th:text="${error}"></span>
+        </div>
+        
+        <!-- Action buttons and search -->
+        <div class="action-buttons">
+            <div class="search-container">
+                <input type="text" id="vendorSearch" class="search-input" placeholder="Search vendors..." onkeyup="searchVendors()">
+                <button class="search-btn"><i class="fas fa-search"></i></button>
+            </div>
+            
+            <button class="add-vendor-btn" onclick="openVendorModal()">
+                <i class="fas fa-plus"></i> Add New Vendor
+            </button>
+        </div>
+        
+        <!-- Simple vendor list for now -->
+        <div class="vendor-grid">
+            <div th:each="vendor : ${vendors}" class="vendor-card" th:data-name="${vendor.name}" th:data-category="${vendor.getCategoryNames()}" th:data-location="${vendor.location != null ? vendor.location : ''}">
+                <div class="vendor-header">
+                    <h3 class="vendor-name" th:text="${vendor.name}">Vendor Name</h3>
+                    <div class="vendor-category">
+                        <i class="fas fa-tag"></i>
+                        <span th:text="${vendor.getCategoryNames()}">Category</span>
+                    </div>
+                </div>
+                
+                <div class="vendor-body">
+                    <div class="vendor-detail" th:if="${vendor.location}">
+                        <span class="detail-label">Location:</span>
+                        <span th:text="${vendor.location}">Location</span>
+                    </div>
+                    
+                    <div class="vendor-detail" th:if="${vendor.priceType == 'per_guest'}">
+                        <span class="detail-label">Price:</span>
+                        <span class="price-highlight" th:text="${'₱' + #numbers.formatDecimal(vendor.pricePerGuest, 1, 'COMMA', 2, 'POINT') + ' per guest'}">₱0.00 per guest</span>
+                    </div>
+                    
+                    <div class="vendor-detail" th:if="${vendor.priceType == 'fixed'}">
+                        <span class="detail-label">Price:</span>
+                        <span class="price-highlight" th:text="${'₱' + #numbers.formatDecimal(vendor.totalPrice, 1, 'COMMA', 2, 'POINT')}">₱0.00</span>
+                    </div>
+                    
+                    <div class="vendor-actions">
+                        <button class="action-btn edit-btn" 
+                                th:onclick="'openEditVendorModal(' + ${vendor.id} + ')'"
+                                th:data-id="${vendor.id}"
+                                th:data-name="${vendor.name}"
+                                th:data-categories="${vendor.getCategoryNames()}"
+                                th:data-location="${vendor.location != null ? vendor.location : ''}"
+                                th:data-price-type="${vendor.priceType}"
+                                th:data-price-per-guest="${vendor.pricePerGuest != null ? vendor.pricePerGuest : ''}"
+                                th:data-total-price="${vendor.totalPrice != null ? vendor.totalPrice : ''}"
+                                th:data-contact="${vendor.contact != null ? vendor.contact : ''}"
+                                th:data-description="${vendor.description != null ? vendor.description : ''}">
+                            <i class="fas fa-edit"></i> Edit
+                        </button>
+                        <button class="action-btn delete-btn" 
+                                th:onclick="'confirmDelete(' + ${vendor.id} + ')'">
+                            <i class="fas fa-trash-alt"></i> Delete
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Add Vendor Modal -->
+    <div id="addVendorModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeVendorModal()">&times;</span>
+            <h2>Add New Vendor</h2>
+            <div th:if="${newVendor == null}" class="message error-message">
+                <i class="fas fa-exclamation-circle"></i> 
+                <span>Error: Vendor form could not be loaded. Please try refreshing the page.</span>
+            </div>
+            <form th:if="${newVendor != null}" th:action="@{/admin/vendors/add}" method="post" class="modal-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="name">Vendor Name</label>
+                        <input type="text" id="name" name="name" placeholder="Enter vendor name" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="categories">Categories <span class="required-field">*</span></label>
+                        <div class="categories-input-container">
+                            <input type="text" id="categoryInput" placeholder="Type and press Enter to add categories" class="categories-input">
+                            <div id="categoriesTags" class="categories-tags"></div>
+                            <input type="hidden" id="categories" name="categoryNames">
+                            <div class="categories-suggestions">
+                                <div class="suggestions-header">Suggested categories:</div>
+                                <div class="suggestions-list">
+                                    <span th:each="category : ${vendorCategories}" 
+                                          class="suggestion-item" 
+                                          th:text="${category}"
+                                          th:attr="data-value=${category}"
+                                          onclick="addSuggestedCategory(this)">Category</span>
+                                </div>
+                            </div>
+                            <div class="help-text">At least one category is required. Click on suggestions or type and press Enter.</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="location">Location</label>
+                        <input type="text" id="location" name="location" placeholder="Enter vendor location">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="priceType">Price Type</label>
+                        <select id="priceType" name="priceType" onchange="togglePriceFields()">
+                            <option value="fixed">Fixed Price</option>
+                            <option value="per_guest">Price Per Guest</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group price-input" id="fixedPriceGroup">
+                        <label for="totalPrice">Fixed Price (₱)</label>
+                        <input type="number" id="totalPrice" name="totalPrice" step="0.01" min="0" placeholder="Enter fixed price">
+                    </div>
+                    
+                    <div class="form-group price-input" id="perGuestPriceGroup">
+                        <label for="pricePerGuest">Price Per Guest (₱)</label>
+                        <input type="number" id="pricePerGuest" name="pricePerGuest" step="0.01" min="0" placeholder="Enter price per guest">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="contact">Contact Info</label>
+                        <input type="text" id="contact" name="contact" placeholder="Website or contact information">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="description">Description</label>
+                    <textarea id="description" name="description" placeholder="Enter vendor description"></textarea>
+                </div>
+                
+                <button type="submit" class="submit-btn">Add Vendor</button>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Edit Vendor Modal -->
+    <div id="editVendorModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeEditVendorModal()">&times;</span>
+            <h2>Edit Vendor</h2>
+            <form id="editVendorForm" th:action="@{/admin/vendors/edit}" method="post" class="modal-form">
+                <input type="hidden" id="editVendorId" name="id">
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="editName">Vendor Name</label>
+                        <input type="text" id="editName" name="name" placeholder="Enter vendor name" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="editCategories">Categories <span class="required-field">*</span></label>
+                        <div class="categories-input-container">
+                            <input type="text" id="editCategoryInput" placeholder="Type and press Enter to add categories" class="categories-input">
+                            <div id="editCategoriesTags" class="categories-tags"></div>
+                            <input type="hidden" id="editCategories" name="categoryNames">
+                            <div class="categories-suggestions">
+                                <div class="suggestions-header">Suggested categories:</div>
+                                <div class="suggestions-list">
+                                    <span th:each="category : ${vendorCategories}" 
+                                          class="suggestion-item" 
+                                          th:text="${category}"
+                                          th:attr="data-value=${category}"
+                                          onclick="addSuggestedEditCategory(this)">Category</span>
+                                </div>
+                            </div>
+                            <div class="help-text">At least one category is required. Click on suggestions or type and press Enter.</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="editLocation">Location</label>
+                        <input type="text" id="editLocation" name="location" placeholder="Enter vendor location">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="editPriceType">Price Type</label>
+                        <select id="editPriceType" name="priceType" onchange="toggleEditPriceFields()">
+                            <option value="fixed">Fixed Price</option>
+                            <option value="per_guest">Price Per Guest</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group price-input" id="editFixedPriceGroup">
+                        <label for="editTotalPrice">Fixed Price (₱)</label>
+                        <input type="number" id="editTotalPrice" name="totalPrice" step="0.01" min="0" placeholder="Enter fixed price">
+                    </div>
+                    
+                    <div class="form-group price-input" id="editPerGuestPriceGroup">
+                        <label for="editPricePerGuest">Price Per Guest (₱)</label>
+                        <input type="number" id="editPricePerGuest" name="pricePerGuest" step="0.01" min="0" placeholder="Enter price per guest">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="editContact">Contact Info</label>
+                        <input type="text" id="editContact" name="contact" placeholder="Website or contact information">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="editDescription">Description</label>
+                    <textarea id="editDescription" name="description" placeholder="Enter vendor description"></textarea>
+                </div>
+                
+                <button type="submit" class="submit-btn">Update Vendor</button>
+            </form>
+        </div>
+    </div>
+</body>
+</html> 

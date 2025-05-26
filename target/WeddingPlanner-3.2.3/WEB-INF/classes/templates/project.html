@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wedding Project</title>
+    
+    <!-- CSS -->
+    <link rel="stylesheet" th:href="@{/styles/styles.css}">
+    <link rel="stylesheet" th:href="@{/styles/home.css}">
+    
+    <!-- Scripts -->
+    <script src="https://kit.fontawesome.com/b80e3de11b.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+</head>
+<body>
+    <header>
+        <img th:src="@{/images/logo.svg}" class="logo" alt="logo">
+        <div>
+            <ul>
+                <li class="active"><a th:href="@{/project/{id}(id=${projectId})}">Home</a></li>
+                <li><a th:href="@{/project/{id}/guest(id=${projectId})}">Guests</a></li>
+                <li><a th:href="@{/project/{id}/planning(id=${projectId})}">Planning</a></li>
+                <li><a th:href="@{/project/{id}/budget(id=${projectId})}">Budget</a></li>
+                <li><a th:href="@{/project/{id}/seatplan(id=${projectId})}">Seat Plan</a></li>
+                <li><a th:href="@{/admin/home}">Admin Page</a></li>
+            </ul>
+            <div class="user-menu">
+                <i class="fa-regular fa-circle-user user-icon"></i>
+                <div class="user-dropdown">
+                    <a th:href="@{/logout}" class="dropdown-item">
+                        <i class="fas fa-sign-out-alt"></i>
+                        Logout
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <h1>Organize your Wedding in One Place</h1>
+        <div class="dashboard">
+            <section class="left">
+                <div class="essential-details">
+                    <h2>Essential Details</h2>
+                    <form th:action="@{/project/{id}/essential-details/update(id=${project.id})}" method="post">
+                        <div class="form-group">
+                            <label for="brideName">Bride's Name</label>
+                            <input type="text" id="brideName" name="brideName" 
+                                   th:value="${project.bride != null ? project.bride.firstName + ' ' + project.bride.lastName : ''}" 
+                                   required>
+                        </div>
+                        <div class="form-group">
+                            <label for="groomName">Groom's Name</label>
+                            <input type="text" id="groomName" name="groomName" 
+                                   th:value="${project.groom != null ? project.groom.firstName + ' ' + project.groom.lastName : ''}" 
+                                   required>
+                        </div>
+                        <div class="form-group">
+                            <label for="weddingDate">Wedding Date</label>
+                            <input type="date" id="weddingDate" name="weddingDate" 
+                                   th:value="${project.weddingDate != null ? #temporals.format(project.weddingDate, 'yyyy-MM-dd') : ''}" 
+                                   required>
+                        </div>
+                        <div class="form-group">
+                            <label for="maidOfHonor">Maid of Honor</label>
+                            <input type="text" id="maidOfHonor" name="maidOfHonor" 
+                                   th:value="${project.maidOfHonor != null ? project.maidOfHonor.email : ''}" 
+                                   placeholder="Enter email address">
+                        </div>
+                        <div class="form-group">
+                            <label for="bestMan">Best Man</label>
+                            <input type="text" id="bestMan" name="bestMan" 
+                                   th:value="${project.bestMan != null ? project.bestMan.email : ''}" 
+                                   placeholder="Enter email address">
+                        </div>
+                        <div class="form-group">
+                            <label for="projectName">Project Name</label>
+                            <input type="text" id="projectName" name="projectName" 
+                                   th:value="${project.projectName}" 
+                                   required>
+                        </div>
+                        <div class="form-group">
+                            <label for="status">Status</label>
+                            <input type="text" id="status" name="status" 
+                                   th:value="${project.status}" 
+                                   required>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Update Details</button>
+                    </form>
+                </div>
+                <div class="guest-list">
+                    <h2>Guest List</h2>
+                    <div class="guest-stats">
+                        <p>Total Invited: <span th:text="${totalGuests}">0</span></p>
+                        <p>Confirmed: <span th:text="${confirmedGuests}">0</span></p>
+                        <p>Pending: <span th:text="${pendingGuests}">0</span></p>
+                    </div>
+                </div>
+            </section>
+            <section class="right">
+                <div class="task-section" th:onclick="'window.location.href=\'' + @{/project/{id}/planning(id=${projectId})} + '\''">
+                    <h2>Upcoming Tasks</h2>
+                    <ul>
+                        <li th:each="task : ${tasks}" th:if="${not task.completed}">
+                            <input type="checkbox" th:checked="${task.completed}" 
+                                   th:data-task-id="${task.id}" class="task-checkbox" 
+                                   onclick="event.stopPropagation(); toggleTask(this);">
+                            <span th:text="${task.title}"></span>
+                            <span th:if="${task.dueDate}" th:text="${#temporals.format(task.dueDate, 'MMM dd')}"></span>
+                        </li>
+                        <li th:if="${#lists.isEmpty(tasks)}">No upcoming tasks</li>
+                    </ul>
+                </div>
+
+                <div class="itinerary">
+                    <h2>Wedding Day Itinerary</h2>
+                    <ul>
+                        <li th:each="item : ${itinerary}" class="itinerary-item">
+                            <div class="time">
+                                <span th:text="${item.startTime}"></span> - 
+                                <span th:text="${item.endTime}"></span>
+                            </div>
+                            <div class="event-details">
+                                <h4 th:text="${item.title}"></h4>
+                                <p th:text="${item.description}"></p>
+                                <p class="location" th:text="${item.location}"></p>
+                            </div>
+                        </li>
+                        <li th:if="${#lists.isEmpty(itinerary)}">No itinerary items added yet</li>
+                    </ul>
+                </div>
+
+                <div class="budget-chart" th:if="${not #lists.isEmpty(budgetCategories)}" style="background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 20px;">
+                    <h2>Budget Distribution</h2>
+                    <div style="height: 400px; width: 100%;">
+                        <canvas id="budgetPieChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="budget-overview" th:if="${not #lists.isEmpty(budgetCategories)}">
+                    <h2>Budget Overview</h2>
+                    <div class="budget-summary">
+                        <div class="budget-total">
+                            <h3>Total Budget</h3>
+                            <p class="amount" th:text="${'₱' + #numbers.formatDecimal(totalBudget, 1, 'COMMA', 2, 'POINT')}">₱0.00</p>
+                        </div>
+                        <div class="budget-spent">
+                            <h3>Total Spent</h3>
+                            <p class="amount" th:text="${'₱' + #numbers.formatDecimal(totalSpent, 1, 'COMMA', 2, 'POINT')}">₱0.00</p>
+                        </div>
+                        <div class="budget-remaining">
+                            <h3>Remaining</h3>
+                            <p class="amount" th:text="${'₱' + #numbers.formatDecimal(totalBudget - totalSpent, 1, 'COMMA', 2, 'POINT')}">₱0.00</p>
+                        </div>
+                    </div>
+                    <ul class="budget-categories">
+                        <li th:each="category, stat : ${budgetCategories}" class="budget-category">
+                            <div class="category-info">
+                                <span class="category-name" th:text="${stat.count + '. ' + category.name}"></span>
+                                <div class="category-details">
+                                    <span class="budget-amount" th:text="${'Budget: ₱' + #numbers.formatDecimal(category.budget != null ? category.budget : 0, 1, 'COMMA', 2, 'POINT')}"></span>
+                                    <span class="expense-amount" th:text="${'Spent: ₱' + #numbers.formatDecimal(category.totalSpent != null ? category.totalSpent : 0, 1, 'COMMA', 2, 'POINT')}"></span>
+                                </div>
+                            </div>
+                            <div class="category-progress">
+                                <div class="progress-bar" th:style="${'width: ' + (category.budget > 0 ? (category.totalSpent / category.budget * 100) : 0) + '%'}"></div>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <!-- Load scripts at the end of body -->
+    <script th:src="@{/js/userMenu.js}"></script>
+    <script th:src="@{/js/project.js}"></script>
+    <script th:inline="javascript">
+        // Initialize budget chart
+        document.addEventListener('DOMContentLoaded', function() {
+            const budgetChart = document.getElementById('budgetPieChart');
+            if (!budgetChart) return;
+
+            const categories = document.querySelectorAll('.budget-category');
+            if (!categories || categories.length === 0) return;
+
+            const labels = [];
+            const data = [];
+            
+            categories.forEach(category => {
+                const nameElement = category.querySelector('.category-name');
+                const amountElement = category.querySelector('.budget-amount');
+                
+                if (nameElement && amountElement) {
+                    const name = nameElement.textContent;
+                    const amount = amountElement.textContent
+                        .replace('Budget: ₱', '')
+                        .replace(/,/g, '');
+                    
+                    if (name && amount) {
+                        labels.push(name);
+                        data.push(parseFloat(amount));
+                    }
+                }
+            });
+
+            if (labels.length > 0 && data.length > 0) {
+                new Chart(budgetChart, {
+                    type: 'pie',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            data: data,
+                            backgroundColor: [
+                                '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', 
+                                '#9966FF', '#FF9F40', '#8AC249', '#EA526F',
+                                '#23B5D3', '#279AF1'
+                            ]
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'right',
+                                labels: {
+                                    font: {
+                                        size: 14
+                                    }
+                                }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        const value = context.raw;
+                                        const total = data.reduce((a, b) => a + b, 0);
+                                        const percentage = ((value / total) * 100).toFixed(1);
+                                        return `${context.label}: ₱${value.toLocaleString()} (${percentage}%)`;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        });
+
+        function toggleTask(checkbox) {
+            const taskId = checkbox.dataset.taskId;
+            const completed = checkbox.checked;
+            
+            fetch(`/project/${taskId}/task/toggle?completed=${completed}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    if (completed) {
+                        checkbox.closest('li').remove();
+                    }
+                } else {
+                    checkbox.checked = !completed;
+                    alert('Failed to update task status');
+                }
+            })
+            .catch(error => {
+                checkbox.checked = !completed;
+                alert('Error updating task status');
+            });
+        }
+    </script>
+</body>
+</html>

@@ -10,12 +10,10 @@
 
 <header>
   Wedding Planner
-  
-  
 </header>
 
 <div class="container">
-  <form action="/user/validate" method="post">
+  <form th:action="@{/user/validate}" method="post">
     <h1>Login to your Account</h1>
 
         <p th:if="${message}" th:text="${message}" style="color: green;"></p>
@@ -28,8 +26,8 @@
 
     
     <button type="submit">Login</button>
-    <a href="/user/signup">Don't have an Account?</a>
-    <a href="/user/reset">Reset Password</a>
+    <a th:href="@{/user/signup}">Don't have an Account?</a>
+    <a th:href="@{/user/reset}">Reset Password</a>
     
   </form>
 </div>

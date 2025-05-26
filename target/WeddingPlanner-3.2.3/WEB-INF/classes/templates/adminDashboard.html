@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" th:href="@{/styles/styles.css}">
+    <link rel="stylesheet" th:href="@{/styles/admin.css}">
+    <script src="https://kit.fontawesome.com/b80e3de11b.js" ></script>
+    <script th:src="@{/js/userMenu.js}"></script>
+    <title>Admin Dashboard</title>
+</head>
+<body>
+    <header>
+        <img th:src="@{/images/logo.svg}" class="logo" alt="logo">
+        <div>
+            
+                <ul>
+                    <li class="active"> <a th:href="@{/admin/home}">Projects</a> </li>
+                    <li><a th:href="@{/admin/users}">Users</a></li>
+                    <li><a th:href="@{/admin/vendors}">Vendors</a></li>
+                </ul>
+            
+                <div class="user-menu">
+                    <i class="fa-regular fa-circle-user user-icon"></i>
+                    <div class="user-dropdown">
+                        <a th:href="@{/admin/logout}" class="dropdown-item">
+                            <i class="fas fa-sign-out-alt"></i>
+                            Logout
+                        </a>
+                    </div>
+                </div>
+        </div>
+    </header>
+    <div class="container">
+        <h1>Wedding Projects</h1>
+        <div th:if="${error}" class="alert alert-danger" role="alert">
+            <span th:text="${error}"></span>
+        </div>
+        <div th:if="${success}" class="alert alert-success" role="alert">
+            <span th:text="${success}"></span>
+        </div>
+        <div class="search-box">
+            <div class="">
+              <input type="text" class="search-box" placeholder="Search project">
+              
+        <i class="fas fa-search"></i>
+            </div>
+            <button id="openModal" class="btn btn-primary">
+              <i class="fa-solid fa-plus"></i>
+              NEW PROJECT</button>
+          </div>
+          <div class="project-list">
+            <ul class="projects-grid">
+                <li th:each="project : ${projects}" class="project-card">
+                    <a th:href="@{/project/{id}(id=${project.id})}">
+                    <div class="project-header">
+                        <h3 th:text="${project.projectName}"></h3>
+                        <span class="status-badge" th:text="${project.status}"></span>
+                    </div>
+                    <div class="project-details">
+                        <div class="detail-item">
+                            <i class="fas fa-user"></i>
+                            <span>Bride: <span th:text="${project.bride.firstName + ' ' + project.bride.lastName}"></span></span>
+                        </div>
+                        <div class="detail-item">
+                            <i class="fas fa-user"></i>
+                            <span>Groom: <span th:text="${project.groom.firstName + ' ' + project.groom.lastName}"></span></span>
+                        </div>
+                        <div class="detail-item" th:if="${project.organizer != null}">
+                            <i class="fas fa-user-tie"></i>
+                            <span>Organizer: <span th:text="${project.organizer.firstName + ' ' + project.organizer.lastName}"></span></span>
+                        </div>
+                        <div class="detail-item">
+                            <i class="fas fa-calendar"></i>
+                            <span>Wedding Date: <span th:text="${#temporals.format(project.weddingDate, 'MMM dd, yyyy HH:mm')}"></span></span>
+                        </div>
+                    </div>
+                </a>
+                    <div class="project-actions">
+                        <button class="edit-btn" th:attr="data-project-id=${project.id}">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="delete-btn" th:attr="data-project-id=${project.id}">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                    
+                </li>
+            </ul>
+          </div>
+    </div>
+    
+<!-- Modal -->
+<div id="projectModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Create New Wedding Project</h2>
+            <span class="close">&times;</span>
+        </div>
+        <form class="projectForm" th:action="@{/project/create}" method="post">
+            <div class="form-group">
+                <label for="projectName">Project Name</label>
+                <input type="text" id="projectName" name="projectName" placeholder="Enter project name" required />
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="groomEmail">Groom</label>
+                    <select id="groomEmail" name="groomEmail" required>
+                        <option value="">Select Groom</option>
+                        <option th:each="groom : ${grooms}" th:value="${groom.email}" th:text="${groom.firstName}+' '+${groom.lastName}"></option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="brideEmail">Bride</label>
+                    <select id="brideEmail" name="brideEmail" required>
+                        <option value="">Select Bride</option>
+                        <option th:each="bride : ${brides}" th:value="${bride.email}" th:text="${bride.firstName}+' '+${bride.lastName}"></option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="organizerEmail">Wedding Organizer (Optional)</label>
+                <select id="organizerEmail" name="organizerEmail">
+                    <option value="">Select Organizer</option>
+                    <option th:each="org : ${organizers}" th:value="${org.email}" th:text="${org.firstName}+' '+${org.lastName}"></option>
+                </select>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="weddingDate">Wedding Date & Time</label>
+                    <input type="datetime-local" id="weddingDate" name="weddingDate" required />
+                </div>
+
+                <div class="form-group">
+                    <label for="status">Project Status</label>
+                    <select id="status" name="status" required>
+                        <option value="Upcoming">Upcoming</option>
+                        <option value="Ongoing">Ongoing</option>
+                        <option value="Completed">Completed</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button type="button" class="btn btn-secondary close-modal">Cancel</button>
+                <button type="submit" class="btn btn-primary">Create Project</button>
+            </div>
+        </form>
+    </div>
+</div>
+    
+        <script th:src="@{/js/admin.js}"></script>
+  
+
+</body>
+</html>
